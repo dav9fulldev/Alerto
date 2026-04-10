@@ -17,6 +17,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
     const [loading, setLoading] = useState(false);
     const [location, setLocation] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
+    const [videoPreview, setVideoPreview] = useState(null);
     const [formData, setFormData] = useState({
         description: '',
         damage_level: 'minime',
@@ -80,8 +81,49 @@ const SubmitReport = ({ lang = 'fr' }) => {
         e.preventDefault();
         setLoading(true);
 
+        let finalImageUrl = formData.image_url;
+        let finalVideoUrl = "";
+
+        // Si on a une photo/vidéo en mémoire locale (blob ou dataURL), on l'upload d'abord
+        const uploadFile = async (dataUrlOrBlob, name) => {
+            try {
+                let blob;
+                if (dataUrlOrBlob.startsWith('data:')) {
+                    const res = await fetch(dataUrlOrBlob);
+                    blob = await res.blob();
+                } else if (dataUrlOrBlob.startsWith('blob:')) {
+                    const res = await fetch(dataUrlOrBlob);
+                    blob = await res.blob();
+                } else {
+                    return null;
+                }
+
+                const fileToUpload = new File([blob], name, { type: blob.type });
+                const uploadFormData = new FormData();
+                uploadFormData.append('file', fileToUpload);
+
+                const res = await axios.post('http://localhost:8000/reports/upload', uploadFormData);
+                return res.data.url;
+            } catch (err) {
+                console.error("Erreur upload:", err);
+                return null;
+            }
+        };
+
+        if (imagePreview) {
+            const uploadedUrl = await uploadFile(imagePreview, "photo_sinistre.jpg");
+            if (uploadedUrl) finalImageUrl = uploadedUrl;
+        }
+
+        if (videoPreview) {
+            const uploadedVideoUrl = await uploadFile(videoPreview, "video_sinistre.webm");
+            if (uploadedVideoUrl) finalVideoUrl = uploadedVideoUrl;
+        }
+
         const payload = {
             ...formData,
+            image_url: finalImageUrl,
+            video_url: finalVideoUrl,
             location: {
                 type: "Point",
                 coordinates: location ? [location.lng, location.lat] : [0, 0]
@@ -120,6 +162,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         });
         setLocation(null);
         setImagePreview(null);
+        setVideoPreview(null);
     };
 
     const [showCamera, setShowCamera] = useState(false);
@@ -134,21 +177,33 @@ const SubmitReport = ({ lang = 'fr' }) => {
             return;
         }
         setShowCamera(true);
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" }, 
-                audio: false 
-            });
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
+        
+        // Laisser 300ms à React pour afficher l'élément <video> dans le DOM
+        setTimeout(async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" }, 
+                    audio: true 
+                });
+                streamRef.current = stream;
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            } catch (err) {
+                console.error("Erreur caméra:", err);
+                setShowCamera(false);
             }
-        } catch (err) {
-            console.error("Erreur caméra:", err);
-            setShowCamera(false);
-        }
+        }, 300);
     };
 
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [captureMode, setCaptureMode] = useState('photo'); 
+    const [isRecording, setIsRecording] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(90);
+    const mediaRecorderRef = useRef(null);
+    const streamRef = useRef(null);
+    const timerRef = useRef(null);
+    const videoChunks = useRef([]);
 
     const capturePhoto = () => {
         const video = videoRef.current;
@@ -161,42 +216,79 @@ const SubmitReport = ({ lang = 'fr' }) => {
             setImagePreview(dataUrl);
             stopCamera();
             
-            // Analyse d'Image Autonome (Simulation de détection de textures/contrastes)
+            // Analyse d'Image Autonome (Simulation)
             setIsAnalyzing(true);
             setTimeout(() => {
                 setIsAnalyzing(false);
-                
-                // On simule une détection basée sur la "densité visuelle" de l'image
-                const isComplexImage = Math.random() > 0.4; // 60% de chance de détecter des dégâts en démo
-                
+                const isComplexImage = Math.random() > 0.4;
                 if (isComplexImage) {
-                    setFormData(prev => ({
-                        ...prev, 
-                        damage_level: "partiel",
-                        infrastructure_type: "Gouvernemental"
-                    }));
+                    setFormData(prev => ({...prev, damage_level: "partiel", infrastructure_type: "Gouvernemental"}));
                     alert(lang === 'fr' 
-                        ? "🤖 IA : Détection autonome d'anomalies structurelles sur bâtiment public [Confiance : 88%]"
-                        : "🤖 AI: Autonomous detection of structural anomalies on public building [Confidence: 88%]");
-                } else {
-                    setFormData(prev => ({
-                        ...prev, 
-                        damage_level: "minime",
-                        infrastructure_type: "Résidentiel"
-                    }));
-                    alert(lang === 'fr' 
-                        ? "🤖 IA : Structure stable détectée. Aucun dégât majeur visible. [Confiance : 94%]"
-                        : "🤖 AI: Stable structure detected. No major damage visible. [Confidence: 94%]");
+                        ? "🤖 IA : Détection autonome d'anomalies structurelles [Confiance : 88%]"
+                        : "🤖 AI: Autonomous detection of structural anomalies [Confidence: 88%]");
                 }
             }, 3000);
         }
     };
 
+    const startRecording = () => {
+        const stream = streamRef.current;
+        
+        if (!stream) {
+            console.error("Flux caméra indisponible dans streamRef");
+            return;
+        }
+
+        setIsRecording(true);
+        setTimeLeft(90);
+        videoChunks.current = [];
+        
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) {
+                videoChunks.current.push(e.data);
+            }
+        };
+
+        mediaRecorder.onstop = () => {
+            clearInterval(timerRef.current);
+            const blob = new Blob(videoChunks.current, { type: 'video/webm' });
+            const videoUrl = URL.createObjectURL(blob);
+            setVideoPreview(videoUrl);
+            setFormData(prev => ({...prev, video_url: "video_temoignage.webm"}));
+            alert(lang === 'fr' ? "📹 Vidéo (1m30 max) capturée !" : "📹 Video (1m30 max) captured!");
+            stopCamera();
+        };
+
+        mediaRecorder.start();
+
+        // Compte à rebours
+        timerRef.current = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev <= 1) {
+                    stopRecording();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+    };
+
+    const stopRecording = () => {
+        setIsRecording(false);
+        mediaRecorderRef.current.stop();
+    };
+
     const stopCamera = () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
         }
         setShowCamera(false);
+        setIsRecording(false);
+        clearInterval(timerRef.current);
     };
 
     const handleDescriptionChange = (val) => {
@@ -228,12 +320,44 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
             {showCamera && (
                 <div className="camera-overlay">
-                    <video ref={videoRef} autoPlay playsInline className="camera-feed"></video>
+                    <div className="camera-mode-tabs">
+                        <button 
+                            className={`mode-tab ${captureMode === 'photo' ? 'active' : ''}`}
+                            onClick={() => setCaptureMode('photo')}
+                        >
+                            {lang === 'fr' ? 'PHOTO' : 'PHOTO'}
+                        </button>
+                        <button 
+                            className={`mode-tab ${captureMode === 'video' ? 'active' : ''}`}
+                            onClick={() => setCaptureMode('video')}
+                        >
+                            {lang === 'fr' ? 'VIDÉO' : 'VIDEO'}
+                        </button>
+                    </div>
+
+                    {isRecording && (
+                        <div className="recording-timer">
+                            {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+                        </div>
+                    )}
+
+                    <video ref={videoRef} autoPlay playsInline muted className="camera-feed"></video>
+                    
                     <div className="camera-controls">
                         <button onClick={stopCamera} className="cam-btn cancel">✕</button>
-                        <button onClick={capturePhoto} className="cam-btn capture">
-                            <div className="inner-circle"></div>
-                        </button>
+                        
+                        {captureMode === 'photo' ? (
+                            <button onClick={capturePhoto} className="cam-btn capture">
+                                <div className="inner-circle"></div>
+                            </button>
+                        ) : (
+                            <button 
+                                onClick={isRecording ? stopRecording : startRecording} 
+                                className={`cam-btn record ${isRecording ? 'recording' : ''}`}
+                            >
+                                <div className="record-circle"></div>
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
@@ -247,10 +371,10 @@ const SubmitReport = ({ lang = 'fr' }) => {
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label>{t.take_photo}</label>
-                        {!imagePreview ? (
+                        {!imagePreview && !videoPreview ? (
                             <div className="photo-upload-placeholder" onClick={startCamera}>
                                 <Camera size={40} />
-                                <span>{t.take_photo}</span>
+                                <span>{captureMode === 'photo' ? t.take_photo : (lang === 'fr' ? 'ENREGISTRER VIDÉO' : 'RECORD VIDEO')}</span>
                             </div>
                         ) : (
                             <div className="photo-preview-container">
@@ -260,8 +384,14 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                         <span>ANALYSE IA...</span>
                                     </div>
                                 )}
-                                <img src={imagePreview} alt="Preview" className="photo-preview" />
-                                <button type="button" className="remove-photo" onClick={() => setImagePreview(null)}>
+                                {imagePreview && <img src={imagePreview} alt="Preview" className="photo-preview" />}
+                                {videoPreview && (
+                                    <video src={videoPreview} controls className="photo-preview" />
+                                )}
+                                <button type="button" className="remove-photo" onClick={() => {
+                                    setImagePreview(null);
+                                    setVideoPreview(null);
+                                }}>
                                     <X size={16} />
                                 </button>
                             </div>
@@ -370,16 +500,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     </div>
 
                     <button type="submit" className={`submit-btn ${!isOnline ? 'offline' : ''}`} disabled={loading}>
-                        {loading ? (
-                            <Loader2 className="animate-spin" />
-                        ) : (
-                            <>
-                                <Send size={18} /> 
-                                {!isOnline 
-                                    ? (lang === 'fr' ? 'Enregistrer localement' : 'Save Locally') 
-                                    : t.submit_btn}
-                            </>
-                        )}
+                        {loading ? '...' : t.submit_btn}
                     </button>
                 </form>
             </div>

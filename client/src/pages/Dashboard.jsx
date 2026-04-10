@@ -16,20 +16,39 @@ const Dashboard = ({ lang = 'fr' }) => {
     const [loading, setLoading] = useState(true);
 
     const exportToCSV = () => {
-        const headers = ["ID", "Crise", "Dégâts", "Infrastructure", "Lat", "Lng", "Date"];
+        const headers = [
+            "ID", "Type de Crise", "Niveau Dégâts", "Infrastructure", 
+            "Latitude", "Longitude", "Localisation", 
+            "Description (FR)", "Description (EN/AI)", 
+            "Électricité", "Santé", "Besoins Urgents", 
+            "Lien Image", "Date Signalement"
+        ];
+        
         const rows = reports.map(r => [
-            r._id, r.crisis_type, r.damage_level, r.infrastructure_type, 
-            r.location.coordinates[1], r.location.coordinates[0], r.created_at
+            r._id, 
+            r.crisis_type, 
+            r.damage_level, 
+            r.infrastructure_type, 
+            r.location.coordinates[1], 
+            r.location.coordinates[0], 
+            `"${r.text_location || ''}"`, 
+            `"${r.description || ''}"`, 
+            `"${r.translated_description || ''}"`,
+            r.electricity_status || 'N/A',
+            r.health_services_status || 'N/A',
+            `"${(r.urgent_needs || []).join(', ')}"`,
+            r.image_url || 'N/A',
+            new Date(r.created_at).toISOString().split('T')[0] + " " + new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
         ]);
         
-        let csvContent = "data:text/csv;charset=utf-8," 
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
             + headers.join(",") + "\n"
             + rows.map(e => e.join(",")).join("\n");
             
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "alerto_data_export.csv");
+        link.setAttribute("download", `ALERTO_UN_REPORT_${new Date().toLocaleDateString()}.csv`);
         document.body.appendChild(link);
         link.click();
     };
@@ -140,7 +159,7 @@ const Dashboard = ({ lang = 'fr' }) => {
                 </div>
             </div>
 
-            <div className="charts-section">
+            <div className="charts-grid-layout">
                 <div className="chart-card">
                     <h2>{lang === 'fr' ? 'Répartition par Infrastructure' : 'Infrastructure Distribution'}</h2>
                     <div className="type-list">
@@ -154,6 +173,33 @@ const Dashboard = ({ lang = 'fr' }) => {
                                     ></div>
                                 </div>
                                 <span className="type-count">{count}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="feed-card">
+                    <h2>{lang === 'fr' ? 'Preuves Visuelles Récentes' : 'Recent Visual Evidence'}</h2>
+                    <div className="feed-list">
+                        {reports.slice(0, 5).map((r) => (
+                            <div key={r._id} className={`feed-item ${r.damage_level}`}>
+                                <div className="feed-img">
+                                    {r.image_url ? (
+                                        <img src={r.image_url} alt="Evidence" />
+                                    ) : (
+                                        <div className="img-placeholder">📸</div>
+                                    )}
+                                </div>
+                                <div className="feed-info">
+                                    <div className="feed-meta">
+                                        <span className="feed-type">{r.crisis_type}</span>
+                                        <span className="feed-time">
+                                            {new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                        </span>
+                                    </div>
+                                    <p className="feed-desc">{r.description || (lang === 'fr' ? "Pas de description" : "No description")}</p>
+                                    <div className="feed-location">📍 {r.text_location || "Unknown"}</div>
+                                </div>
                             </div>
                         ))}
                     </div>

@@ -50,6 +50,7 @@
 .leaflet-container {
     flex: 1;
     width: 100%;
+    background: #0b1120 !important; /* Couleur de l'espace profond */
 }
 
 /* Custom Popup Styles */

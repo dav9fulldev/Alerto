@@ -17,7 +17,9 @@ class Report(BaseModel):
     debris_present: bool = False
     location: Location
     text_location: Optional[str] = None
+    video_url: Optional[str] = None
     is_duplicate: bool = False
+    contact_phone: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     # Annexe 1 - Questions Modulaires

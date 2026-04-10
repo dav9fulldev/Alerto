@@ -156,27 +156,44 @@ input:focus, select:focus, textarea:focus {
 .submit-btn {
   width: 100%;
   padding: 16px;
-  margin-top: 12px;
-  background: linear-gradient(to right, #f43f5e, #e11d48);
+  margin-top: 24px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  background-size: 200% 200%;
+  animation: gradientShift 5s ease infinite;
   border: none;
   border-radius: 16px;
   color: white;
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.3);
+  box-shadow: 0 10px 20px -3px rgba(59, 130, 246, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 25px -5px rgba(244, 63, 94, 0.4);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 30px -5px rgba(139, 92, 246, 0.5);
+  filter: brightness(1.1);
 }
 
 .submit-btn:disabled {
-  opacity: 0.5;
+  background: #475569;
+  opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 /* Photo Upload Styles */
@@ -391,4 +408,107 @@ input:focus, select:focus, textarea:focus {
     0% { top: 0; }
     50% { top: 90%; }
     100% { top: 0; }
+}
+
+.camera-mode-tabs {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    z-index: 2002;
+    background: rgba(0,0,0,0.5);
+    padding: 5px 20px;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+}
+
+.mode-tab {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mode-tab.active {
+    color: #fbbf24;
+}
+
+.cam-btn.record {
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.2);
+    border: 3px solid white;
+}
+
+.record-circle {
+    width: 60px;
+    height: 60px;
+    background: #f43f5e;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.recording .record-circle {
+    border-radius: 8px;
+    transform: scale(0.7);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.recording-timer {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(244, 63, 94, 0.8);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.2rem;
+    font-weight: bold;
+    z-index: 2003;
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.5);
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 600px) {
+    .submit-report-card {
+        padding: 20px 15px;
+        margin: 10px;
+    }
+
+    .form-row {
+        flex-direction: column !important;
+        gap: 20px !important;
+    }
+
+    .damage-level-selector {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .damage-btn {
+        width: 100% !important;
+    }
+
+    .needs-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .camera-mode-tabs {
+        width: 90%;
+        justify-content: center;
+    }
 }

@@ -1,3 +1,5 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
 export const translations = {
     fr: {
         title: "🚨 ALERTO",
@@ -9,7 +11,7 @@ export const translations = {
         infrastructure_label: "Type d'infrastructure",
         crisis_label: "Nature de la crise",
         location_label: "Localisation exacte",
-        submit_btn: "Envoyer le rapport",
+        submit_btn: "ENVOYER",
         gps_active: "GPS Actif",
         gps_searching: "Recherche GPS...",
         online_success: "✅ Rapport envoyé en ligne !",
@@ -36,7 +38,7 @@ export const translations = {
         infrastructure_label: "Infrastructure Type",
         crisis_label: "Nature of Crisis",
         location_label: "Exact Location",
-        submit_btn: "Submit Report",
+        submit_btn: "SEND",
         gps_active: "GPS Active",
         gps_searching: "Searching GPS...",
         online_success: "✅ Report sent online!",
@@ -63,7 +65,7 @@ export const translations = {
         infrastructure_label: "Tipo de infraestructura",
         crisis_label: "Naturaleza de la crisis",
         location_label: "Ubicación exacta",
-        submit_btn: "Enviar informe",
+        submit_btn: "ENVIAR",
         gps_active: "GPS Activo",
         gps_searching: "Buscando GPS...",
         online_success: "✅ ¡Informe enviado en línea!",
@@ -90,7 +92,7 @@ export const translations = {
         infrastructure_label: "نوع البنية التحتية",
         crisis_label: "طبيعة الأزمة",
         location_label: "الموقع الدقيق",
-        submit_btn: "ارسال التقرير",
+        submit_btn: "إرسال",
         gps_active: "نظام تحديد المواقع نشط",
         gps_searching: "البحث عن نظام تحديد المواقع...",
         online_success: "✅ تم إرسال التقرير عبر الإنترنت!",
@@ -117,7 +119,7 @@ export const translations = {
         infrastructure_label: "基础设施类型",
         crisis_label: "危机性质",
         location_label: "准确位置",
-        submit_btn: "提交报告",
+        submit_btn: "发送",
         gps_active: "GPS 已激活",
         gps_searching: "正在搜索 GPS...",
         online_success: "✅ 报告已在线发送！",
@@ -144,7 +146,7 @@ export const translations = {
         infrastructure_label: "Тип инфраструктуры",
         crisis_label: "Характер кризиса",
         location_label: "Точное местоположение",
-        submit_btn: "Отправить отчет",
+        submit_btn: "ОТПРАВИТЬ",
         gps_active: "GPS Активен",
         gps_searching: "Поиск GPS...",
         online_success: "✅ Отчет отправлен онлайн!",
@@ -161,4 +163,27 @@ export const translations = {
             health: { fonctionnel: "Функционирует", partiel: "Частично", perturbe: "Нарушено", HS: "Не работает" }
         }
     }
+};
+
+const LanguageContext = createContext();
+
+export const LanguageProvider = ({ children }) => {
+    const [lang, setLang] = useState(localStorage.getItem('alerto_lang') || 'fr');
+
+    useEffect(() => {
+        localStorage.setItem('alerto_lang', lang);
+    }, [lang]);
+
+    const t = translations[lang] || translations['fr'];
+
+    // On utilise React.createElement pour eviter le JSX dans un fichier .js
+    return React.createElement(LanguageContext.Provider, { value: { t, lang, setLang } }, children);
+};
+
+export const useTranslation = () => {
+    const context = useContext(LanguageContext);
+    if (!context) {
+        throw new Error("useTranslation must be used within a LanguageProvider");
+    }
+    return context;
 };
