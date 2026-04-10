@@ -1,0 +1,114 @@
+.app-container {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    height: 60px;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.bottom-nav button {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.bottom-nav button.active {
+    color: #f43f5e;
+    transform: scale(1.1);
+}
+
+.bottom-nav button:hover {
+    color: #f43f5e;
+}
+
+.bottom-nav.admin-nav {
+    width: 320px;
+}
+
+.citoyen-header, .admin-header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: flex-end;
+    position: absolute;
+    width: 100%;
+    z-index: 1001;
+}
+
+.lang-select {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* RTL Support for Arabic */
+.rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+.rtl .photo-upload-placeholder {
+    flex-direction: row-reverse;
+}
+
+.logout-btn:hover {
+    color: #f43f5e !important;
+}
+
+.mini-gps-btn {
+    background: none;
+    border: none;
+    color: #f43f5e;
+    font-size: 0.7rem;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-left: 10px;
+}
+
+.input-with-button {
+    display: flex;
+    gap: 8px;
+}
+
+.gps-refresh-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0 12px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.gps-refresh-btn:hover {
+    background: #f43f5e;
+    color: white;
+}

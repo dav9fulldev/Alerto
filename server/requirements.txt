@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pymongo
+motor
+pydantic
+python-multipart
+python-dotenv
+httpx
+google-cloud-translate
+pillow

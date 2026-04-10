@@ -1,0 +1,123 @@
+.map-page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #0f172a;
+    color: white;
+}
+
+.map-header {
+    background: rgba(15, 23, 42, 0.9);
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.map-header h1 {
+    font-size: 1.2rem;
+    margin: 0;
+    font-weight: 800;
+    color: #f43f5e;
+}
+
+.map-legend {
+    display: flex;
+    gap: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.dot.critical { background: #f43f5e; box-shadow: 0 0 10px #f43f5e; }
+.dot.partial { background: #fbbf24; box-shadow: 0 0 10px #fbbf24; }
+.dot.minimal { background: #10b981; box-shadow: 0 0 10px #10b981; }
+
+.leaflet-container {
+    flex: 1;
+    width: 100%;
+}
+
+/* Custom Popup Styles */
+.custom-popup .leaflet-popup-content-wrapper {
+    background: #1e293b;
+    color: white;
+    border-radius: 16px;
+    padding: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-popup .leaflet-popup-tip {
+    background: #1e293b;
+}
+
+.popup-content h3 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.damage-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.damage-tag.complet { background: rgba(244, 63, 94, 0.2); color: #f43f5e; }
+.damage-tag.partiel { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+.damage-tag.minime { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+
+.description {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    line-height: 1.4;
+    margin: 10px 0;
+}
+
+.location-text {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 6px;
+    border-radius: 6px;
+}
+
+.popup-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.timestamp {
+    font-size: 0.65rem;
+    color: #64748b;
+}
+
+.offline-pill {
+    background: #3b82f6;
+    color: white;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 800;
+}
