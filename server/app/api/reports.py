@@ -9,14 +9,24 @@ router = APIRouter()
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
+    print(f"📥 Réception d'un fichier : {file.filename}")
     try:
+        # On affiche le chemin ABSOLU pour savoir où on écrit réellement
+        abs_path = os.path.abspath("uploads")
+        if not os.path.exists(abs_path):
+            os.makedirs(abs_path)
+            
         file_extension = file.filename.split(".")[-1]
         file_name = f"{uuid.uuid4()}.{file_extension}"
-        file_path = os.path.join("uploads", file_name)
-        with open(file_path, "wb") as buffer:
+        target_path = os.path.join(abs_path, file_name)
+        
+        with open(target_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-        return {"url": f"http://localhost:8000/uploads/{file_name}"}
+            
+        print(f"✅ Fichier sauvegardé dans : {target_path}")
+        return {"url": f"/uploads/{file_name}"}
     except Exception as e:
+        print(f"❌ ERREUR UPLOAD : {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 async def get_location_details(lat: float, lon: float):
@@ -83,13 +93,18 @@ async def create_report(report: Report):
 
         # Reverse Geocoding Intelligente : Adresse + Téléphone
         coords = report_dict["location"]["coordinates"]
+        print(f"🌍 Recherche de localisation pour : {coords}")
         addr, phone = await get_location_details(coords[1], coords[0])
         report_dict["text_location"] = addr
         report_dict["contact_phone"] = phone
+        print(f"🏠 Lieu trouvé : {addr} | Tél : {phone}")
+        
         if check_for_duplicate(report_dict):
             report_dict["is_duplicate"] = True
+            print("⚠️ Doublon détecté.")
             
         result = reports_collection.insert_one(report_dict)
+        print(f"🚀 Rapport enregistré avec succès ! ID: {result.inserted_id}")
         return {
             "message": "Report created successfully", 
             "id": str(result.inserted_id), 

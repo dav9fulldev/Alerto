@@ -6,12 +6,7 @@ from app.api.reports import router as reports_router
 
 app = FastAPI(title="ALERTO API", version="1.0.0")
 
-# Setup uploads directory
-if not os.path.exists("uploads"):
-    os.makedirs("uploads")
-
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
+# CORS doit etre declare AVANT le montage des fichiers statiques
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,6 +14,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Setup uploads directory
+if not os.path.exists("uploads"):
+    os.makedirs("uploads")
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Include Routers
 app.include_router(reports_router, prefix="/reports", tags=["Reports"])
