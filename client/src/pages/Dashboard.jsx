@@ -3,7 +3,9 @@ import axios from 'axios';
 import { BarChart3, AlertTriangle, CheckCircle2, Download, Table } from 'lucide-react';
 import './Dashboard.css';
 
-const API_URL = 'http://localhost:8000/reports';
+const API_BASE = `http://${window.location.hostname}:8000`;
+const API_URL = `${API_BASE}/reports`;
+
 
 const Dashboard = ({ lang = 'fr' }) => {
     const [reports, setReports] = useState([]);
@@ -14,6 +16,17 @@ const Dashboard = ({ lang = 'fr' }) => {
         byType: {}
     });
     const [loading, setLoading] = useState(true);
+    const [selectedMedia, setSelectedMedia] = useState(null); // { type: 'video'|'image', url: '...' }
+
+    const getMediaUrl = (url) => {
+        if (!url) return null;
+        if (url.startsWith('http')) return url;
+        if (url.startsWith('/')) return `${API_BASE}${url}`;
+        return `${API_BASE}/uploads/${url}`;
+    };
+
+    const openMedia = (type, url) => setSelectedMedia({ type, url: getMediaUrl(url) });
+    const closeMedia = () => setSelectedMedia(null);
 
     const exportToCSV = () => {
         const headers = [
@@ -115,6 +128,7 @@ const Dashboard = ({ lang = 'fr' }) => {
     if (loading) return <div className="loading">{lang === 'fr' ? 'Chargement des analyses...' : 'Loading analytics...'}</div>;
 
     return (
+        <>
         <div className="dashboard-container">
             <header className="dash-header">
                 <div>
@@ -181,15 +195,29 @@ const Dashboard = ({ lang = 'fr' }) => {
                 <div className="feed-card">
                     <h2>{lang === 'fr' ? 'Preuves Visuelles Récentes' : 'Recent Visual Evidence'}</h2>
                     <div className="feed-list">
-                        {reports.slice(0, 5).map((r) => (
+                        {[...reports].reverse().slice(0, 5).map((r) => (
                             <div key={r._id} className={`feed-item ${r.damage_level}`}>
                                 <div className="feed-img">
-                                    {r.image_url ? (
-                                        <img src={r.image_url} alt="Evidence" />
+                                    {r.video_url ? (
+                                        <div className="media-thumb" onClick={() => openMedia('video', r.video_url)} title="Cliquer pour regarder">
+                                            <video 
+                                                src={getMediaUrl(r.video_url)} 
+                                                muted 
+                                                preload="metadata"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px', pointerEvents: 'none' }}
+                                            />
+                                            <div className="play-overlay">▶</div>
+                                        </div>
+                                    ) : r.image_url ? (
+                                        <div className="media-thumb" onClick={() => openMedia('image', r.image_url)} title="Cliquer pour agrandir">
+                                            <img src={getMediaUrl(r.image_url)} alt="Evidence" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'4px' }} />
+                                            <div className="zoom-overlay">🔍</div>
+                                        </div>
                                     ) : (
                                         <div className="img-placeholder">📸</div>
                                     )}
                                 </div>
+
                                 <div className="feed-info">
                                     <div className="feed-meta">
                                         <span className="feed-type">{r.crisis_type}</span>
@@ -199,6 +227,13 @@ const Dashboard = ({ lang = 'fr' }) => {
                                     </div>
                                     <p className="feed-desc">{r.description || (lang === 'fr' ? "Pas de description" : "No description")}</p>
                                     <div className="feed-location">📍 {r.text_location || "Unknown"}</div>
+                                    {r.contact_phone && (
+                                        <div className="feed-phone">
+                                            <a href={`tel:${r.contact_phone}`} className="call-tactical-btn">
+                                                📞 {r.contact_phone}
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -206,6 +241,33 @@ const Dashboard = ({ lang = 'fr' }) => {
                 </div>
             </div>
         </div>
+
+        {/* ── Modal Lecteur Média ── */}
+        {selectedMedia && (
+            <div className="media-modal-overlay" onClick={closeMedia}>
+                <div className="media-modal-box" onClick={e => e.stopPropagation()}>
+                    <button className="media-modal-close" onClick={closeMedia}>✕</button>
+                    {selectedMedia.type === 'video' ? (
+                        <video 
+                            src={selectedMedia.url} 
+                            controls 
+                            autoPlay
+                            style={{ width: '100%', maxHeight: '80vh', borderRadius: '12px', background: '#000' }}
+                        />
+                    ) : (
+                        <img 
+                            src={selectedMedia.url} 
+                            alt="Preuve visuelle"
+                            style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '12px' }}
+                        />
+                    )}
+                    <p style={{ textAlign: 'center', color: '#94a3b8', marginTop: '12px', fontSize: '0.8rem' }}>
+                        {lang === 'fr' ? 'Cliquer en dehors pour fermer' : 'Click outside to close'}
+                    </p>
+                </div>
+            </div>
+        )}
+        </>
     );
 };
 

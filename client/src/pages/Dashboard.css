@@ -35,9 +35,17 @@
 }
 
 @keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 .stats-grid {
@@ -67,9 +75,20 @@
     font-size: 1.5rem;
 }
 
-.stat-icon.total { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-.stat-icon.critical { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
-.stat-icon.duplicates { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.stat-icon.total {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.stat-icon.critical {
+    background: rgba(244, 63, 94, 0.1);
+    color: #f43f5e;
+}
+
+.stat-icon.duplicates {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
 
 .stat-value {
     font-size: 2rem;
@@ -159,8 +178,13 @@
     color: white;
 }
 
-.export-btn.csv { border-color: rgba(59, 130, 246, 0.3); }
-.export-btn.geojson { border-color: rgba(139, 92, 246, 0.3); }
+.export-btn.csv {
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.export-btn.geojson {
+    border-color: rgba(139, 92, 246, 0.3);
+}
 
 /* --- Charts & Feed Grid --- */
 .charts-grid-layout {
@@ -196,6 +220,7 @@
 .feed-list::-webkit-scrollbar {
     width: 6px;
 }
+
 .feed-list::-webkit-scrollbar-thumb {
     background: var(--primary);
     border-radius: 10px;
@@ -204,24 +229,33 @@
 .feed-item {
     display: flex;
     gap: 12px;
-    background: rgba(255,255,255,0.03);
+    background: rgba(255, 255, 255, 0.03);
     padding: 12px;
     border-radius: 14px;
     border-left: 4px solid #94a3b8;
     transition: transform 0.2s;
 }
 
-.feed-item.complet { border-left-color: #ef4444; }
-.feed-item.partiel { border-left-color: #f59e0b; }
-.feed-item.minime { border-left-color: #10b981; }
+.feed-item.complet {
+    border-left-color: #ef4444;
+}
+
+.feed-item.partiel {
+    border-left-color: #f59e0b;
+}
+
+.feed-item.minime {
+    border-left-color: #10b981;
+}
 
 .feed-img {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     flex-shrink: 0;
     border-radius: 10px;
     overflow: hidden;
     background: #1e293b;
+    position: relative;
 }
 
 .feed-img img {
@@ -239,4 +273,94 @@
 .feed-desc {
     font-size: 0.85rem;
     color: #f1f5f9;
+}
+/* ── Thumbnails cliquables ── */
+.media-thumb {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.play-overlay, .zoom-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    color: white;
+    font-size: 1.3rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    border-radius: 4px;
+}
+.media-thumb:hover .play-overlay,
+.media-thumb:hover .zoom-overlay {
+    opacity: 1;
+}
+.img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    background: rgba(148, 163, 184, 0.08);
+    color: #475569;
+    border-radius: 10px;
+}
+
+/* ── Modal Lecteur Média ── */
+.media-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.media-modal-box {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 24px;
+    animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+.media-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    z-index: 1;
+}
+.media-modal-close:hover {
+    background: #ef4444;
 }

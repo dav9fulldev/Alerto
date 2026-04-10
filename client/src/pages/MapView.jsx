@@ -5,7 +5,8 @@ import 'leaflet/dist/leaflet.css';
 import './MapView.css';
 import { useTranslation } from '../services/i18n';
 
-const API_URL = 'http://localhost:8000/reports/';
+const API_BASE = `http://${window.location.hostname}:8000`;
+const API_URL = `${API_BASE}/reports/`;
 
 const RecenterMap = ({ reports }) => {
     const map = useMap();
@@ -95,6 +96,19 @@ const MapView = () => {
                         >
                             <Popup className="custom-popup">
                                 <div className="popup-content">
+                                    {report.video_url ? (
+                                        <video 
+                                            src={report.video_url.startsWith('http') ? report.video_url : (report.video_url.startsWith('/') ? `${API_BASE}${report.video_url}` : `${API_BASE}/uploads/${report.video_url}`)} 
+                                            controls 
+                                            style={{ width: '100%', borderRadius: '8px', marginBottom: '8px' }} 
+                                        />
+                                    ) : report.image_url && (
+                                        <img 
+                                            src={report.image_url.startsWith('http') ? report.image_url : (report.image_url.startsWith('/') ? `${API_BASE}${report.image_url}` : `${API_BASE}/uploads/${report.image_url}`)} 
+                                            alt="Evidence" 
+                                            style={{ width: '100%', borderRadius: '8px', marginBottom: '8px' }} 
+                                        />
+                                    )}
                                     <h3>{report.infrastructure_type}</h3>
                                     <div className={`damage-tag ${report.damage_level}`}>
                                         {t.options.damage[report.damage_level]}

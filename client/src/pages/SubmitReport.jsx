@@ -5,8 +5,8 @@ import axios from 'axios';
 import { saveReportOffline } from '../services/storage';
 import { syncOfflineData } from '../services/sync';
 
-const API_URL = 'http://localhost:8000/reports';
-
+const API_BASE = `http://${window.location.hostname}:8000`;
+const API_URL = `${API_BASE}/reports`;
 import { translations } from '../services/i18n';
 
 const SubmitReport = ({ lang = 'fr' }) => {
@@ -18,6 +18,8 @@ const SubmitReport = ({ lang = 'fr' }) => {
     const [location, setLocation] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [videoPreview, setVideoPreview] = useState(null);
+    const [selectedImageFile, setSelectedImageFile] = useState(null);
+    const [selectedVideoFile, setSelectedVideoFile] = useState(null);
     const [formData, setFormData] = useState({
         description: '',
         damage_level: 'minime',
@@ -68,10 +70,10 @@ const SubmitReport = ({ lang = 'fr' }) => {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            setSelectedImageFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result);
-                setFormData({ ...formData, image_url: "photo_capturee.jpg" });
             };
             reader.readAsDataURL(file);
         }
@@ -85,39 +87,41 @@ const SubmitReport = ({ lang = 'fr' }) => {
         let finalVideoUrl = "";
 
         // Si on a une photo/vidéo en mémoire locale (blob ou dataURL), on l'upload d'abord
-        const uploadFile = async (dataUrlOrBlob, name) => {
+        const uploadFile = async (fileToUpload, name) => {
+            if (!fileToUpload) return null;
             try {
-                let blob;
-                if (dataUrlOrBlob.startsWith('data:')) {
-                    const res = await fetch(dataUrlOrBlob);
-                    blob = await res.blob();
-                } else if (dataUrlOrBlob.startsWith('blob:')) {
-                    const res = await fetch(dataUrlOrBlob);
-                    blob = await res.blob();
-                } else {
-                    return null;
-                }
-
-                const fileToUpload = new File([blob], name, { type: blob.type });
                 const uploadFormData = new FormData();
                 uploadFormData.append('file', fileToUpload);
 
-                const res = await axios.post('http://localhost:8000/reports/upload', uploadFormData);
+                console.log(`📡 Envoi du fichier ${name} au serveur...`);
+                const res = await axios.post(`${API_BASE}/reports/upload`, uploadFormData);
+                console.log("✅ Serveur a reçu le fichier :", res.data.url);
                 return res.data.url;
             } catch (err) {
-                console.error("Erreur upload:", err);
+                console.error("❌ ERREUR UPLOAD :", err);
                 return null;
             }
         };
 
-        if (imagePreview) {
-            const uploadedUrl = await uploadFile(imagePreview, "photo_sinistre.jpg");
-            if (uploadedUrl) finalImageUrl = uploadedUrl;
+        console.log("🛠️ DÉBUT SOUMISSION - Fichiers détectés :", { 
+            image: !!selectedImageFile, 
+            video: !!selectedVideoFile 
+        });
+
+        if (selectedImageFile) {
+            console.log("📸 Tentative d'upload Image Physique...");
+            const uploadedUrl = await uploadFile(selectedImageFile, "photo_sinistre.jpg");
+            if (uploadedUrl) {
+                finalImageUrl = uploadedUrl;
+            }
         }
 
-        if (videoPreview) {
-            const uploadedVideoUrl = await uploadFile(videoPreview, "video_sinistre.webm");
-            if (uploadedVideoUrl) finalVideoUrl = uploadedVideoUrl;
+        if (selectedVideoFile) {
+            console.log("🎥 Tentative d'upload Vidéo Physique...");
+            const uploadedVideoUrl = await uploadFile(selectedVideoFile, "video_sinistre.webm");
+            if (uploadedVideoUrl) {
+                finalVideoUrl = uploadedVideoUrl;
+            }
         }
 
         const payload = {
@@ -158,11 +162,13 @@ const SubmitReport = ({ lang = 'fr' }) => {
             crisis_type: 'Inondation',
             debris_present: false,
             text_location: '',
-            image_url: 'test.jpg'
+            image_url: ''
         });
         setLocation(null);
         setImagePreview(null);
         setVideoPreview(null);
+        setSelectedImageFile(null);
+        setSelectedVideoFile(null);
     };
 
     const [showCamera, setShowCamera] = useState(false);
@@ -212,6 +218,15 @@ const SubmitReport = ({ lang = 'fr' }) => {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            // On genere un FICHIER reel pour l'envoi
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    const file = new File([blob], "photo_capturee.jpg", { type: "image/jpeg" });
+                    setSelectedImageFile(file);
+                }
+            }, 'image/jpeg');
+
             const dataUrl = canvas.toDataURL('image/jpeg');
             setImagePreview(dataUrl);
             stopCamera();
@@ -278,8 +293,21 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     const stopRecording = () => {
         setIsRecording(false);
-        mediaRecorderRef.current.stop();
+        if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.onstop = () => {
+                clearInterval(timerRef.current);
+                const blob = new Blob(videoChunks.current, { type: 'video/webm' });
+                const file = new File([blob], "video_temoignage.webm", { type: 'video/webm' });
+                setSelectedVideoFile(file); // ON SAUVEGARDE LE FICHIER REEL
+                
+                const videoUrl = URL.createObjectURL(blob);
+                setVideoPreview(videoUrl);
+                stopCamera();
+            };
+            mediaRecorderRef.current.stop();
+        }
     };
+
 
     const stopCamera = () => {
         if (streamRef.current) {
