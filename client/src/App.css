@@ -48,6 +48,30 @@
     width: 320px;
 }
 
+/* Language Selector - Compact */
+.lang-select {
+    padding: 6px 10px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    max-width: 120px;
+}
+
+.lang-select:hover {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: #f43f5e;
+}
+
+.lang-select:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
+}
+
 .citoyen-header, .admin-header {
     padding: 15px 20px;
     display: flex;
