@@ -12,6 +12,7 @@ import { translations } from '../services/i18n';
 const SubmitReport = ({ lang = 'fr' }) => {
     const t = translations[lang] || translations.fr;
     const isRTL = lang === 'ar';
+    const [formStep, setFormStep] = useState(1);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [offlineCount, setOfflineCount] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -27,7 +28,11 @@ const SubmitReport = ({ lang = 'fr' }) => {
         crisis_type: 'Inondation',
         debris_present: false,
         text_location: '',
-        image_url: 'test.jpg'
+        image_url: 'test.jpg',
+        electricity_status: '',
+        health_services_status: '',
+        urgent_needs: [],
+        urgent_needs_other: ''
     });
 
     useEffect(() => {
@@ -396,7 +401,21 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     <p>{t.subtitle}</p>
                 </div>
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (formStep === 1) {
+                        setFormStep(2);
+                    } else {
+                        handleSubmit(e);
+                    }
+                }}>
+                    {formStep === 1 && (
+                        <>
+                        <div style={{textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
+                            <p style={{fontSize: '12px', color: 'rgba(255,255,255,0.6)', margin: '0'}}>
+                                {lang === 'fr' ? 'Étape 1/2' : lang === 'en' ? 'Step 1/2' : lang === 'es' ? 'Paso 1/2' : lang === 'ar' ? 'الخطوة 1/2' : lang === 'zh' ? '第 1/2 步' : 'Шаг 1/2'}
+                            </p>
+                        </div>
                     <div className="form-group">
                         <label>{t.take_photo}</label>
                         {!imagePreview && !videoPreview ? (
@@ -500,7 +519,16 @@ const SubmitReport = ({ lang = 'fr' }) => {
                             </button>
                         </div>
                     </div>
+                    </>
+                    )}
 
+                    {formStep === 2 && (
+                    <>
+                    <div style={{textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
+                        <p style={{fontSize: '12px', color: 'rgba(255,255,255,0.6)', margin: '0'}}>
+                            {lang === 'fr' ? 'Étape 2/2' : lang === 'en' ? 'Step 2/2' : lang === 'es' ? 'Paso 2/2' : lang === 'ar' ? 'الخطوة 2/2' : lang === 'zh' ? '第 2/2 步' : 'Шаг 2/2'}
+                        </p>
+                    </div>
                     <div className="form-group modular-section">
                         <h3>📋 {t.needs}</h3>
                         
@@ -525,11 +553,61 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                 <option key={key} value={key}>{label}</option>
                             ))}
                         </select>
-                    </div>
 
-                    <button type="submit" className={`submit-btn ${!isOnline ? 'offline' : ''}`} disabled={loading}>
-                        {loading ? '...' : t.submit_btn}
-                    </button>
+                        <label style={{marginTop: '15px', display: 'block', fontWeight: 'bold', color: '#f472b6'}}>
+                            🆘 {lang === 'fr' ? 'Besoins les plus urgents' : lang === 'en' ? 'Most urgent needs' : lang === 'es' ? 'Necesidades más urgentes' : lang === 'ar' ? 'الاحتياجات الأكثر إلحاحا' : lang === 'zh' ? '最紧急的需求' : 'Самые неотложные потребности'}
+                        </label>
+                        <p style={{fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginBottom: '10px'}}>
+                            {lang === 'fr' ? 'Sélectionnez tous les besoins applicables' : lang === 'en' ? 'Select all applicable needs' : lang === 'es' ? 'Seleccione todas las necesidades aplicables' : lang === 'ar' ? 'اختر جميع الاحتياجات المعمول بها' : lang === 'zh' ? '选择所有适用的需求' : 'Выберите все применимые потребности'}
+                        </p>
+                        <div className="checkboxes-grid">
+                            {Object.entries(t.options.urgent_needs).filter(([key]) => key !== 'other').map(([key, label]) => (
+                                <label key={key}>
+                                    <input 
+                                        type="checkbox"
+                                        checked={formData.urgent_needs.includes(key)}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setFormData({...formData, urgent_needs: [...formData.urgent_needs, key]});
+                                            } else {
+                                                setFormData({...formData, urgent_needs: formData.urgent_needs.filter(n => n !== key)});
+                                            }
+                                        }}
+                                    />
+                                    <span>{label}</span>
+                                </label>
+                            ))}
+                        </div>
+
+                        <label style={{marginTop: '15px', display: 'block', fontWeight: '500', marginBottom: '8px'}}>
+                            {t.options.urgent_needs.other}
+                        </label>
+                        <input 
+                            type="text"
+                            placeholder={lang === 'fr' ? 'Précisez si autre...' : lang === 'en' ? 'Please specify if other...' : lang === 'es' ? 'Por favor especifique si otro...' : lang === 'ar' ? 'يرجى التحديد إذا كان آخر...' : lang === 'zh' ? '请说明是否为其他...' : 'Пожалуйста укажите если другое...'}
+                            value={formData.urgent_needs_other || ''}
+                            onChange={(e) => setFormData({...formData, urgent_needs_other: e.target.value})}
+                            style={{width: '100%', padding: '10px', marginBottom: '15px', backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', color: 'white', fontFamily: 'inherit', fontSize: '14px'}}
+                        />
+                    </div>
+                    </>
+                    )}
+
+                    <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                        {formStep === 2 && (
+                            <button 
+                                type="button"
+                                onClick={() => setFormStep(1)}
+                                className="submit-btn"
+                                style={{flex: 1, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)'}}
+                            >
+                                {lang === 'fr' ? '← RETOUR' : lang === 'en' ? '← BACK' : lang === 'es' ? '← VOLVER' : lang === 'ar' ? '← رجوع' : lang === 'zh' ? '← 返回' : '← НАЗАД'}
+                            </button>
+                        )}
+                        <button type="submit" className={`submit-btn ${!isOnline ? 'offline' : ''}`} disabled={loading} style={{flex: 1}}>
+                            {loading ? '...' : (formStep === 1 ? (lang === 'fr' ? 'SUIVANT →' : lang === 'en' ? 'NEXT →' : lang === 'es' ? 'SIGUIENTE →' : lang === 'ar' ? 'التالي →' : lang === 'zh' ? '下一步 →' : 'ДАЛЕЕ →') : t.submit_btn)}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

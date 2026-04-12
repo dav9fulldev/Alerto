@@ -22,10 +22,10 @@ function App() {
   const LangSwitcher = () => {
     const isAdmin = path === '/pnud';
     const options = isAdmin 
-      ? [{ v: 'fr', l: 'FR' }, { v: 'en', l: 'EN' }]
+      ? [{ v: 'fr', l: '🇫🇷' }, { v: 'en', l: '🇬🇧' }]
       : [
-          { v: 'fr', l: 'FR' }, { v: 'en', l: 'EN' }, { v: 'es', l: 'ES' }, 
-          { v: 'ar', l: 'AR' }, { v: 'zh', l: 'ZH' }, { v: 'ru', l: 'RU' }
+          { v: 'fr', l: '🇫🇷' }, { v: 'en', l: '🇬🇧' }, { v: 'es', l: '🇪🇸' }, 
+          { v: 'ar', l: '🇸🇦' }, { v: 'zh', l: '🇨🇳' }, { v: 'ru', l: '🇷🇺' }
         ];
 
     return (

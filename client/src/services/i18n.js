@@ -24,8 +24,33 @@ export const translations = {
             damage: { minime: "MINIME", partiel: "PARTIEL", complet: "COMPLET" },
             infra: ["Résidentiel", "Commercial", "Gouvernemental", "Services publics", "Transport", "Communautaire", "Espaces publics", "Autre"],
             crisis: ["Tremblement de terre", "Inondation", "Ouragan", "Tsunami", "Feu de forêt", "Conflit", "Explosion"],
-            elec: { aucun: "Aucun", mineur: "Mineur", modere: "Modéré", important: "Important", detruit: "Détruit" },
-            health: { fonctionnel: "Fonctionnel", partiel: "Partiel", perturbe: "Perturbé", HS: "Hors service" }
+            elec: { 
+                aucun: "Aucun dommage observé",
+                mineur: "Dommages mineurs (interruptions rapidement réparables)",
+                modere: "Dommages modérés (pannes partielles)",
+                important: "Dommages importants (pannes prolongées)",
+                detruit: "Complètement détruit",
+                inconnu: "Inconnu/ne peut être évalué"
+            },
+            health: { 
+                fonctionnel: "Entièrement fonctionnel",
+                partiel: "Partiellement fonctionnel",
+                perturbe: "Fortement perturbé",
+                HS: "Ne fonctionne pas du tout",
+                inconnu: "Inconnu"
+            },
+            urgent_needs: {
+                food: "Aide alimentaire et eau potable",
+                financial: "Aide financière ou en espèces",
+                health: "Accès aux soins de santé et aux médicaments essentiels",
+                shelter: "Abri, réparation de logement ou hébergement temporaire",
+                livelihood: "Rétablissement des moyens de subsistance ou des sources de revenus",
+                wash: "Eau, assainissement et hygiène (toilettes, installations sanitaires)",
+                services: "Rétablissement des services et infrastructures de base",
+                psycho: "Services de protection et soutien psychosocial",
+                authorities: "Soutien des autorités locales et des organisations communautaires",
+                other: "Autre, veuillez préciser"
+            }
         }
     },
     en: {
@@ -51,8 +76,33 @@ export const translations = {
             damage: { minime: "MINIMAL", partiel: "PARTIAL", complet: "COMPLETE" },
             infra: ["Residential", "Commercial", "Governmental", "Public Services", "Transport", "Community", "Public Spaces", "Other"],
             crisis: ["Earthquake", "Flood", "Hurricane", "Tsunami", "Wildfire", "Conflict", "Explosion"],
-            elec: { aucun: "None", mineur: "Minor", modere: "Moderate", important: "Major", detruit: "Destroyed" },
-            health: { fonctionnel: "Functional", partiel: "Partial", perturbe: "Disrupted", HS: "Out of service" }
+            elec: { 
+                aucun: "No damage observed",
+                mineur: "Minor damage (service interruptions but quickly repairable)",
+                modere: "Moderate damage (partial outages requiring repairs)",
+                important: "Major damage (major infrastructure damaged, prolonged outages)",
+                detruit: "Completely destroyed",
+                inconnu: "Unknown/cannot evaluate"
+            },
+            health: { 
+                fonctionnel: "Fully functional",
+                partiel: "Partially functional",
+                perturbe: "Strongly disrupted",
+                HS: "Not functioning at all",
+                inconnu: "Unknown"
+            },
+            urgent_needs: {
+                food: "Food and water assistance",
+                financial: "Financial or cash assistance",
+                health: "Access to healthcare and essential medicines",
+                shelter: "Shelter, housing repairs or temporary accommodation",
+                livelihood: "Restoring livelihoods or sources of income",
+                wash: "Water, sanitation and hygiene (toilets, sanitary facilities)",
+                services: "Restoration of basic services and infrastructure",
+                psycho: "Protection services and psychosocial support",
+                authorities: "Support from local authorities and community organizations",
+                other: "Other, please specify"
+            }
         }
     },
     es: {
@@ -78,8 +128,33 @@ export const translations = {
             damage: { minime: "MÍNIMO", partiel: "PARCIAL", complet: "COMPLETO" },
             infra: ["Residencial", "Comercial", "Gubernamental", "Servicios públicos", "Transporte", "Comunitario", "Espacios públicos", "Otro"],
             crisis: ["Terremoto", "Inundación", "Huracán", "Tsunami", "Incendio forestal", "Conflicto", "Explosión"],
-            elec: { aucun: "Ninguno", mineur: "Menor", modere: "Moderado", important: "Grave", detruit: "Destruido" },
-            health: { fonctionnel: "Funcional", partiel: "Parcial", perturbe: "Perturbado", HS: "Fuera de servicio" }
+            elec: { 
+                aucun: "Ningún daño observado",
+                mineur: "Daño menor (interrupciones reparables rápidamente)",
+                modere: "Daño moderado (cortes parciales)",
+                important: "Daño importante (infraestructura dañada)",
+                detruit: "Completamente destruido",
+                inconnu: "Desconocido/no puede evaluarse"
+            },
+            health: { 
+                fonctionnel: "Completamente funcional",
+                partiel: "Parcialmente funcional",
+                perturbe: "Fuertemente perturbado",
+                HS: "No funciona en absoluto",
+                inconnu: "Desconocido"
+            },
+            urgent_needs: {
+                food: "Asistencia alimentaria y agua potable",
+                financial: "Asistencia financiera o en efectivo",
+                health: "Acceso a atención médica y medicamentos esenciales",
+                shelter: "Alojamiento, reparación de vivienda o alojamiento temporal",
+                livelihood: "Restablecimiento de medios de vida o fuentes de ingresos",
+                wash: "Agua, saneamiento e higiene (sanitarios, instalaciones)",
+                services: "Restablecimiento de servicios e infraestructuras básicas",
+                psycho: "Servicios de protección y apoyo psicosocial",
+                authorities: "Apoyo de autoridades locales y organizaciones comunitarias",
+                other: "Otro, por favor especifique"
+            }
         }
     },
     ar: {
@@ -105,8 +180,33 @@ export const translations = {
             damage: { minime: "أدنى", partiel: "جزئي", complet: "كامل" },
             infra: ["سكني", "تجاري", "حكومي", "خدمات عامة", "النقل", "مجتمعي", "أماكن عامة", "آخر"],
             crisis: ["زلزال", "فيضان", "إعصار", "تسونامي", "حريق غابات", "صراع", "انفجار"],
-            elec: { aucun: "لا يوجد", mineur: "طفيـف", modere: "متوسط", important: "كبير", detruit: "مدمر" },
-            health: { fonctionnel: "وظيفي", partiel: "جزئي", perturbe: "معطل", HS: "خارج الخدمة" }
+            elec: { 
+                aucun: "لا أضرار ملاحظة",
+                mineur: "أضرار طفيفة (انقطاعات يمكن إصلاحها بسرعة)",
+                modere: "أضرار معتدلة (انقطاعات جزئية)",
+                important: "أضرار كبيرة (بنية تحتية مدمرة)",
+                detruit: "مدمر تماماً",
+                inconnu: "غير معروف/لا يمكن تقييمه"
+            },
+            health: { 
+                fonctionnel: "يعمل بكامل الطاقة",
+                partiel: "يعمل بشكل جزئي",
+                perturbe: "مضطرب بشدة",
+                HS: "لا يعمل على الإطلاق",
+                inconnu: "غير معروف"
+            },
+            urgent_needs: {
+                food: "المساعدات الغذائية والمياه النظيفة",
+                financial: "المساعدات المالية أو النقدية",
+                health: "الوصول إلى الرعاية الصحية والأدوية الأساسية",
+                shelter: "المأوى أو إصلاح المنزل أو الإقامة المؤقتة",
+                livelihood: "استعادة سبل العيش أو مصادر الدخل",
+                wash: "المياه والصرف الصحي والنظافة",
+                services: "استعادة الخدمات والبنية التحتية الأساسية",
+                psycho: "خدمات الحماية والدعم النفسي",
+                authorities: "دعم السلطات المحلية والمنظمات المجتمعية",
+                other: "آخر، يرجى التحديد"
+            }
         }
     },
     zh: {
@@ -132,8 +232,33 @@ export const translations = {
             damage: { minime: "最小", partiel: "部分", complet: "完全" },
             infra: ["住宅", "商业", "政府", "公共服务", "交通", "社区", "公共空间", "其他"],
             crisis: ["地震", "洪水", "飓风", "海啸", "森林火灾", "冲突", "爆炸"],
-            elec: { aucun: "无", mineur: "轻微", modere: "中等", important: "重大", detruit: "毁坏" },
-            health: { fonctionnel: "正常", partiel: "部分正常", perturbe: "中断", HS: "停止服务" }
+            elec: { 
+                aucun: "未观察到损害",
+                mineur: "轻微损害(可快速修复)",
+                modere: "中等损害(部分停电)",
+                important: "重大损害(主要基础设施受损)",
+                detruit: "完全毁坏",
+                inconnu: "未知/无法评估"
+            },
+            health: { 
+                fonctionnel: "完全正常",
+                partiel: "部分正常",
+                perturbe: "严重中断",
+                HS: "完全停止",
+                inconnu: "未知"
+            },
+            urgent_needs: {
+                food: "食物和饮用水援助",
+                financial: "财务或现金援助",
+                health: "获得医疗保健和基本药物",
+                shelter: "避难所、住房维修或临时住所",
+                livelihood: "恢复生计或收入来源",
+                wash: "水、卫生设施和卫生(厕所等)",
+                services: "恢复基本服务和基础设施",
+                psycho: "保护服务和心理社会支持",
+                authorities: "地方当局和社区组织的支持",
+                other: "其他，请说明"
+            }
         }
     },
     ru: {
@@ -159,8 +284,33 @@ export const translations = {
             damage: { minime: "МИНИМАЛЬНЫЙ", partiel: "ЧАСТИЧНЫЙ", complet: "ПОЛНЫЙ" },
             infra: ["Жилой", "Коммерческий", "Государственный", "Госуслуги", "Транспорт", "Общественный", "Публичные места", "Другое"],
             crisis: ["Землетрясение", "Наводнение", "Ураган", "Цунами", "Лесной пожар", "Конфликт", "Взрыв"],
-            elec: { aucun: "Нет", mineur: "Минимальный", modere: "Умеренный", important: "Серьезный", detruit: "Разрушено" },
-            health: { fonctionnel: "Функционирует", partiel: "Частично", perturbe: "Нарушено", HS: "Не работает" }
+            elec: { 
+                aucun: "Нет наблюдаемого ущерба",
+                mineur: "Незначительный ущерб (быстро поправимые перебои)",
+                modere: "Умеренный ущерб (частичные отключения)",
+                important: "Серьезный ущерб (поврежденная инфраструктура)",
+                detruit: "Полностью разрушено",
+                inconnu: "Неизвестно/невозможно оценить"
+            },
+            health: { 
+                fonctionnel: "Полностью работает",
+                partiel: "Частично работает",
+                perturbe: "Сильно нарушено",
+                HS: "Не работает вообще",
+                inconnu: "Неизвестно"
+            },
+            urgent_needs: {
+                food: "Продовольственная и питьевая вода помощь",
+                financial: "Финансовая или денежная помощь",
+                health: "Доступ к медицинской помощи и основным лекарствам",
+                shelter: "Жилье, ремонт дома или временное жилье",
+                livelihood: "Восстановление средств к существованию",
+                wash: "Вода, санитария и гигиена",
+                services: "Восстановление базовых услуг и инфраструктуры",
+                psycho: "Услуги защиты и психосоциальная поддержка",
+                authorities: "Поддержка местных органов власти и общественных организаций",
+                other: "Другое, пожалуйста укажите"
+            }
         }
     }
 };
