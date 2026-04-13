@@ -4,6 +4,7 @@ import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import './MapView.css';
 import { useTranslation } from '../services/i18n';
+import { COUNTRY_LIST, filterReportsByCountry, getCountryFromCoordinates } from '../services/countryFilter';
 
 const API_BASE = `http://${window.location.hostname}:8000`;
 const API_URL = `${API_BASE}/reports/`;
@@ -22,6 +23,7 @@ const RecenterMap = ({ reports }) => {
 
 const MapView = () => {
     const [reports, setReports] = useState([]);
+    const [selectedCountry, setSelectedCountry] = useState("All");
     const { t, lang } = useTranslation();
 
     useEffect(() => {
@@ -48,6 +50,25 @@ const MapView = () => {
         <div className="map-page">
             <div className="map-header">
                 <h1>{t.map_title || "ALERTO - Carte SIG"}</h1>
+                
+                {/* Country Filter */}
+                <div className="country-filter">
+                    <label htmlFor="country-select">🌍 Filtrer par pays:</label>
+                    <select 
+                        id="country-select"
+                        value={selectedCountry}
+                        onChange={(e) => setSelectedCountry(e.target.value)}
+                        className="country-selector"
+                    >
+                        <option value="All">Tous les pays</option>
+                        {COUNTRY_LIST.map(country => (
+                            <option key={country} value={country}>
+                                {country.replace(/_/g, ' ')}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
                 <div className="map-legend">
                     <div className="legend-item"><span className="dot critical"></span> {t.options.damage.complet}</div>
                     <div className="legend-item"><span className="dot partial"></span> {t.options.damage.partiel}</div>
@@ -84,7 +105,7 @@ const MapView = () => {
                 />
                 <RecenterMap reports={reports} />
 
-                {reports.map((report) => {
+                {filterReportsByCountry(reports, selectedCountry).map((report) => {
                     const coords = report.location.coordinates;
                     const options = getMarkerOptions(report.damage_level);
 
