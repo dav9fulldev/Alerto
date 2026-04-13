@@ -13,13 +13,17 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
     backdrop-filter: blur(10px);
 }
 
 .map-header > div:first-child {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    width: 100%;
 }
 
 .map-header h1 {
@@ -27,47 +31,63 @@
     margin: 0;
     font-weight: 800;
     color: #f43f5e;
+    width: 100%;
 }
 
 .country-filter {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    gap: 12px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .country-filter label {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #cbd5e1;
+    white-space: nowrap;
 }
 
 .country-selector {
-    padding: 8px 12px;
+    padding: 10px 15px;
     background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(244, 63, 94, 0.3);
-    border-radius: 8px;
+    border: 2px solid rgba(244, 63, 94, 0.3);
+    border-radius: 10px;
     color: #fff;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 200px;
+    min-width: 280px;
+    max-width: 400px;
+    font-weight: 600;
 }
 
 .country-selector:hover {
     background: rgba(15, 23, 42, 0.8);
     border-color: #f43f5e;
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.2);
 }
 
 .country-selector:focus {
     outline: none;
-    box-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
     border-color: #f43f5e;
+    background: rgba(15, 23, 42, 0.9);
 }
 
 .country-selector option {
     background: #0f172a;
     color: #fff;
+    padding: 8px;
+}
+
+.map-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .map-legend {

@@ -49,9 +49,9 @@ const MapView = () => {
     return (
         <div className="map-page">
             <div className="map-header">
-                <h1>{t.map_title || "ALERTO - Carte SIG"}</h1>
+                <h1>🚨 ALERTO - Carte SIG</h1>
                 
-                {/* Country Filter */}
+                {/* Country Filter - Centered */}
                 <div className="country-filter">
                     <label htmlFor="country-select">🌍 Filtrer par pays:</label>
                     <select 
@@ -60,7 +60,7 @@ const MapView = () => {
                         onChange={(e) => setSelectedCountry(e.target.value)}
                         className="country-selector"
                     >
-                        <option value="All">Tous les pays</option>
+                        <option value="All">✓ Tous les pays</option>
                         {COUNTRY_LIST.map(country => (
                             <option key={country} value={country}>
                                 {country.replace(/_/g, ' ')}
