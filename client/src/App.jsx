@@ -5,12 +5,13 @@ import Dashboard from './pages/Dashboard';
 import PnudLogin from './pages/PnudLogin';
 import { Map as MapIcon, BarChart3, LogOut } from 'lucide-react';
 import './App.css';
+import { LanguageProvider, useTranslation } from './services/i18n';
 
-function App() {
+function AppContent() {
   const [path, setPath] = useState(window.location.pathname);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminView, setAdminView] = useState('dash');
-  const [lang, setLang] = useState('fr');
+  const { lang, setLang } = useTranslation();
 
   // Écouter les changements d'URL
   useEffect(() => {
@@ -94,4 +95,10 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
+  );
+}

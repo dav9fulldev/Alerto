@@ -4,11 +4,47 @@ import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import './MapView.css';
 import { useTranslation } from '../services/i18n';
-import { COUNTRY_LIST, filterReportsByCountry, getCountryFromCoordinates } from '../services/countryFilter';
+import { COUNTRY_LIST, filterReportsByCountry, getCountryFromCoordinates, COUNTRY_BOUNDS } from '../services/countryFilter';
 import { getCountryName } from '../services/countryNames';
 
 const API_BASE = `http://${window.location.hostname}:8000`;
 const API_URL = `${API_BASE}/reports/`;
+
+// Helper function to get center and zoom level for a country
+const getCountryCenterAndZoom = (country) => {
+    if (!country || country === "All") return { center: [5, -5], zoom: 3 };
+    
+    const bounds = COUNTRY_BOUNDS[country];
+    if (!bounds) return { center: [5, -5], zoom: 3 };
+    
+    const [minLat, minLon, maxLat, maxLon] = bounds;
+    const centerLat = (minLat + maxLat) / 2;
+    const centerLon = (minLon + maxLon) / 2;
+    
+    // Calculate zoom level based on country size
+    const latDiff = Math.abs(maxLat - minLat);
+    const lonDiff = Math.abs(maxLon - minLon);
+    const maxDiff = Math.max(latDiff, lonDiff);
+    
+    let zoom = 3;
+    if (maxDiff < 2) zoom = 12;
+    else if (maxDiff < 5) zoom = 10;
+    else if (maxDiff < 10) zoom = 8;
+    else if (maxDiff < 20) zoom = 6;
+    else if (maxDiff < 40) zoom = 5;
+    else zoom = 4;
+    
+    return { center: [centerLat, centerLon], zoom };
+};
+
+const RecenterToCountry = ({ selectedCountry }) => {
+    const map = useMap();
+    useEffect(() => {
+        const { center, zoom } = getCountryCenterAndZoom(selectedCountry);
+        map.setView(center, zoom, { animate: true, duration: 1 });
+    }, [selectedCountry, map]);
+    return null;
+};
 
 const RecenterMap = ({ reports }) => {
     const map = useMap();
@@ -104,6 +140,7 @@ const MapView = () => {
                     opacity={0.8}
                     noWrap={true}
                 />
+                <RecenterToCountry selectedCountry={selectedCountry} />
                 <RecenterMap reports={reports} />
 
                 {filterReportsByCountry(reports, selectedCountry).map((report) => {
