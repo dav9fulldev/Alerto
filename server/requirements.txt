@@ -8,3 +8,7 @@ python-dotenv
 httpx
 google-cloud-translate
 pillow
+nudenet
+torch
+torchvision
+requests

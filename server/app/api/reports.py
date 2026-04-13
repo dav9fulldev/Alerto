@@ -82,12 +82,14 @@ def sanitize_input(text: str) -> str:
 # ============ SERVICES IMPORTS ============
 from app.services.translation import translate_text
 from app.services.ai_classification import classify_damage
+from app.services.nsfw_detection import validate_image_safety
+from app.core.config import NSFW_ENABLED, NSFW_BLOCK_THRESHOLD
 
 # ============ ROUTES ============
 
 @router.post("/")
 async def create_report(report: Report):
-    """Crée un nouveau rapport de crise"""
+    """Crée un nouveau rapport de crise avec validation NSFW"""
     try:
         if reports_collection is None:
             raise HTTPException(status_code=500, detail="Database connection failed")
@@ -96,13 +98,49 @@ async def create_report(report: Report):
         if report_dict.get("description"):
             report_dict["description"] = sanitize_input(report_dict["description"])
             report_dict["translated_description"] = await translate_text(report_dict["description"])
+        
+        # ============ NSFW DETECTION ============
+        if NSFW_ENABLED and report_dict.get("image_url"):
+            image_path = report_dict["image_url"]
+            
+            # Convert URL to local path if it's an upload path
+            if image_path.startswith("/uploads/"):
+                image_path = os.path.join("uploads", image_path.split("/uploads/")[1])
+            
+            print(f"🔍 Vérification NSFW pour: {image_path}")
+            
+            if os.path.exists(image_path):
+                safety_check = await validate_image_safety(image_path)
+                
+                # Store NSFW results in report
+                report_dict["nsfw_score"] = safety_check["nsfw_score"]
+                report_dict["is_nsfw"] = not safety_check["safe"]
+                report_dict["is_flagged"] = safety_check["is_flagged"]
+                report_dict["nsfw_detection_method"] = safety_check["detection_method"]
+                
+                print(f"📊 NSFW Score: {safety_check['nsfw_score']:.2f} | Action: {safety_check['action']}")
+                
+                # Reject if flagged as inappropriate
+                if safety_check["action"] == "reject":
+                    print(f"❌ Image rejetée - NSFW")
+                    raise HTTPException(
+                        status_code=400, 
+                        detail=f"Image rejected: {safety_check['message']}"
+                    )
+                elif safety_check["action"] == "flag":
+                    print(f"⚠️ Image marquée pour révision")
+                    report_dict["is_flagged"] = True
+            else:
+                print(f"⚠️ Image non trouvée pour vérification NSFW: {image_path}")
+        
+        # ============ AI CLASSIFICATION ============
         report_dict["ai_suggested_level"] = await classify_damage(
             report_dict.get("image_url", ""), 
             report_dict.get("description", "")
         )
         report_dict["created_at"] = datetime.datetime.utcnow()
 
-        # Reverse Geocoding
+        # ============ REVERSE GEOCODING ============
         coords = report_dict["location"]["coordinates"]
         print(f"🌍 Recherche de localisation pour : {coords}")
         addr, phone = await get_location_details(coords[1], coords[0])
@@ -110,17 +148,23 @@ async def create_report(report: Report):
         report_dict["contact_phone"] = phone
         print(f"🏠 Lieu trouvé : {addr} | Tél : {phone}")
         
+        # ============ DUPLICATE CHECK ============
         if check_for_duplicate(report_dict):
             report_dict["is_duplicate"] = True
             print("⚠️ Doublon détecté.")
-            
+        
+        # ============ SAVE REPORT ============        
         result = reports_collection.insert_one(report_dict)
         print(f"🚀 Rapport enregistré avec succès ! ID: {result.inserted_id}")
         return {
             "message": "Report created successfully", 
             "id": str(result.inserted_id), 
-            "is_duplicate": report_dict.get("is_duplicate", False)
+            "is_duplicate": report_dict.get("is_duplicate", False),
+            "nsfw_score": report_dict.get("nsfw_score", 0.0),
+            "is_flagged": report_dict.get("is_flagged", False)
         }
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"❌ ERREUR CREATE_REPORT: {str(e)}")
         import traceback
@@ -138,6 +182,8 @@ async def get_stats():
         total = reports_collection.count_documents({})
         critical = reports_collection.count_documents({"damage_level": "complet"})
         duplicates = reports_collection.count_documents({"is_duplicate": True})
+        nsfw_flagged = reports_collection.count_documents({"is_flagged": True})
+        nsfw_detected = reports_collection.count_documents({"is_nsfw": True})
         
         # Répartition par infrastructure
         pipeline = [
@@ -145,15 +191,58 @@ async def get_stats():
         ]
         infra_dist = list(reports_collection.aggregate(pipeline))
         
+        # NSFW Score distribution
+        nsfw_pipeline = [
+            {"$match": {"nsfw_score": {"$gt": 0}}},
+            {"$bucketAuto": {"groupBy": "$nsfw_score", "buckets": 5}}
+        ]
+        nsfw_dist = list(reports_collection.aggregate(nsfw_pipeline))
+        
         print(f"✅ Stats calculées: {total} rapports")
         return {
             "total_reports": total,
             "critical_zones": critical,
             "duplicates_detected": duplicates,
-            "infrastructure_distribution": {item["_id"]: item["count"] for item in infra_dist}
+            "nsfw_flagged": nsfw_flagged,
+            "nsfw_detected": nsfw_detected,
+            "infrastructure_distribution": {item["_id"]: item["count"] for item in infra_dist},
+            "nsfw_score_distribution": nsfw_dist
         }
     except Exception as e:
         print(f"❌ ERREUR GET_STATS: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/summary/nsfw-review")
+async def get_nsfw_reports():
+    """Récupère les rapports flaggés pour révision NSFW"""
+    try:
+        if reports_collection is None:
+            raise HTTPException(status_code=500, detail="Database connection failed")
+        
+        print(f"🔍 Récupération des rapports NSFW flaggés...")
+        flagged_reports = []
+        
+        for report in reports_collection.find({"is_flagged": True}).sort("nsfw_score", -1):
+            report["_id"] = str(report["_id"])
+            flagged_reports.append({
+                "id": report["_id"],
+                "image_url": report.get("image_url"),
+                "nsfw_score": report.get("nsfw_score", 0),
+                "nsfw_detection_method": report.get("nsfw_detection_method"),
+                "description": report.get("description", "")[:100],
+                "location": report.get("text_location"),
+                "created_at": report.get("created_at")
+            })
+        
+        print(f"✅ {len(flagged_reports)} rapports flaggés trouvés")
+        return {
+            "count": len(flagged_reports),
+            "flagged_reports": flagged_reports
+        }
+    except Exception as e:
+        print(f"❌ ERREUR GET_NSFW_REPORTS: {str(e)}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

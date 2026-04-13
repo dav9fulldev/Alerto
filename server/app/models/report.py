@@ -26,5 +26,12 @@ class Report(BaseModel):
     electricity_status: Optional[str] = None
     health_services_status: Optional[str] = None
     urgent_needs: List[str] = []
+    
+    # NSFW Content Moderation
+    nsfw_score: float = 0.0
+    is_nsfw: bool = False
+    is_flagged: bool = False
+    nsfw_detection_method: Optional[str] = None
+    image_blurred: bool = False
 
 Report.model_rebuild()
