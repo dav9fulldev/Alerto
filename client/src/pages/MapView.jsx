@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import './MapView.css';
 import { useTranslation } from '../services/i18n';
 import { COUNTRY_LIST, filterReportsByCountry, getCountryFromCoordinates } from '../services/countryFilter';
+import { getCountryName } from '../services/countryNames';
 
 const API_BASE = `http://${window.location.hostname}:8000`;
 const API_URL = `${API_BASE}/reports/`;
@@ -53,17 +54,17 @@ const MapView = () => {
                 
                 {/* Country Filter - Centered */}
                 <div className="country-filter">
-                    <label htmlFor="country-select">🌍 Filtrer par pays:</label>
+                    <label htmlFor="country-select">🌍 {lang === 'fr' ? 'Filtrer par pays:' : lang === 'es' ? 'Filtrar por país:' : lang === 'ar' ? 'تصفية حسب الدولة:' : lang === 'zh' ? '按国家筛选:' : lang === 'ru' ? 'Фильтровать по стране:' : 'Filter by country:'}</label>
                     <select 
                         id="country-select"
                         value={selectedCountry}
                         onChange={(e) => setSelectedCountry(e.target.value)}
                         className="country-selector"
                     >
-                        <option value="All">✓ Tous les pays</option>
+                        <option value="All">{getCountryName("All", lang)}</option>
                         {COUNTRY_LIST.map(country => (
                             <option key={country} value={country}>
-                                {country.replace(/_/g, ' ')}
+                                {getCountryName(country, lang)}
                             </option>
                         ))}
                     </select>
