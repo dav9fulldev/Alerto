@@ -1,6 +1,6 @@
 fastapi
 uvicorn[standard]
-pymongo
+pymongo[srv]
 motor
 pydantic
 python-multipart
@@ -12,3 +12,6 @@ nudenet
 torch
 torchvision
 requests
+python-jose[cryptography]
+bcrypt==3.2.0
+dnspython

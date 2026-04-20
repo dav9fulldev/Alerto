@@ -6,7 +6,7 @@ import { saveReportOffline } from '../services/storage';
 import { syncOfflineData } from '../services/sync';
 
 const API_BASE = `http://${window.location.hostname}:8000`;
-const API_URL = `${API_BASE}/reports`;
+const API_URL = `${API_BASE}/reports/`;
 import { translations } from '../services/i18n';
 
 const SubmitReport = ({ lang = 'fr' }) => {
@@ -28,7 +28,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         crisis_type: 'Inondation',
         debris_present: false,
         text_location: '',
-        image_url: 'test.jpg',
+        image_url: '',
         electricity_status: '',
         health_services_status: '',
         urgent_needs: [],
@@ -39,35 +39,46 @@ const SubmitReport = ({ lang = 'fr' }) => {
         const handleStatus = () => setIsOnline(navigator.onLine);
         window.addEventListener('online', handleStatus);
         window.addEventListener('offline', handleStatus);
-        
+
         getGPS();
         if (navigator.onLine) syncOfflineData();
-        
+
         return () => {
             window.removeEventListener('online', handleStatus);
             window.removeEventListener('offline', handleStatus);
         };
     }, []);
 
+    const [gpsError, setGpsError] = useState(null);
+
     const getGPS = () => {
         if ("geolocation" in navigator) {
+            setGpsError(null);
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
                     const { latitude, longitude } = position.coords;
                     setLocation({ lat: latitude, lng: longitude });
-                    
-                    // Reverse Geocoding via Nominatim (Gratuit & Open Source)
+                    setGpsError(null);
+
+                    // Reverse Geocoding via Nominatim
                     try {
                         const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
                         if (response.data && response.data.display_name) {
-                            setFormData(prev => ({...prev, text_location: response.data.display_name}));
+                            setFormData(prev => ({ ...prev, text_location: response.data.display_name }));
                         }
                     } catch (error) {
                         console.error("Erreur Geocoding:", error);
                     }
                 },
-                (error) => console.error("Erreur GPS:", error),
-                { enableHighAccuracy: true }
+                (error) => {
+                    console.error("Erreur GPS:", error);
+                    if (error.code === 1) {
+                        setGpsError(lang === 'fr' ? "Accès GPS refusé. Veuillez l'activer dans les réglages de votre navigateur." : "GPS Access denied. Please enable it in your browser settings.");
+                    } else {
+                        setGpsError(lang === 'fr' ? "Impossible de récupérer votre position." : "Unable to retrieve your location.");
+                    }
+                },
+                { enableHighAccuracy: true, timeout: 5000 }
             );
         }
     };
@@ -108,9 +119,9 @@ const SubmitReport = ({ lang = 'fr' }) => {
             }
         };
 
-        console.log("🛠️ DÉBUT SOUMISSION - Fichiers détectés :", { 
-            image: !!selectedImageFile, 
-            video: !!selectedVideoFile 
+        console.log("🛠️ DÉBUT SOUMISSION - Fichiers détectés :", {
+            image: !!selectedImageFile,
+            video: !!selectedVideoFile
         });
 
         if (selectedImageFile) {
@@ -182,19 +193,19 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     const startCamera = async () => {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert(lang === 'fr' 
-                ? "Caméra bloquée : Votre navigateur nécessite une connexion sécurisée (HTTPS) ou localhost pour accéder à l'appareil photo." 
+            alert(lang === 'fr'
+                ? "Caméra bloquée : Votre navigateur nécessite une connexion sécurisée (HTTPS) ou localhost pour accéder à l'appareil photo."
                 : "Camera blocked: Your browser requires a secure connection (HTTPS) or localhost to access the camera.");
             return;
         }
         setShowCamera(true);
-        
+
         // Laisser 300ms à React pour afficher l'élément <video> dans le DOM
         setTimeout(async () => {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "environment" }, 
-                    audio: true 
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" },
+                    audio: true
                 });
                 streamRef.current = stream;
                 if (videoRef.current) {
@@ -208,7 +219,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
     };
 
     const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [captureMode, setCaptureMode] = useState('photo'); 
+    const [captureMode, setCaptureMode] = useState('photo');
     const [isRecording, setIsRecording] = useState(false);
     const [timeLeft, setTimeLeft] = useState(90);
     const mediaRecorderRef = useRef(null);
@@ -223,7 +234,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
-            
+
             // On genere un FICHIER reel pour l'envoi
             canvas.toBlob((blob) => {
                 if (blob) {
@@ -235,15 +246,15 @@ const SubmitReport = ({ lang = 'fr' }) => {
             const dataUrl = canvas.toDataURL('image/jpeg');
             setImagePreview(dataUrl);
             stopCamera();
-            
+
             // Analyse d'Image Autonome (Simulation)
             setIsAnalyzing(true);
             setTimeout(() => {
                 setIsAnalyzing(false);
                 const isComplexImage = Math.random() > 0.4;
                 if (isComplexImage) {
-                    setFormData(prev => ({...prev, damage_level: "partiel", infrastructure_type: "Gouvernemental"}));
-                    alert(lang === 'fr' 
+                    setFormData(prev => ({ ...prev, damage_level: "partiel", infrastructure_type: "Gouvernemental" }));
+                    alert(lang === 'fr'
                         ? "🤖 IA : Détection autonome d'anomalies structurelles [Confiance : 88%]"
                         : "🤖 AI: Autonomous detection of structural anomalies [Confidence: 88%]");
                 }
@@ -253,7 +264,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     const startRecording = () => {
         const stream = streamRef.current;
-        
+
         if (!stream) {
             console.error("Flux caméra indisponible dans streamRef");
             return;
@@ -262,7 +273,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         setIsRecording(true);
         setTimeLeft(90);
         videoChunks.current = [];
-        
+
         const mediaRecorder = new MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
 
@@ -277,7 +288,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             const blob = new Blob(videoChunks.current, { type: 'video/webm' });
             const videoUrl = URL.createObjectURL(blob);
             setVideoPreview(videoUrl);
-            setFormData(prev => ({...prev, video_url: "video_temoignage.webm"}));
+            setFormData(prev => ({ ...prev, video_url: "video_temoignage.webm" }));
             alert(lang === 'fr' ? "📹 Vidéo (1m30 max) capturée !" : "📹 Video (1m30 max) captured!");
             stopCamera();
         };
@@ -304,7 +315,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                 const blob = new Blob(videoChunks.current, { type: 'video/webm' });
                 const file = new File([blob], "video_temoignage.webm", { type: 'video/webm' });
                 setSelectedVideoFile(file); // ON SAUVEGARDE LE FICHIER REEL
-                
+
                 const videoUrl = URL.createObjectURL(blob);
                 setVideoPreview(videoUrl);
                 stopCamera();
@@ -325,11 +336,11 @@ const SubmitReport = ({ lang = 'fr' }) => {
     };
 
     const handleDescriptionChange = (val) => {
-        setFormData({...formData, description: val});
-        
+        setFormData({ ...formData, description: val });
+
         const text = val.toLowerCase();
         let suggestion = 'minime';
-        
+
         if (text.includes('détruit') || text.includes('effondré') || text.includes('mort') || text.includes('total')) {
             suggestion = 'complet';
         } else if (text.includes('fissure') || text.includes('cassé') || text.includes('partiel') || text.includes('réparable')) {
@@ -337,14 +348,14 @@ const SubmitReport = ({ lang = 'fr' }) => {
         }
 
         if (suggestion !== formData.damage_level) {
-            setFormData(prev => ({...prev, damage_level: suggestion}));
+            setFormData(prev => ({ ...prev, damage_level: suggestion }));
         }
     };
 
     return (
         <div className={`report-container ${isRTL ? 'rtl' : ''}`}>
             <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-            
+
             {!isOnline && (
                 <div className="offline-banner">
                     ⚠️ {lang === 'fr' ? 'Mode Hors-Ligne Actif' : 'Offline Mode Active'}
@@ -354,13 +365,13 @@ const SubmitReport = ({ lang = 'fr' }) => {
             {showCamera && (
                 <div className="camera-overlay">
                     <div className="camera-mode-tabs">
-                        <button 
+                        <button
                             className={`mode-tab ${captureMode === 'photo' ? 'active' : ''}`}
                             onClick={() => setCaptureMode('photo')}
                         >
                             {lang === 'fr' ? 'PHOTO' : 'PHOTO'}
                         </button>
-                        <button 
+                        <button
                             className={`mode-tab ${captureMode === 'video' ? 'active' : ''}`}
                             onClick={() => setCaptureMode('video')}
                         >
@@ -375,17 +386,17 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     )}
 
                     <video ref={videoRef} autoPlay playsInline muted className="camera-feed"></video>
-                    
+
                     <div className="camera-controls">
                         <button onClick={stopCamera} className="cam-btn cancel">✕</button>
-                        
+
                         {captureMode === 'photo' ? (
                             <button onClick={capturePhoto} className="cam-btn capture">
                                 <div className="inner-circle"></div>
                             </button>
                         ) : (
-                            <button 
-                                onClick={isRecording ? stopRecording : startRecording} 
+                            <button
+                                onClick={isRecording ? stopRecording : startRecording}
                                 className={`cam-btn record ${isRecording ? 'recording' : ''}`}
                             >
                                 <div className="record-circle"></div>
@@ -411,200 +422,205 @@ const SubmitReport = ({ lang = 'fr' }) => {
                 }}>
                     {formStep === 1 && (
                         <>
-                        <div style={{textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
-                            <p style={{fontSize: '12px', color: 'rgba(255,255,255,0.6)', margin: '0'}}>
-                                {lang === 'fr' ? 'Étape 1/2' : lang === 'en' ? 'Step 1/2' : lang === 'es' ? 'Paso 1/2' : lang === 'ar' ? 'الخطوة 1/2' : lang === 'zh' ? '第 1/2 步' : 'Шаг 1/2'}
-                            </p>
-                        </div>
-                    <div className="form-group">
-                        <label>{t.take_photo}</label>
-                        {!imagePreview && !videoPreview ? (
-                            <div className="photo-upload-placeholder" onClick={startCamera}>
-                                <Camera size={40} />
-                                <span>{captureMode === 'photo' ? t.take_photo : (lang === 'fr' ? 'ENREGISTRER VIDÉO' : 'RECORD VIDEO')}</span>
+                            <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', margin: '0' }}>
+                                    {lang === 'fr' ? 'Étape 1/2' : lang === 'en' ? 'Step 1/2' : lang === 'es' ? 'Paso 1/2' : lang === 'ar' ? 'الخطوة 1/2' : lang === 'zh' ? '第 1/2 步' : 'Шаг 1/2'}
+                                </p>
                             </div>
-                        ) : (
-                            <div className="photo-preview-container">
-                                {isAnalyzing && (
-                                    <div className="ai-scanning-overlay">
-                                        <div className="scan-line"></div>
-                                        <span>ANALYSE IA...</span>
+                            <div className="form-group">
+                                <label>{t.take_photo}</label>
+                                {!imagePreview && !videoPreview ? (
+                                    <div className="photo-upload-placeholder" onClick={startCamera}>
+                                        <Camera size={40} />
+                                        <span>{captureMode === 'photo' ? t.take_photo : (lang === 'fr' ? 'ENREGISTRER VIDÉO' : 'RECORD VIDEO')}</span>
+                                    </div>
+                                ) : (
+                                    <div className="photo-preview-container">
+                                        {isAnalyzing && (
+                                            <div className="ai-scanning-overlay">
+                                                <div className="scan-line"></div>
+                                                <span>ANALYSE IA...</span>
+                                            </div>
+                                        )}
+                                        {imagePreview && <img src={imagePreview} alt="Preview" className="photo-preview" />}
+                                        {videoPreview && (
+                                            <video src={videoPreview} controls className="photo-preview" />
+                                        )}
+                                        <button type="button" className="remove-photo" onClick={() => {
+                                            setImagePreview(null);
+                                            setVideoPreview(null);
+                                        }}>
+                                            <X size={16} />
+                                        </button>
                                     </div>
                                 )}
-                                {imagePreview && <img src={imagePreview} alt="Preview" className="photo-preview" />}
-                                {videoPreview && (
-                                    <video src={videoPreview} controls className="photo-preview" />
-                                )}
-                                <button type="button" className="remove-photo" onClick={() => {
-                                    setImagePreview(null);
-                                    setVideoPreview(null);
-                                }}>
-                                    <X size={16} />
-                                </button>
                             </div>
-                        )}
-                    </div>
 
-                    <div className="form-group">
-                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                            <label>{t.description_label}</label>
-                            {formData.description.length > 5 && (
-                                <span className="ai-badge">🤖 IA Active</span>
-                            )}
-                        </div>
-                        <textarea 
-                            required
-                            placeholder={t.description_placeholder}
-                            value={formData.description}
-                            onChange={(e) => handleDescriptionChange(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>{t.damage_label}</label>
-                        <div className="damage-grid">
-                            {Object.entries(t.options.damage).map(([key, label]) => (
-                                <div 
-                                    key={key}
-                                    className={`damage-option ${formData.damage_level === key ? 'active' : ''}`}
-                                    onClick={() => setFormData({...formData, damage_level: key})}
-                                >
-                                    {label}
+                            <div className="form-group">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <label>{t.description_label}</label>
+                                    {formData.description.length > 5 && (
+                                        <span className="ai-badge">🤖 IA Active</span>
+                                    )}
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <div style={{display: 'flex', gap: '10px'}}>
-                            <div style={{flex: 1}}>
-                                <label>{t.infrastructure_label}</label>
-                                <select 
-                                    value={formData.infrastructure_type}
-                                    onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}
-                                >
-                                    {t.options.infra.map(item => <option key={item}>{item}</option>)}
-                                </select>
+                                <textarea
+                                    required
+                                    placeholder={t.description_placeholder}
+                                    value={formData.description}
+                                    onChange={(e) => handleDescriptionChange(e.target.value)}
+                                />
                             </div>
-                            <div style={{flex: 1}}>
-                                <label>{t.crisis_label}</label>
-                                <select 
-                                    value={formData.crisis_type}
-                                    onChange={(e) => setFormData({...formData, crisis_type: e.target.value})}
-                                >
-                                    {t.options.crisis.map(item => <option key={item}>{item}</option>)}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="form-group">
-                        <div className="gps-status">
-                            <MapPin size={14} color={location ? "#10b981" : "#f43f5e"} />
-                            <span>{location ? `${t.gps_active} (${location.lat.toFixed(4)})` : t.gps_searching}</span>
-                            {!location && (
-                                <button type="button" onClick={getGPS} className="mini-gps-btn">
-                                    📍 {lang === 'fr' ? 'Réessayer' : 'Retry'}
-                                </button>
-                            )}
-                        </div>
-                        <div className="input-with-button">
-                            <input 
-                                placeholder={t.location_label}
-                                value={formData.text_location}
-                                onChange={(e) => setFormData({...formData, text_location: e.target.value})}
-                            />
-                            <button type="button" onClick={getGPS} className="gps-refresh-btn">
-                                <MapPin size={18} />
-                            </button>
-                        </div>
-                    </div>
-                    </>
+                            <div className="form-group">
+                                <label>{t.damage_label}</label>
+                                <div className="damage-grid">
+                                    {Object.entries(t.options.damage).map(([key, label]) => (
+                                        <div
+                                            key={key}
+                                            className={`damage-option ${formData.damage_level === key ? 'active' : ''}`}
+                                            onClick={() => setFormData({ ...formData, damage_level: key })}
+                                        >
+                                            {label}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <label>{t.infrastructure_label}</label>
+                                        <select
+                                            value={formData.infrastructure_type}
+                                            onChange={(e) => setFormData({ ...formData, infrastructure_type: e.target.value })}
+                                        >
+                                            {t.options.infra.map(item => <option key={item}>{item}</option>)}
+                                        </select>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <label>{t.crisis_label}</label>
+                                        <select
+                                            value={formData.crisis_type}
+                                            onChange={(e) => setFormData({ ...formData, crisis_type: e.target.value })}
+                                        >
+                                            {t.options.crisis.map(item => <option key={item}>{item}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <div className="gps-status">
+                                    <MapPin size={14} color={location ? "#10b981" : "#f43f5e"} />
+                                    <span>{location ? `${t.gps_active} (${location.lat.toFixed(4)})` : t.gps_searching}</span>
+                                    {!location && (
+                                        <button type="button" onClick={getGPS} className="mini-gps-btn">
+                                            📍 {lang === 'fr' ? 'Réessayer' : 'Retry'}
+                                        </button>
+                                    )}
+                                </div>
+                                {gpsError && (
+                                    <p className="gps-error-hint" style={{ color: '#f43f5e', fontSize: '11px', margin: '5px 0' }}>
+                                        ⚠️ {gpsError}
+                                    </p>
+                                )}
+                                <div className="input-with-button">
+                                    <input
+                                        placeholder={t.location_label}
+                                        value={formData.text_location}
+                                        onChange={(e) => setFormData({ ...formData, text_location: e.target.value })}
+                                    />
+                                    <button type="button" onClick={getGPS} className="gps-refresh-btn">
+                                        <MapPin size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                        </>
                     )}
 
                     {formStep === 2 && (
-                    <>
-                    <div style={{textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
-                        <p style={{fontSize: '12px', color: 'rgba(255,255,255,0.6)', margin: '0'}}>
-                            {lang === 'fr' ? 'Étape 2/2' : lang === 'en' ? 'Step 2/2' : lang === 'es' ? 'Paso 2/2' : lang === 'ar' ? 'الخطوة 2/2' : lang === 'zh' ? '第 2/2 步' : 'Шаг 2/2'}
-                        </p>
-                    </div>
-                    <div className="form-group modular-section">
-                        <h3>📋 {t.needs}</h3>
-                        
-                        <label>{t.electricity}</label>
-                        <select 
-                            value={formData.electricity_status || ''}
-                            onChange={(e) => setFormData({...formData, electricity_status: e.target.value})}
-                        >
-                            <option value="">{t.select_placeholder}</option>
-                            {Object.entries(t.options.elec).map(([key, label]) => (
-                                <option key={key} value={key}>{label}</option>
-                            ))}
-                        </select>
+                        <>
+                            <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', margin: '0' }}>
+                                    {lang === 'fr' ? 'Étape 2/2' : lang === 'en' ? 'Step 2/2' : lang === 'es' ? 'Paso 2/2' : lang === 'ar' ? 'الخطوة 2/2' : lang === 'zh' ? '第 2/2 步' : 'Шаг 2/2'}
+                                </p>
+                            </div>
+                            <div className="form-group modular-section">
+                                <h3>📋 {t.needs}</h3>
 
-                        <label>{t.health}</label>
-                        <select 
-                            value={formData.health_services_status || ''}
-                            onChange={(e) => setFormData({...formData, health_services_status: e.target.value})}
-                        >
-                            <option value="">{t.select_placeholder}</option>
-                            {Object.entries(t.options.health).map(([key, label]) => (
-                                <option key={key} value={key}>{label}</option>
-                            ))}
-                        </select>
+                                <label>{t.electricity}</label>
+                                <select
+                                    value={formData.electricity_status || ''}
+                                    onChange={(e) => setFormData({ ...formData, electricity_status: e.target.value })}
+                                >
+                                    <option value="">{t.select_placeholder}</option>
+                                    {Object.entries(t.options.elec).map(([key, label]) => (
+                                        <option key={key} value={key}>{label}</option>
+                                    ))}
+                                </select>
 
-                        <label style={{marginTop: '15px', display: 'block', fontWeight: 'bold', color: '#f472b6'}}>
-                            🆘 {lang === 'fr' ? 'Besoins les plus urgents' : lang === 'en' ? 'Most urgent needs' : lang === 'es' ? 'Necesidades más urgentes' : lang === 'ar' ? 'الاحتياجات الأكثر إلحاحا' : lang === 'zh' ? '最紧急的需求' : 'Самые неотложные потребности'}
-                        </label>
-                        <p style={{fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginBottom: '10px'}}>
-                            {lang === 'fr' ? 'Sélectionnez tous les besoins applicables' : lang === 'en' ? 'Select all applicable needs' : lang === 'es' ? 'Seleccione todas las necesidades aplicables' : lang === 'ar' ? 'اختر جميع الاحتياجات المعمول بها' : lang === 'zh' ? '选择所有适用的需求' : 'Выберите все применимые потребности'}
-                        </p>
-                        <div className="checkboxes-grid">
-                            {Object.entries(t.options.urgent_needs).filter(([key]) => key !== 'other').map(([key, label]) => (
-                                <label key={key}>
-                                    <input 
-                                        type="checkbox"
-                                        checked={formData.urgent_needs.includes(key)}
-                                        onChange={(e) => {
-                                            if (e.target.checked) {
-                                                setFormData({...formData, urgent_needs: [...formData.urgent_needs, key]});
-                                            } else {
-                                                setFormData({...formData, urgent_needs: formData.urgent_needs.filter(n => n !== key)});
-                                            }
-                                        }}
-                                    />
-                                    <span>{label}</span>
+                                <label>{t.health}</label>
+                                <select
+                                    value={formData.health_services_status || ''}
+                                    onChange={(e) => setFormData({ ...formData, health_services_status: e.target.value })}
+                                >
+                                    <option value="">{t.select_placeholder}</option>
+                                    {Object.entries(t.options.health).map(([key, label]) => (
+                                        <option key={key} value={key}>{label}</option>
+                                    ))}
+                                </select>
+
+                                <label style={{ marginTop: '15px', display: 'block', fontWeight: 'bold', color: '#f472b6' }}>
+                                    🆘 {lang === 'fr' ? 'Besoins les plus urgents' : lang === 'en' ? 'Most urgent needs' : lang === 'es' ? 'Necesidades más urgentes' : lang === 'ar' ? 'الاحتياجات الأكثر إلحاحا' : lang === 'zh' ? '最紧急的需求' : 'Самые неотложные потребности'}
                                 </label>
-                            ))}
-                        </div>
+                                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginBottom: '10px' }}>
+                                    {lang === 'fr' ? 'Sélectionnez tous les besoins applicables' : lang === 'en' ? 'Select all applicable needs' : lang === 'es' ? 'Seleccione todas las necesidades aplicables' : lang === 'ar' ? 'اختر جميع الاحتياجات المعمول بها' : lang === 'zh' ? '选择所有适用的需求' : 'Выберите все применимые потребности'}
+                                </p>
+                                <div className="checkboxes-grid">
+                                    {Object.entries(t.options.urgent_needs).filter(([key]) => key !== 'other').map(([key, label]) => (
+                                        <label key={key}>
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.urgent_needs.includes(key)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setFormData({ ...formData, urgent_needs: [...formData.urgent_needs, key] });
+                                                    } else {
+                                                        setFormData({ ...formData, urgent_needs: formData.urgent_needs.filter(n => n !== key) });
+                                                    }
+                                                }}
+                                            />
+                                            <span>{label}</span>
+                                        </label>
+                                    ))}
+                                </div>
 
-                        <label style={{marginTop: '15px', display: 'block', fontWeight: '500', marginBottom: '8px'}}>
-                            {t.options.urgent_needs.other}
-                        </label>
-                        <input 
-                            type="text"
-                            placeholder={lang === 'fr' ? 'Précisez si autre...' : lang === 'en' ? 'Please specify if other...' : lang === 'es' ? 'Por favor especifique si otro...' : lang === 'ar' ? 'يرجى التحديد إذا كان آخر...' : lang === 'zh' ? '请说明是否为其他...' : 'Пожалуйста укажите если другое...'}
-                            value={formData.urgent_needs_other || ''}
-                            onChange={(e) => setFormData({...formData, urgent_needs_other: e.target.value})}
-                            style={{width: '100%', padding: '10px', marginBottom: '15px', backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', color: 'white', fontFamily: 'inherit', fontSize: '14px'}}
-                        />
-                    </div>
-                    </>
+                                <label style={{ marginTop: '15px', display: 'block', fontWeight: '500', marginBottom: '8px' }}>
+                                    {t.options.urgent_needs.other}
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder={lang === 'fr' ? 'Précisez si autre...' : lang === 'en' ? 'Please specify if other...' : lang === 'es' ? 'Por favor especifique si otro...' : lang === 'ar' ? 'يرجى التحديد إذا كان آخر...' : lang === 'zh' ? '请说明是否为其他...' : 'Пожалуйста укажите если другое...'}
+                                    value={formData.urgent_needs_other || ''}
+                                    onChange={(e) => setFormData({ ...formData, urgent_needs_other: e.target.value })}
+                                    style={{ width: '100%', padding: '10px', marginBottom: '15px', backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', color: 'white', fontFamily: 'inherit', fontSize: '14px' }}
+                                />
+                            </div>
+                        </>
                     )}
 
-                    <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                         {formStep === 2 && (
-                            <button 
+                            <button
                                 type="button"
                                 onClick={() => setFormStep(1)}
                                 className="submit-btn"
-                                style={{flex: 1, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)'}}
+                                style={{ flex: 1, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
                             >
                                 {lang === 'fr' ? '← RETOUR' : lang === 'en' ? '← BACK' : lang === 'es' ? '← VOLVER' : lang === 'ar' ? '← رجوع' : lang === 'zh' ? '← 返回' : '← НАЗАД'}
                             </button>
                         )}
-                        <button type="submit" className={`submit-btn ${!isOnline ? 'offline' : ''}`} disabled={loading} style={{flex: 1}}>
+                        <button type="submit" className={`submit-btn ${!isOnline ? 'offline' : ''}`} disabled={loading} style={{ flex: 1 }}>
                             {loading ? '...' : (formStep === 1 ? (lang === 'fr' ? 'SUIVANT →' : lang === 'en' ? 'NEXT →' : lang === 'es' ? 'SIGUIENTE →' : lang === 'ar' ? 'التالي →' : lang === 'zh' ? '下一步 →' : 'ДАЛЕЕ →') : t.submit_btn)}
                         </button>
                     </div>

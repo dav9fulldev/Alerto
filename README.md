@@ -92,11 +92,16 @@ Instructions for local setup will be added as implementation progresses.
 - `POST /reports/upload` - Upload image before report submission
 
 ### Statistics & Analysis
-- `GET /reports/summary/stats` - Dashboard statistics (includes NSFW metrics)
-- `GET /reports/summary/nsfw-review` - Flagged images for moderation review
-- `POST /reports/sync-offline` - Sync offline-collected reports
+- `GET /analytics/stats` - Global dashboard statistics (Damage, Infra, NSFW)
+- `GET /analytics/nsfw-review` - List of images flagged for manual review
+- `GET /analytics/trends` - Daily report trends (last 7 days)
 
-### Data Formats
+### Authentication (Authority/PNUD)
+- `POST /auth/register` - Create a new authority account
+- `POST /auth/login` - Authenticate and obtain JWT access token (OAuth2 standard)
+
+### Data Formats & Sync
+- `POST /reports/sync-offline` - Sync reports collected without internet
 - **Export**: CSV, GeoJSON formats
 - **Geospatial Queries**: MongoDB 2dsphere with country/region filtering
 

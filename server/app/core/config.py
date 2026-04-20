@@ -37,3 +37,8 @@ ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
 
 # Logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+# Security
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours

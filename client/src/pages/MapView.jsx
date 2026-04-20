@@ -65,8 +65,11 @@ const MapView = () => {
 
     useEffect(() => {
         const fetchReports = async () => {
+            const token = localStorage.getItem('alerto_token');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            
             try {
-                const response = await axios.get(API_URL);
+                const response = await axios.get(API_URL, { headers });
                 setReports(response.data);
             } catch (error) {
                 console.error("Erreur chargement rapports:", error);

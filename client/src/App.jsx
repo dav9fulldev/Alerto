@@ -3,22 +3,46 @@ import SubmitReport from './pages/SubmitReport';
 import MapView from './pages/MapView';
 import Dashboard from './pages/Dashboard';
 import PnudLogin from './pages/PnudLogin';
-import { Map as MapIcon, BarChart3, LogOut } from 'lucide-react';
+import { Map as MapIcon, BarChart3, LogOut, HelpCircle } from 'lucide-react';
+import HelpGuide from './pages/HelpGuide';
 import './App.css';
 import { LanguageProvider, useTranslation } from './services/i18n';
 
 function AppContent() {
   const [path, setPath] = useState(window.location.pathname);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [user, setUser] = useState(null);
   const [adminView, setAdminView] = useState('dash');
   const { lang, setLang } = useTranslation();
 
-  // Écouter les changements d'URL
+  // Vérifier si un utilisateur est déjà connecté au chargement
   useEffect(() => {
+    const savedToken = localStorage.getItem('alerto_token');
+    const savedUser = localStorage.getItem('alerto_user');
+    if (savedToken && savedUser) {
+      setIsAuthenticated(true);
+      setUser(JSON.parse(savedUser));
+    }
+    
     const handleLocationChange = () => setPath(window.location.pathname);
     window.addEventListener('popstate', handleLocationChange);
     return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
+
+  const handleLoginSuccess = (userData) => {
+    setIsAuthenticated(true);
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('alerto_token');
+    localStorage.removeItem('alerto_user');
+    setIsAuthenticated(false);
+    setUser(null);
+    window.history.pushState({}, '', '/');
+    setPath('/');
+  };
 
   const LangSwitcher = () => {
     const isAdmin = path === '/pnud';
@@ -41,13 +65,16 @@ function AppContent() {
     if (!isAuthenticated) {
       return <PnudLogin 
                 onBack={() => { window.history.pushState({}, '', '/'); setPath('/'); }} 
-                onLoginSuccess={() => setIsAuthenticated(true)} 
+                onLoginSuccess={handleLoginSuccess} 
              />;
     }
 
     return (
       <div className="app-container">
         <header className="admin-header">
+           <div className="user-info-badge">
+             👤 {user?.username}
+           </div>
            <LangSwitcher />
         </header>
         {adminView === 'map' && <MapView lang={lang} />}
@@ -70,16 +97,30 @@ function AppContent() {
           </button>
           <button 
             className="logout-btn"
-            onClick={() => { 
-                setIsAuthenticated(false); 
-                window.history.pushState({}, '', '/'); 
-                setPath('/'); 
-            }}
+            onClick={handleLogout}
           >
             <LogOut size={18} />
             <span>Sortir</span>
           </button>
         </nav>
+
+        {/* Bouton d'Aide Flottant (Admin) */}
+        <button 
+          className="floating-help-btn" 
+          onClick={() => setShowHelp(true)}
+          style={{
+            position: 'fixed', bottom: '90px', right: '20px',
+            width: '50px', height: '50px', borderRadius: '50%',
+            backgroundColor: '#f43f5e', color: 'white',
+            border: 'none', boxShadow: '0 4px 12px rgba(244, 63, 94, 0.4)',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 900
+          }}
+        >
+          <HelpCircle size={24} />
+        </button>
+
+        {showHelp && <HelpGuide lang={lang} onClose={() => setShowHelp(false)} />}
       </div>
     );
   }
@@ -91,6 +132,25 @@ function AppContent() {
           <LangSwitcher />
       </header>
       <SubmitReport lang={lang} />
+      
+      {/* Bouton d'Aide Flottant */}
+      <button 
+        className="floating-help-btn" 
+        onClick={() => setShowHelp(true)}
+        title={lang === 'fr' ? 'Besoin d\'aide ?' : 'Need help?'}
+        style={{
+          position: 'fixed', bottom: '90px', right: '20px',
+          width: '50px', height: '50px', borderRadius: '50%',
+          backgroundColor: '#f43f5e', color: 'white',
+          border: 'none', boxShadow: '0 4px 12px rgba(244, 63, 94, 0.4)',
+          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 900, transition: 'transform 0.2s ease'
+        }}
+      >
+        <HelpCircle size={24} />
+      </button>
+
+      {showHelp && <HelpGuide lang={lang} onClose={() => setShowHelp(false)} />}
     </div>
   );
 }

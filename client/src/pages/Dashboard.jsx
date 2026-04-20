@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { BarChart3, AlertTriangle, CheckCircle2, Download, Table } from 'lucide-react';
+import { BarChart3, AlertTriangle, CheckCircle2, Download, Table, Trash2 } from 'lucide-react';
 import './Dashboard.css';
 
 const API_BASE = `http://${window.location.hostname}:8000`;
-const API_URL = `${API_BASE}/reports`;
-
 
 const Dashboard = ({ lang = 'fr' }) => {
     const [reports, setReports] = useState([]);
     const [stats, setStats] = useState({
-        total: 0,
-        critical: 0,
-        duplicates: 0,
-        byType: {}
+        total_reports: 0,
+        critical_zones: 0,
+        duplicates_detected: 0,
+        infrastructure_distribution: {}
     });
     const [loading, setLoading] = useState(true);
-    const [selectedMedia, setSelectedMedia] = useState(null); // { type: 'video'|'image', url: '...' }
+    const [error, setError] = useState(null);
+    const [selectedMedia, setSelectedMedia] = useState(null);
 
     const getMediaUrl = (url) => {
         if (!url) return null;
@@ -99,33 +98,86 @@ const Dashboard = ({ lang = 'fr' }) => {
         downloadAnchorNode.remove();
     };
 
+    const handleDeleteReport = async (id) => {
+        if (!window.confirm(lang === 'fr' ? 'Supprimer ce rapport définitivement ?' : 'Delete this report permanently?')) return;
+        
+        const token = localStorage.getItem('alerto_token');
+        const headers = { 'Authorization': `Bearer ${token}` };
+
+        try {
+            await axios.delete(`${API_BASE}/reports/${id}`, { headers });
+            window.location.reload(); 
+        } catch (err) {
+            alert("Erreur lors de la suppression: " + (err.response?.data?.detail || err.message));
+        }
+    };
+
     useEffect(() => {
-        const fetchStats = async () => {
+        const fetchData = async () => {
+            const token = localStorage.getItem('alerto_token');
+            if (!token) {
+                setError("Session expirée. Veuillez vous reconnecter.");
+                setLoading(false);
+                return;
+            }
+
+            const headers = { 'Authorization': `Bearer ${token}` };
+
             try {
-                const response = await axios.get(API_URL);
-                const data = response.data;
-                setReports(data);
+                console.log("📡 Récupération des données du Dashboard...");
                 
-                const statsMap = {
-                    total: data.length,
-                    critical: data.filter(r => r.damage_level === 'complet').length,
-                    duplicates: data.filter(r => r.is_duplicate).length,
-                    byType: data.reduce((acc, r) => {
-                        acc[r.infrastructure_type] = (acc[r.infrastructure_type] || 0) + 1;
-                        return acc;
-                    }, {})
-                };
-                setStats(statsMap);
-            } catch (error) {
-                console.error("Erreur stats:", error);
+                // 1. Fetch Stats Sécurisées (timeout de 8s)
+                const statsResponse = await axios.get(`${API_BASE}/analytics/stats`, { 
+                    headers,
+                    timeout: 8000 
+                });
+                setStats(statsResponse.data);
+                
+                // 2. Fetch Liste des Rapports
+                const reportsResponse = await axios.get(`${API_BASE}/reports/`, { 
+                    headers,
+                    timeout: 8000
+                });
+                setReports(reportsResponse.data);
+                
+            } catch (err) {
+                console.error("Erreur Dashboard:", err);
+                const msg = err.response?.data?.detail || err.message || "Erreur de connexion au serveur";
+                setError(msg);
+                
+                if (err.response?.status === 401) {
+                    localStorage.removeItem('alerto_token');
+                    setTimeout(() => window.location.reload(), 2000);
+                }
             } finally {
                 setLoading(false);
             }
         };
-        fetchStats();
+        fetchData();
+        
+        // Rafraîchissement automatique toutes les 30 secondes (Mode LIVE)
+        const interval = setInterval(fetchData, 30000);
+        return () => clearInterval(interval);
     }, []);
 
-    if (loading) return <div className="loading">{lang === 'fr' ? 'Chargement des analyses...' : 'Loading analytics...'}</div>;
+    if (loading) return (
+        <div className="loading-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '80vh', gap: '20px' }}>
+            <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid rgba(244, 63, 94, 0.1)', borderTop: '4px solid #f43f5e', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+            <p style={{ color: '#94a3b8' }}>{lang === 'fr' ? 'Chargement des analyses...' : 'Loading analytics...'}</p>
+            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+    );
+
+    if (error) return (
+        <div className="error-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '80vh', textAlign: 'center', padding: '20px' }}>
+            <AlertTriangle size={48} color="#f43f5e" style={{ marginBottom: '20px' }} />
+            <h2 style={{ color: '#fff', marginBottom: '10px' }}>Impossible de charger les données</h2>
+            <p style={{ color: '#94a3b8', marginBottom: '20px' }}>{error}</p>
+            <button onClick={() => window.location.reload()} style={{ padding: '10px 20px', background: '#f43f5e', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+                Réessayer
+            </button>
+        </div>
+    );
 
     return (
         <>
@@ -150,7 +202,7 @@ const Dashboard = ({ lang = 'fr' }) => {
                     <div className="stat-icon total"><BarChart3 /></div>
                     <div className="stat-info">
                         <h3>{lang === 'fr' ? 'Total Signalements' : 'Total Reports'}</h3>
-                        <p className="stat-value">{stats.total}</p>
+                        <p className="stat-value">{stats.total_reports}</p>
                     </div>
                 </div>
                 
@@ -158,7 +210,7 @@ const Dashboard = ({ lang = 'fr' }) => {
                     <div className="stat-icon critical"><AlertTriangle /></div>
                     <div className="stat-info">
                         <h3>{lang === 'fr' ? 'Zones Critiques' : 'Critical Zones'}</h3>
-                        <p className="stat-value">{stats.critical}</p>
+                        <p className="stat-value">{stats.critical_zones}</p>
                         <span className="stat-sub">{lang === 'fr' ? 'Dégâts complets' : 'Complete damage'}</span>
                     </div>
                 </div>
@@ -167,7 +219,7 @@ const Dashboard = ({ lang = 'fr' }) => {
                     <div className="stat-icon duplicates"><CheckCircle2 /></div>
                     <div className="stat-info">
                         <h3>{lang === 'fr' ? 'Doublons Détectés' : 'Duplicates Detected'}</h3>
-                        <p className="stat-value">{stats.duplicates}</p>
+                        <p className="stat-value">{stats.duplicates_detected}</p>
                         <span className="stat-sub">{lang === 'fr' ? 'Optimisation data' : 'Data optimization'}</span>
                     </div>
                 </div>
@@ -177,13 +229,13 @@ const Dashboard = ({ lang = 'fr' }) => {
                 <div className="chart-card">
                     <h2>{lang === 'fr' ? 'Répartition par Infrastructure' : 'Infrastructure Distribution'}</h2>
                     <div className="type-list">
-                        {Object.entries(stats.byType).map(([type, count]) => (
+                        {Object.entries(stats.infrastructure_distribution || {}).map(([type, count]) => (
                             <div key={type} className="type-item">
                                 <span className="type-name">{type}</span>
                                 <div className="type-bar-bg">
                                     <div 
                                         className="type-bar-fill" 
-                                        style={{ width: `${(count / stats.total) * 100}%` }}
+                                        style={{ width: `${(count / stats.total_reports) * 100}%` }}
                                     ></div>
                                 </div>
                                 <span className="type-count">{count}</span>
@@ -224,6 +276,14 @@ const Dashboard = ({ lang = 'fr' }) => {
                                         <span className="feed-time">
                                             {new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                         </span>
+                                        <button 
+                                            className="delete-report-btn" 
+                                            onClick={() => handleDeleteReport(r._id)}
+                                            title={lang === 'fr' ? 'Supprimer' : 'Delete'}
+                                            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
                                     </div>
                                     <p className="feed-desc">{r.description || (lang === 'fr' ? "Pas de description" : "No description")}</p>
                                     <div className="feed-location">📍 {r.text_location || "Unknown"}</div>
