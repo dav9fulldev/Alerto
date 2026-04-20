@@ -165,7 +165,7 @@ pm2 start "uvicorn main:app --host 0.0.0.0 --port 8000" --name alerto-api
 ### 4. Reverse Proxy Nginx
 Configurez Nginx pour servir le dossier `client/dist` (statique) et rediriger `/api` vers le port 8000 du backend.
 
-**Documentation Complète** : Un guide étape par étape est disponible dans `docs/HOSTINGER_DEPLOYMENT.md` (à créer).
+**Documentation Complète** : Un guide étape par étape est disponible dans  [HOSTINGER_DEPLOYMENT.md](docs/HOSTINGER_DEPLOYMENT.md).
 
 ---
 *Built for the PNUD Crisis Mapping Challenge (Deadline: June 23, 2026)*
