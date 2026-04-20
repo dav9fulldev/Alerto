@@ -1,4 +1,4 @@
-# Guide de Déploiement : Hostinger VPS (Ubuntu/Debian) 🌐🚀
+# Guide de Déploiement : Hostinger VPS (Ubuntu) 🌐🚀
 
 Ce guide détaille les étapes pour héberger la plateforme **ALERTO** sur un serveur privé virtuel (VPS) Hostinger.
 
