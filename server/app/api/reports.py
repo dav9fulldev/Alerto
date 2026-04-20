@@ -169,7 +169,7 @@ async def create_report(report: Report):
         print(f"ERREUR CREATE_REPORT: {str(e)}")
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 

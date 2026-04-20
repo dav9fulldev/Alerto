@@ -52,7 +52,7 @@ async def get_stats(current_user: User = Depends(get_current_user)):
         }
     except Exception as e:
         print(f"ERREUR GET_STATS: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.get("/nsfw-review")
 async def get_nsfw_reports(current_user: User = Depends(get_current_user)):
@@ -82,7 +82,7 @@ async def get_nsfw_reports(current_user: User = Depends(get_current_user)):
         }
     except Exception as e:
         print(f"ERREUR GET_NSFW_REPORTS: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.get("/trends")
 async def get_trends(current_user: User = Depends(get_current_user)):
@@ -115,4 +115,4 @@ async def get_trends(current_user: User = Depends(get_current_user)):
         return trends
     except Exception as e:
         print(f"ERREUR GET_TRENDS: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")

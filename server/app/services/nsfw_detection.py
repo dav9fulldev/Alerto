@@ -62,7 +62,7 @@ def detect_nsfw_offline(image_path: str) -> Dict:
                 "is_nsfw": False,
                 "is_flagged": False,
                 "detection_method": "offline",
-                "error": "Image not found"
+                "error": "Media source not found"
             }
 
         detector = get_detector()
@@ -105,7 +105,7 @@ def detect_nsfw_offline(image_path: str) -> Dict:
             "is_nsfw": False,
             "is_flagged": False,
             "detection_method": "offline",
-            "error": str(e)
+            "error": "Analysis failed"
         }
 
 
