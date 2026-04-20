@@ -230,8 +230,8 @@ async def delete_report(report_id: str, current_user: User = Depends(get_current
         raise HTTPException(status_code=400, detail="Invalid report ID format")
 
 @router.post("/sync-offline")
-async def sync_reports(payload: dict, current_user: User = Depends(get_current_user)):
-    """Synchronise les rapports hors ligne (Sécurisé)"""
+async def sync_reports(payload: dict):
+    """Synchronise les rapports hors ligne (Public)"""
     reports = payload.get("reports", [])
     if not reports:
         return {"message": "No reports to sync"}

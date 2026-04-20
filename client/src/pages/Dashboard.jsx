@@ -113,7 +113,11 @@ const Dashboard = ({ lang = 'fr' }) => {
     };
 
     useEffect(() => {
+        let isStopped = false;
+
         const fetchData = async () => {
+            if (isStopped) return;
+            
             const token = localStorage.getItem('alerto_token');
             if (!token) {
                 setError("Session expirée. Veuillez vous reconnecter.");
@@ -124,8 +128,6 @@ const Dashboard = ({ lang = 'fr' }) => {
             const headers = { 'Authorization': `Bearer ${token}` };
 
             try {
-                console.log("📡 Récupération des données du Dashboard...");
-                
                 // 1. Fetch Stats Sécurisées (timeout de 8s)
                 const statsResponse = await axios.get(`${API_BASE}/analytics/stats`, { 
                     headers,
@@ -142,22 +144,29 @@ const Dashboard = ({ lang = 'fr' }) => {
                 
             } catch (err) {
                 console.error("Erreur Dashboard:", err);
-                const msg = err.response?.data?.detail || err.message || "Erreur de connexion au serveur";
-                setError(msg);
-                
                 if (err.response?.status === 401) {
+                    isStopped = true; // Arrête les futurs appels du setInterval
                     localStorage.removeItem('alerto_token');
-                    setTimeout(() => window.location.reload(), 2000);
+                    setError("Session expirée. Redirection...");
+                    setTimeout(() => window.location.href = '/login', 2000);
+                } else {
+                    const msg = err.response?.data?.detail || err.message || "Erreur de connexion au serveur";
+                    setError(msg);
                 }
             } finally {
                 setLoading(false);
             }
         };
+
         fetchData();
         
         // Rafraîchissement automatique toutes les 30 secondes (Mode LIVE)
         const interval = setInterval(fetchData, 30000);
-        return () => clearInterval(interval);
+        
+        return () => {
+            isStopped = true;
+            clearInterval(interval);
+        };
     }, []);
 
     if (loading) return (
