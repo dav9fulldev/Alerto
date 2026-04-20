@@ -14,10 +14,10 @@
 
 ## 🛠 Tech Stack
 
-- **Frontend**: React (PWA with Service Workers) - Deployed on Vercel.
-- **Backend**: FastAPI (Python) - Deployed on Render.
+- **Frontend**: React (PWA with Service Workers) - Deployed on Hostinger VPS (Nginx).
+- **Backend**: FastAPI (Python) - Deployed on Hostinger VPS (Gunicorn/PM2).
 - **Database**: MongoDB Atlas (GeoJSON & Geospatial indexing).
-- **Storage**: S3-compatible cloud storage for images.
+- **Storage**: S3-compatible cloud storage (or local storage on VPS).
 
 ## 📁 Project Structure
 
@@ -138,24 +138,34 @@ python test_nsfw_integration.py  # NSFW system verification
 http://localhost:8000/docs
 ```
 
-## 📦 Deployment
+## 📦 Déploiement (Hostinger VPS)
 
-### Development
+### 1. Préparation (Local)
 ```bash
-# Terminal 1: Backend
-cd server && python -m uvicorn main:app --reload
-
-# Terminal 2: Frontend
-cd client && npm run dev
+# Build du frontend
+cd client && npm run build
+# Le dossier 'dist' est prêt à être transféré
 ```
 
-### Production
-- **Frontend**: Deploy React build to Vercel/Netlify
-- **Backend**: Docker container on Render/Railway
-- **Database**: MongoDB Atlas (cloud)
-- **Storage**: S3-compatible cloud storage
+### 2. Configuration Serveur (Hostinger)
+1.  **Accès SSH** : Connectez-vous à votre VPS Hostinger.
+2.  **Installation** : Installez Python 3.10+, Node.js (pour PM2) et Nginx.
+3.  **Clonage** : `git clone` votre projet dans `/var/www/alerto`.
 
-**Deployment Documentation**: Detailed guides available in `docs/`
+### 3. Lancement Backend (Production)
+```bash
+cd /var/www/alerto/server
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+# Lancement avec Gunicorn ou PM2
+pm2 start "uvicorn main:app --host 0.0.0.0 --port 8000" --name alerto-api
+```
+
+### 4. Reverse Proxy Nginx
+Configurez Nginx pour servir le dossier `client/dist` (statique) et rediriger `/api` vers le port 8000 du backend.
+
+**Documentation Complète** : Un guide étape par étape est disponible dans `docs/HOSTINGER_DEPLOYMENT.md` (à créer).
 
 ---
 *Built for the PNUD Crisis Mapping Challenge (Deadline: June 23, 2026)*
