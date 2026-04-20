@@ -60,7 +60,7 @@ Contenu suggéré :
 ```nginx
 server {
     listen 80;
-    server_name votre-domaine.com;
+    server_name alerto-pnud.com www.alerto-pnud.com;
 
     # Frontend
     location / {
