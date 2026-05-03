@@ -7,25 +7,25 @@ import { useTranslation } from '../services/i18n';
 import { COUNTRY_LIST, filterReportsByCountry, getCountryFromCoordinates, COUNTRY_BOUNDS } from '../services/countryFilter';
 import { getCountryName } from '../services/countryNames';
 
-const API_BASE = `http://${window.location.hostname}:8000`;
+import { API_BASE } from '../services/api';
 const API_URL = `${API_BASE}/reports/`;
 
 // Helper function to get center and zoom level for a country
 const getCountryCenterAndZoom = (country) => {
     if (!country || country === "All") return { center: [5, -5], zoom: 3 };
-    
+
     const bounds = COUNTRY_BOUNDS[country];
     if (!bounds) return { center: [5, -5], zoom: 3 };
-    
+
     const [minLat, minLon, maxLat, maxLon] = bounds;
     const centerLat = (minLat + maxLat) / 2;
     const centerLon = (minLon + maxLon) / 2;
-    
+
     // Calculate zoom level based on country size
     const latDiff = Math.abs(maxLat - minLat);
     const lonDiff = Math.abs(maxLon - minLon);
     const maxDiff = Math.max(latDiff, lonDiff);
-    
+
     let zoom = 3;
     if (maxDiff < 2) zoom = 12;
     else if (maxDiff < 5) zoom = 10;
@@ -33,7 +33,7 @@ const getCountryCenterAndZoom = (country) => {
     else if (maxDiff < 20) zoom = 6;
     else if (maxDiff < 40) zoom = 5;
     else zoom = 4;
-    
+
     return { center: [centerLat, centerLon], zoom };
 };
 
@@ -67,7 +67,7 @@ const MapView = () => {
         const fetchReports = async () => {
             const token = localStorage.getItem('alerto_token');
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-            
+
             try {
                 const response = await axios.get(API_URL, { headers });
                 setReports(response.data);
@@ -90,11 +90,11 @@ const MapView = () => {
         <div className="map-page">
             <div className="map-header">
                 <h1>🚨 ALERTO - Carte SIG</h1>
-                
+
                 {/* Country Filter - Centered */}
                 <div className="country-filter">
                     <label htmlFor="country-select">🌍 {lang === 'fr' ? 'Filtrer par pays:' : lang === 'es' ? 'Filtrar por país:' : lang === 'ar' ? 'تصفية حسب الدولة:' : lang === 'zh' ? '按国家筛选:' : lang === 'ru' ? 'Фильтровать по стране:' : 'Filter by country:'}</label>
-                    <select 
+                    <select
                         id="country-select"
                         value={selectedCountry}
                         onChange={(e) => setSelectedCountry(e.target.value)}
@@ -159,16 +159,16 @@ const MapView = () => {
                             <Popup className="custom-popup">
                                 <div className="popup-content">
                                     {report.video_url ? (
-                                        <video 
-                                            src={report.video_url.startsWith('http') ? report.video_url : (report.video_url.startsWith('/') ? `${API_BASE}${report.video_url}` : `${API_BASE}/uploads/${report.video_url}`)} 
-                                            controls 
-                                            style={{ width: '100%', borderRadius: '8px', marginBottom: '8px' }} 
+                                        <video
+                                            src={report.video_url.startsWith('http') ? report.video_url : (report.video_url.startsWith('/') ? `${API_BASE}${report.video_url}` : `${API_BASE}/uploads/${report.video_url}`)}
+                                            controls
+                                            style={{ width: '100%', borderRadius: '8px', marginBottom: '8px' }}
                                         />
                                     ) : report.image_url && (
-                                        <img 
-                                            src={report.image_url.startsWith('http') ? report.image_url : (report.image_url.startsWith('/') ? `${API_BASE}${report.image_url}` : `${API_BASE}/uploads/${report.image_url}`)} 
-                                            alt="Evidence" 
-                                            style={{ width: '100%', borderRadius: '8px', marginBottom: '8px' }} 
+                                        <img
+                                            src={report.image_url.startsWith('http') ? report.image_url : (report.image_url.startsWith('/') ? `${API_BASE}${report.image_url}` : `${API_BASE}/uploads/${report.image_url}`)}
+                                            alt="Evidence"
+                                            style={{ width: '100%', borderRadius: '8px', marginBottom: '8px' }}
                                         />
                                     )}
                                     <h3>{report.infrastructure_type}</h3>

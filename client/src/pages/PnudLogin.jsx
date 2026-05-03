@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Lock, ArrowLeft, Loader2, User as UserIcon } from 'lucide-react';
 import './PnudLogin.css';
 
-const API_BASE = `http://${window.location.hostname}:8000`;
+import { API_BASE } from '../services/api';
 
 const PnudLogin = ({ onBack, onLoginSuccess }) => {
     const [username, setUsername] = useState('');

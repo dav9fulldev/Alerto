@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { getOfflineReports, clearOfflineReports } from './storage';
 
-const SYNC_URL = 'http://localhost:8000/reports/sync-offline';
+import { API_BASE } from './api';
+const SYNC_URL = `${API_BASE}/reports/sync-offline`;
 
 export const syncOfflineData = async () => {
     const reports = await getOfflineReports();

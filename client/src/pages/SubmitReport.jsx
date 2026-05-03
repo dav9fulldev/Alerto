@@ -5,7 +5,7 @@ import axios from 'axios';
 import { saveReportOffline } from '../services/storage';
 import { syncOfflineData } from '../services/sync';
 
-const API_BASE = `http://${window.location.hostname}:8000`;
+import { API_BASE } from '../services/api';
 const API_URL = `${API_BASE}/reports/`;
 import { translations } from '../services/i18n';
 

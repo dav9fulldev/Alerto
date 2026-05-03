@@ -1,0 +1,63 @@
+name: ALERTO Deployment Pipeline 🚀
+
+# On définit QUAND le pipeline doit s'exécuter
+on:
+  push:
+    branches: [ main ]  # S'exécute uniquement quand on push sur la branche main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # On utilise une machine virtuelle Ubuntu toute neuve
+
+    # 1. On récupère le code de votre dépôt sur la machine virtuelle
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+      # 2. On installe Node.js pour pouvoir compiler le React
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'  # Ou la version de votre PWA
+    
+    # 3. On installe les dépendances du dossier client
+    - name: Install Frontend dependencies
+      run: |
+        cd client
+        npm install
+    
+    # 4. On génère les fichiers de production (le dossier dist/)
+    - name: Build frontend
+      run: |
+        cd client
+        npm run build
+
+    
+    - name: Deploy frontend
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_IP }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          # 1. Aller dans le dossier du projet
+          cd /var/www/alerto
+          
+          # 2. Mettre à jour le code source
+          git pull origin main
+          
+          # 3. Mettre à jour le Backend (Python)
+          cd server
+          source venv/bin/activate
+          pip install -r requirements.txt
+          
+          # 4. Relancer le serveur Backend avec PM2 pour appliquer les changements
+          pm2 restart alerto-api || pm2 start main.py --name alerto-api --interpreter ./venv/bin/python
+
+          # 5. Mettre à jour le Frontend (React)
+          cd ../client
+          npm install
+          npm run build
+          
+          # Pas besoin de relancer Nginx, il sert automatiquement le dossier 'dist'
