@@ -4,10 +4,10 @@ import { MapPin, Send, Loader2, Camera, X } from 'lucide-react';
 import axios from 'axios';
 import { saveReportOffline } from '../services/storage';
 import { syncOfflineData } from '../services/sync';
-
 import { API_BASE } from '../services/api';
-const API_URL = `${API_BASE}/reports/`;
 import { translations } from '../services/i18n';
+
+const API_URL = `${API_BASE}/reports/`;
 
 const SubmitReport = ({ lang = 'fr' }) => {
     const t = translations[lang] || translations.fr;

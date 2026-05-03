@@ -47,26 +47,16 @@ function AppContent() {
   const LangSwitcher = () => {
     const isAdmin = path === '/pnud';
     const options = isAdmin 
-      ? [{ v: 'fr', l: 'FR', f: '🇫🇷' }, { v: 'en', l: 'EN', f: '🇬🇧' }]
+      ? [{ v: 'fr', l: '🇫🇷' }, { v: 'en', l: '🇬🇧' }]
       : [
-          { v: 'fr', l: 'FR', f: '🇫🇷' }, { v: 'en', l: 'EN', f: '🇬🇧' }, { v: 'es', l: 'ES', f: '🇪🇸' }, 
-          { v: 'ar', l: 'AR', f: '🇸🇦' }, { v: 'zh', l: 'ZH', f: '🇨🇳' }, { v: 'ru', l: 'RU', f: '🇷🇺' }
+          { v: 'fr', l: '🇫🇷' }, { v: 'en', l: '🇬🇧' }, { v: 'es', l: '🇪🇸' }, 
+          { v: 'ar', l: '🇸🇦' }, { v: 'zh', l: '🇨🇳' }, { v: 'ru', l: '🇷🇺' }
         ];
 
     return (
-      <div className="premium-lang-switcher">
-        {options.map(opt => (
-          <button 
-            key={opt.v} 
-            className={`lang-pill ${lang === opt.v ? 'active' : ''}`}
-            onClick={() => setLang(opt.v)}
-            title={opt.l}
-          >
-            <span className="flag">{opt.f}</span>
-            <span className="label">{opt.l}</span>
-          </button>
-        ))}
-      </div>
+      <select className="lang-select" value={lang} onChange={(e) => setLang(e.target.value)}>
+        {options.map(opt => <option key={opt.v} value={opt.v}>{opt.l}</option>)}
+      </select>
     );
   };
 
