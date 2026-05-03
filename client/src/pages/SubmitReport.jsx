@@ -24,9 +24,10 @@ const SubmitReport = ({ lang = 'fr' }) => {
     const [formData, setFormData] = useState({
         description: '',
         damage_level: 'minime',
-        infrastructure_type: 'Résidentiel',
+        infrastructure_type: 'Infrastructures résidentielles (maisons, appartements)',
+        infrastructure_name: '',
         crisis_type: 'Inondation',
-        debris_present: false,
+        debris_present: 'no',
         text_location: '',
         image_url: '',
         electricity_status: '',
