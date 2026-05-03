@@ -49,7 +49,7 @@ export const translations = {
                 "Troubles civils"
             ],
             debris: { yes: "Oui, débris présents", no: "Non, pas de débris" },
-            elec: { 
+            elec: {
                 aucun: "Aucun dommage observé",
                 mineur: "Dommages mineurs (interruptions rapidement réparables)",
                 modere: "Dommages modérés (pannes partielles)",
@@ -57,7 +57,7 @@ export const translations = {
                 detruit: "Complètement détruit",
                 inconnu: "Inconnu/ne peut être évalué"
             },
-            health: { 
+            health: {
                 fonctionnel: "Entièrement fonctionnel",
                 partiel: "Partiellement fonctionnel",
                 perturbe: "Fortement perturbé",
@@ -112,21 +112,21 @@ export const translations = {
                 "Other"
             ],
             crisis: [
-                "--- Natural Hazards ---",
+                "-- Natural Hazards",
                 "Earthquake",
                 "Flood",
                 "Tsunami",
                 "Hurricane / Cyclone",
                 "Wildfire",
-                "--- Technological Hazards ---",
+                "-- Technological Hazards",
                 "Explosion",
                 "Chemical Incident",
-                "--- Human-induced Crises ---",
+                "-- Human-induced Crises",
                 "Conflict",
                 "Civil Unrest"
             ],
             debris: { yes: "Yes, debris present", no: "No debris" },
-            elec: { 
+            elec: {
                 aucun: "No damage observed",
                 mineur: "Minor damage (service interruptions but quickly repairable)",
                 modere: "Moderate damage (partial outages requiring repairs)",
@@ -134,7 +134,7 @@ export const translations = {
                 detruit: "Completely destroyed",
                 inconnu: "Unknown/cannot evaluate"
             },
-            health: { 
+            health: {
                 fonctionnel: "Fully functional",
                 partiel: "Partially functional",
                 perturbe: "Strongly disrupted",
@@ -178,7 +178,7 @@ export const translations = {
             damage: { minime: "MÍNIMO", partiel: "PARCIAL", complet: "COMPLETO" },
             infra: ["Residencial", "Comercial", "Gubernamental", "Servicios públicos", "Transporte", "Comunitario", "Espacios públicos", "Otro"],
             crisis: ["Terremoto", "Inundación", "Huracán", "Tsunami", "Incendio forestal", "Conflicto", "Explosión"],
-            elec: { 
+            elec: {
                 aucun: "Ningún daño observado",
                 mineur: "Daño menor (interrupciones reparables rápidamente)",
                 modere: "Daño moderado (cortes parciales)",
@@ -186,7 +186,7 @@ export const translations = {
                 detruit: "Completamente destruido",
                 inconnu: "Desconocido/no puede evaluarse"
             },
-            health: { 
+            health: {
                 fonctionnel: "Completamente funcional",
                 partiel: "Parcialmente funcional",
                 perturbe: "Fuertemente perturbado",
@@ -230,7 +230,7 @@ export const translations = {
             damage: { minime: "أدنى", partiel: "جزئي", complet: "كامل" },
             infra: ["سكني", "تجاري", "حكومي", "خدمات عامة", "النقل", "مجتمعي", "أماكن عامة", "آخر"],
             crisis: ["زلزال", "فيضان", "إعصار", "تسونامي", "حريق غابات", "صراع", "انفجار"],
-            elec: { 
+            elec: {
                 aucun: "لا أضرار ملاحظة",
                 mineur: "أضرار طفيفة (انقطاعات يمكن إصلاحها بسرعة)",
                 modere: "أضرار معتدلة (انقطاعات جزئية)",
@@ -238,7 +238,7 @@ export const translations = {
                 detruit: "مدمر تماماً",
                 inconnu: "غير معروف/لا يمكن تقييمه"
             },
-            health: { 
+            health: {
                 fonctionnel: "يعمل بكامل الطاقة",
                 partiel: "يعمل بشكل جزئي",
                 perturbe: "مضطرب بشدة",
@@ -282,7 +282,7 @@ export const translations = {
             damage: { minime: "最小", partiel: "部分", complet: "完全" },
             infra: ["住宅", "商业", "政府", "公共服务", "交通", "社区", "公共空间", "其他"],
             crisis: ["地震", "洪水", "飓风", "海啸", "森林火灾", "冲突", "爆炸"],
-            elec: { 
+            elec: {
                 aucun: "未观察到损害",
                 mineur: "轻微损害(可快速修复)",
                 modere: "中等损害(部分停电)",
@@ -290,7 +290,7 @@ export const translations = {
                 detruit: "完全毁坏",
                 inconnu: "未知/无法评估"
             },
-            health: { 
+            health: {
                 fonctionnel: "完全正常",
                 partiel: "部分正常",
                 perturbe: "严重中断",
@@ -334,7 +334,7 @@ export const translations = {
             damage: { minime: "МИНИМАЛЬНЫЙ", partiel: "ЧАСТИЧНЫЙ", complet: "ПОЛНЫЙ" },
             infra: ["Жилой", "Коммерческий", "Государственный", "Госуслуги", "Транспорт", "Общественный", "Публичные места", "Другое"],
             crisis: ["Землетрясение", "Наводнение", "Ураган", "Цунами", "Лесной пожар", "Конфликт", "Взрыв"],
-            elec: { 
+            elec: {
                 aucun: "Нет наблюдаемого ущерба",
                 mineur: "Незначительный ущерб (быстро поправимые перебои)",
                 modere: "Умеренный ущерб (частичные отключения)",
@@ -342,7 +342,7 @@ export const translations = {
                 detruit: "Полностью разрушено",
                 inconnu: "Неизвестно/невозможно оценить"
             },
-            health: { 
+            health: {
                 fonctionnel: "Полностью работает",
                 partiel: "Частично работает",
                 perturbe: "Сильно нарушено",
