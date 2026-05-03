@@ -3,7 +3,7 @@ import axios from 'axios';
 import { BarChart3, AlertTriangle, CheckCircle2, Download, Table, Trash2 } from 'lucide-react';
 import './Dashboard.css';
 
-const API_BASE = `http://${window.location.hostname}:8000`;
+import { API_BASE } from '../services/api';
 
 const Dashboard = ({ lang = 'fr' }) => {
     const [reports, setReports] = useState([]);
