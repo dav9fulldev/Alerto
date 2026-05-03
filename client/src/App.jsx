@@ -47,10 +47,10 @@ function AppContent() {
   const LangSwitcher = () => {
     const isAdmin = path === '/pnud';
     const options = isAdmin 
-      ? [{ v: 'fr', l: 'FR', f: '🇫🇷' }, { v: 'en', l: 'EN', f: '🇬🇧' }]
+      ? [{ v: 'fr', l: 'FR' }, { v: 'en', l: 'EN' }]
       : [
-          { v: 'fr', l: 'FR', f: '🇫🇷' }, { v: 'en', l: 'EN', f: '🇬🇧' }, { v: 'es', l: 'ES', f: '🇪🇸' }, 
-          { v: 'ar', l: 'AR', f: '🇸🇦' }, { v: 'zh', l: 'ZH', f: '🇨🇳' }, { v: 'ru', l: 'RU', f: '🇷🇺' }
+          { v: 'fr', l: 'FR' }, { v: 'en', l: 'EN' }, { v: 'es', l: 'ES' }, 
+          { v: 'ar', l: 'AR' }, { v: 'zh', l: 'ZH' }, { v: 'ru', l: 'RU' }
         ];
 
     return (
@@ -60,10 +60,8 @@ function AppContent() {
             key={opt.v} 
             className={`lang-pill ${lang === opt.v ? 'active' : ''}`}
             onClick={() => setLang(opt.v)}
-            title={opt.l}
           >
-            <span className="flag">{opt.f}</span>
-            <span className="label">{opt.l}</span>
+            {opt.l}
           </button>
         ))}
       </div>
