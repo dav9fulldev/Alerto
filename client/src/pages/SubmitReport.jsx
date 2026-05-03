@@ -422,10 +422,13 @@ const SubmitReport = ({ lang = 'fr' }) => {
                 }}>
                     {formStep === 1 && (
                         <>
-                            <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', margin: '0' }}>
+                            <div className="step-indicator-container">
+                                <p className="step-text">
                                     {lang === 'fr' ? 'Étape 1/2' : lang === 'en' ? 'Step 1/2' : lang === 'es' ? 'Paso 1/2' : lang === 'ar' ? 'الخطوة 1/2' : lang === 'zh' ? '第 1/2 步' : 'Шаг 1/2'}
                                 </p>
+                                <div className="progress-bar-bg">
+                                    <div className="progress-bar-fill step-1"></div>
+                                </div>
                             </div>
                             <div className="form-group">
                                 <label>{t.take_photo}</label>
@@ -540,10 +543,13 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
                     {formStep === 2 && (
                         <>
-                            <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', margin: '0' }}>
+                            <div className="step-indicator-container">
+                                <p className="step-text">
                                     {lang === 'fr' ? 'Étape 2/2' : lang === 'en' ? 'Step 2/2' : lang === 'es' ? 'Paso 2/2' : lang === 'ar' ? 'الخطوة 2/2' : lang === 'zh' ? '第 2/2 步' : 'Шаг 2/2'}
                                 </p>
+                                <div className="progress-bar-bg">
+                                    <div className="progress-bar-fill step-2"></div>
+                                </div>
                             </div>
                             <div className="form-group modular-section">
                                 <h3>📋 {t.needs}</h3>
