@@ -18,13 +18,13 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18'  # Ou la version de votre PWA
+        node-version: '20'
     
     # 3. On installe les dépendances du dossier client
     - name: Install Frontend dependencies
       run: |
         cd client
-        npm install
+        npm install --legacy-peer-deps
     
     # 4. On génère les fichiers de production (le dossier dist/)
     - name: Build frontend
@@ -57,7 +57,7 @@ jobs:
 
           # 5. Mettre à jour le Frontend (React)
           cd ../client
-          npm install
+          npm install --legacy-peer-deps
           npm run build
           
           # Pas besoin de relancer Nginx, il sert automatiquement le dossier 'dist'
