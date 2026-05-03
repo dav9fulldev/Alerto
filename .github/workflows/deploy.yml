@@ -44,19 +44,22 @@ jobs:
           # 1. Aller dans le dossier du projet
           cd /var/www/alerto
           
-          # 2. Mettre à jour le code source
-          git pull origin main
+          # 2. Forcer la mise à jour (évite les conflits de fichiers locaux)
+          git fetch origin main
+          git reset --hard origin/main
           
           # 3. Mettre à jour le Backend (Python)
           cd server
           source venv/bin/activate
           pip install -r requirements.txt
           
-          # 4. Relancer le serveur Backend avec PM2 pour appliquer les changements
+          # 4. Relancer le serveur Backend
           pm2 restart alerto-api || pm2 start main.py --name alerto-api --interpreter ./venv/bin/python
-
+          
           # 5. Mettre à jour le Frontend (React)
           cd ../client
+          # On supprime le dossier build précédent pour libérer de la place si besoin
+          rm -rf dist
           npm install --legacy-peer-deps
           npm run build
           
