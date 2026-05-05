@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl } from 'react-leaflet';
+import React, { useState, useEffect, useCallback } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
 import { API_BASE } from '../services/api';
@@ -11,16 +11,26 @@ import { translations } from '../services/i18n';
 import './PublicMap.css';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-const MapUpdater = ({ trigger }) => {
+// Advanced Fix for "Broken Tiles" / "Coupe-Coupe"
+const MapAutoFixer = ({ trigger }) => {
     const map = useMap();
-    useEffect(() => {
-        // Run immediately and again after a short delay to ensure full tile loading
-        map.invalidateSize();
-        const timer = setTimeout(() => {
+    
+    const fixMap = useCallback(() => {
+        if (map) {
             map.invalidateSize();
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [map, trigger]);
+            // Sequential invalidation to ensure all tile layers catch up
+            setTimeout(() => map.invalidateSize(), 100);
+            setTimeout(() => map.invalidateSize(), 500);
+            setTimeout(() => map.invalidateSize(), 1000);
+        }
+    }, [map]);
+
+    useEffect(() => {
+        fixMap();
+        window.addEventListener('resize', fixMap);
+        return () => window.removeEventListener('resize', fixMap);
+    }, [fixMap, trigger]);
+
     return null;
 };
 
@@ -116,25 +126,25 @@ const PublicMap = ({ lang = 'fr' }) => {
                 <span>{isSatellite ? 'Standard' : 'Satellite'}</span>
             </button>
 
+            {/* Using key to force full re-mount on view switch (Fixes broken tiles) */}
             <MapContainer 
+                key={`${isSatellite ? 'sat' : 'std'}`}
                 center={center} 
                 zoom={13} 
                 zoomControl={false} 
                 style={{ height: '100%', width: '100%' }}
                 preferCanvas={true}
             >
-                <MapUpdater trigger={isSatellite} />
+                <MapAutoFixer trigger={isSatellite} />
                 
                 {isSatellite ? (
                     <TileLayer 
-                        key="sat"
-                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" 
-                        attribution='&copy; Esri'
-                        maxZoom={19}
+                        url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}" 
+                        attribution='&copy; Google'
+                        maxZoom={20}
                     />
                 ) : (
                     <TileLayer 
-                        key="std"
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
                         attribution='&copy; OpenStreetMap'
                         maxZoom={19}
