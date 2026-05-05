@@ -1,7 +1,9 @@
 .public-map-container {
-    width: 100%;
-    height: 100vh;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: #f1f5f9;
     overflow: hidden;
 }
@@ -96,7 +98,7 @@
     .map-lang-badge { display: block; }
     .sat-toggle-btn { top: 90px; }
     .map-legend-fab { bottom: 90px; }
-    .public-map-container { height: calc(100vh - 75px); }
+    .public-map-container { bottom: 75px; } /* Leave space for bottom nav */
 }
 
 .popup-card { width: 240px; overflow: hidden; border-radius: 18px; }

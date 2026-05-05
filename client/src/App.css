@@ -36,12 +36,15 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  min-width: 0; /* Prevent flex overflow */
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .main-content {
   flex: 1;
   width: 100%;
+  position: relative;
   overflow: hidden;
 }
 
