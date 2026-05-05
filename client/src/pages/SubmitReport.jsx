@@ -50,7 +50,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         damage_level: 'minime', 
         infrastructure_type: (t.options && t.options.infra) ? t.options.infra[0] : '',
         infrastructure_name: '',
-        crisis_type: 'Inondation',
+        crisis_type: (t.options && t.options.crisis) ? t.options.crisis[1] : 'Inondation',
         crisis_type_other: '',
         debris_present: 'no',
         text_location: t.gps_searching || 'GPS...',
@@ -62,15 +62,37 @@ const SubmitReport = ({ lang = 'fr' }) => {
         urgent_needs: []
     });
 
-    const crisisOptions = [
-        { id: 'Inondation', icon: <Droplets size={24} />, label: lang === 'fr' ? 'Inondation' : 'Flood' },
-        { id: 'Incendie', icon: <Flame size={24} />, label: lang === 'fr' ? 'Incendie' : 'Fire' },
-        { id: 'Accident', icon: <Car size={24} />, label: lang === 'fr' ? 'Accident' : 'Accident' },
-        { id: 'Séisme', icon: <Home size={24} />, label: lang === 'fr' ? 'Séisme' : 'Earthquake' },
-        { id: 'Conflit', icon: <ShieldAlert size={24} />, label: lang === 'fr' ? 'Conflit' : 'Conflict' },
-        { id: 'Explosion', icon: <Bomb size={24} />, label: lang === 'fr' ? 'Explosion' : 'Explosion' },
-        { id: 'Autre', icon: <PlusCircle size={24} />, label: lang === 'fr' ? 'Autre' : 'Other' }
-    ];
+    // Dynamic crisis options with translated labels
+    const getCrisisOptions = () => {
+        const icons = {
+            'Séisme': <Home size={24} />,
+            'Inondation': <Droplets size={24} />,
+            'Cyclone': <Users size={24} />, // Approximation
+            'Tsunami': <Droplets size={24} />,
+            'Incendie de forêt': <Flame size={24} />,
+            'Explosion': <Bomb size={24} />,
+            'Incident chimique': <ShieldAlert size={24} />,
+            'Conflit': <ShieldAlert size={24} />,
+            'Troubles civils': <Users size={24} />,
+            'Autre': <PlusCircle size={24} />,
+            'Earthquake': <Home size={24} />,
+            'Flood': <Droplets size={24} />,
+            'Wildfire': <Flame size={24} />,
+            'Conflict': <ShieldAlert size={24} />,
+            'Civil Unrest': <Users size={24} />
+        };
+
+        // If translations exist, use them
+        if (t.options && t.options.crisis) {
+            return t.options.crisis.map((label, index) => ({
+                id: label, // We use the translated label as ID for simplicity in this version
+                icon: icons[label] || <PlusCircle size={24} />,
+                label: label
+            }));
+        }
+
+        return [];
+    };
 
     useEffect(() => {
         const handleStatus = () => setIsOnline(navigator.onLine);
@@ -150,7 +172,6 @@ const SubmitReport = ({ lang = 'fr' }) => {
                 ...formData,
                 image_url: mediaUrl,
                 media_type: mediaType,
-                damage_level: formData.damage_level,
                 location: {
                     type: "Point",
                     coordinates: location ? [location.lng, location.lat] : [0, 0]
@@ -183,7 +204,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             damage_level: 'minime',
             infrastructure_type: (t.options && t.options.infra) ? t.options.infra[0] : '',
             infrastructure_name: '',
-            crisis_type: 'Inondation',
+            crisis_type: (t.options && t.options.crisis) ? t.options.crisis[0] : 'Inondation',
             crisis_type_other: '',
             debris_present: 'no',
             text_location: '',
@@ -204,7 +225,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         <div className="report-container">
             {showInstallPrompt && (
                 <div className="install-banner">
-                    <span>Installer ALERTO (Accès Direct & Offline)</span>
+                    <span>Installer ALERTO (Direct Access)</span>
                     <button onClick={handleInstallClick}>Installer</button>
                     <X size={16} onClick={() => setShowInstallPrompt(false)} />
                 </div>
@@ -221,7 +242,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     ) : (
                         <div className="map-placeholder">
                            <Loader2 className="spinner" />
-                           <span>GPS ACTIF...</span>
+                           <span>{t.gps_searching}</span>
                         </div>
                     )}
                     <div className="address-overlay">
@@ -240,7 +261,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                             <>
                                 <h2 className="form-section-title">{t.crisis_label}</h2>
                                 <div className="crisis-grid">
-                                    {crisisOptions.map(opt => (
+                                    {getCrisisOptions().map(opt => (
                                         <div 
                                             key={opt.id} 
                                             className={`crisis-item ${formData.crisis_type === opt.id ? 'active' : ''}`}
@@ -331,7 +352,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                     </div>
                                     <label className="checkbox-label">
                                         <input type="checkbox" checked={formData.allow_contact} onChange={(e) => setFormData({...formData, allow_contact: e.target.checked})} />
-                                        Autoriser le contact des secours (ONU/PNUD)
+                                        Autoriser le contact (ONU/PNUD)
                                     </label>
                                 </div>
                             </>
