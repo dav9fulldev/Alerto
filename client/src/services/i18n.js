@@ -80,6 +80,15 @@ export const translations = {
             damage: { minime: "MINIME", partiel: "PARTIEL", complet: "COMPLET" },
             infra: ["Résidentiel", "Commercial", "Gouvernemental", "Services Publics", "Transport", "Communautaire", "Espaces Publics", "Autre"],
             crisis: ["Tremblement de terre", "Inondation", "Tsunami", "Ouragan / Cyclone", "Feu de forêt", "Explosion", "Incident chimique", "Conflit", "Troubles civils"]
+        },
+        footer: {
+            brand: "ALERTO par le PNUD",
+            mission: "Technologie au service de la résilience face aux catastrophes.",
+            legal: "Mentions Légales",
+            privacy: "Confidentialité",
+            api: "API Développeurs",
+            copyright: "© 2026 ALERTO. Tous droits réservés.",
+            made_with: "Propulsé par l'IA et la solidarité."
         }
     },
     en: {
@@ -161,6 +170,15 @@ export const translations = {
             damage: { minime: "MINIMAL", partiel: "PARTIAL", complet: "COMPLETE" },
             infra: ["Residential", "Commercial", "Government", "Public Services", "Transport", "Community", "Public Spaces", "Other"],
             crisis: ["Earthquake", "Flood", "Tsunami", "Hurricane / Cyclone", "Wildfire", "Explosion", "Chemical Incident", "Conflict", "Civil Unrest"]
+        },
+        footer: {
+            brand: "ALERTO by UNDP",
+            mission: "Technology serving disaster resilience.",
+            legal: "Legal Notice",
+            privacy: "Privacy Policy",
+            api: "Developer API",
+            copyright: "© 2026 ALERTO. All rights reserved.",
+            made_with: "Powered by AI and solidarity."
         }
     },
     es: {
@@ -242,6 +260,15 @@ export const translations = {
             damage: { minime: "MÍNIMO", partiel: "PARCIAL", complet: "COMPLETO" },
             infra: ["Residencial", "Comercial", "Gubernamental", "Servicios", "Transporte", "Comunitario", "Público", "Otro"],
             crisis: ["Terremoto", "Inundación", "Tsunami", "Huracán", "Incendio", "Explosión", "Químico", "Conflicto", "Disturbios"]
+        },
+        footer: {
+            brand: "ALERTO por el PNUD",
+            mission: "Tecnología al servicio de la resiliencia ante desastres.",
+            legal: "Aviso Legal",
+            privacy: "Privacidad",
+            api: "API Desarrolladores",
+            copyright: "© 2026 ALERTO. Todos los derechos reservados.",
+            made_with: "Impulsado por IA y solidaridad."
         }
     },
     ar: {
@@ -323,6 +350,15 @@ export const translations = {
             damage: { minime: "أدنى", partiel: "جزئي", complet: "كامل" },
             infra: ["سكني", "تجاري", "حكومي", "خدمات", "نقل", "مجتمعي", "عام", "آخر"],
             crisis: ["زلزال", "فيضان", "تسونامي", "إعصار", "حريق", "انفجار", "كيميائي", "صراع", "اضطرابات"]
+        },
+        footer: {
+            brand: "ALERTO من قبل برنامج الأمم المتحدة الإنمائي",
+            mission: "التكنولوجيا في خدمة القدرة على الصمود في وجه الكوارث.",
+            legal: "إشعار قانوني",
+            privacy: "سياسة الخصوصية",
+            api: "واجهة برمجة التطبيقات",
+            copyright: "© 2026 ALERTO. جميع الحقوق محفوظة.",
+            made_with: "بدعم من الذكاء الاصطناعي والتضامن."
         }
     },
     zh: {
@@ -404,6 +440,15 @@ export const translations = {
             damage: { minime: "最小", partiel: "部分", complet: "完全" },
             infra: ["住宅", "商业", "政府", "公共服务", "交通", "社区", "公共", "其他"],
             crisis: ["地震", "洪水", "海啸", "飓风", "火灾", "爆炸", "化学", "冲突", "骚乱"]
+        },
+        footer: {
+            brand: "联合国开发计划署 ALERTO",
+            mission: "服务于灾害韧性的技术。",
+            legal: "法律声明",
+            privacy: "隐私政策",
+            api: "开发者接口",
+            copyright: "© 2026 ALERTO. 版权所有。",
+            made_with: "由 AI 和团结力量驱动。"
         }
     },
     ru: {
@@ -485,6 +530,15 @@ export const translations = {
             damage: { minime: "МИНИМАЛЬНЫЙ", partiel: "ЧАСТИЧНЫЙ", complet: "ПОЛНЫЙ" },
             infra: ["Жилой", "Коммерческий", "Государственный", "Госуслуги", "Транспорт", "Общественный", "Публичные места", "Другое"],
             crisis: ["Землетрясение", "Наводнение", "Цунами", "Ураган", "Пожар", "Взрыв", "Химическая авария", "Конфликт", "Беспорядки"]
+        },
+        footer: {
+            brand: "ALERTO от ПРООН",
+            mission: "Технологии на службе устойчивости к бедствиям.",
+            legal: "Юридическая информация",
+            privacy: "Конфиденциальность",
+            api: "API для разработчиков",
+            copyright: "© 2026 ALERTO. Все права защищены.",
+            made_with: "При поддержке ИИ и солидарности."
         }
     }
 };

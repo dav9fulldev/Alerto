@@ -154,6 +154,25 @@ function AppContent() {
           )}
         </main>
 
+        <footer className="app-footer">
+          <div className="footer-content">
+            <div className="footer-brand">
+              <ShieldCheck size={24} color="#0ea5e9" />
+              <span>{t.footer.brand}</span>
+            </div>
+            <p className="footer-mission">{t.footer.mission}</p>
+            <div className="footer-links">
+              <a href="#">{t.footer.legal}</a>
+              <a href="#">{t.footer.privacy}</a>
+              <a href="#">{t.footer.api}</a>
+            </div>
+            <div className="footer-bottom">
+              <p>{t.footer.copyright}</p>
+              <p className="made-with">{t.footer.made_with}</p>
+            </div>
+          </div>
+        </footer>
+
         {/* Bottom Nav (Mobile Only) */}
         <nav className="bottom-nav">
           <button className={`nav-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => setActiveTab('map')}>
