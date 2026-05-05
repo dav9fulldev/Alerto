@@ -3,6 +3,13 @@
     height: 100vh;
     position: relative;
     background: #f1f5f9;
+    overflow: hidden;
+}
+
+.leaflet-container {
+    width: 100% !important;
+    height: 100% !important;
+    outline: none;
 }
 
 .map-header-overlay {

@@ -11,11 +11,16 @@ import { translations } from '../services/i18n';
 import './PublicMap.css';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-const MapUpdater = () => {
+const MapUpdater = ({ trigger }) => {
     const map = useMap();
     useEffect(() => {
-        setTimeout(() => map.invalidateSize(), 500);
-    }, [map]);
+        // Run immediately and again after a short delay to ensure full tile loading
+        map.invalidateSize();
+        const timer = setTimeout(() => {
+            map.invalidateSize();
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [map, trigger]);
     return null;
 };
 
@@ -37,7 +42,9 @@ const PublicMap = ({ lang = 'fr' }) => {
         'Earthquake': <Mountain size={20} color="white" />,
         'Flood': <Droplets size={20} color="white" />,
         'Hurricane / Cyclone': <Wind size={20} color="white" />,
-        'Wildfire': <Trees size={20} color="white" />
+        'Wildfire': <Trees size={20} color="white" />,
+        'Землетрясение': <Mountain size={20} color="white" />,
+        'Наводнение': <Droplets size={20} color="white" />
     };
 
     const getDamageColor = (level) => {
@@ -109,18 +116,28 @@ const PublicMap = ({ lang = 'fr' }) => {
                 <span>{isSatellite ? 'Standard' : 'Satellite'}</span>
             </button>
 
-            <MapContainer center={center} zoom={13} zoomControl={false} style={{ height: '100vh', width: '100%' }}>
-                <MapUpdater />
+            <MapContainer 
+                center={center} 
+                zoom={13} 
+                zoomControl={false} 
+                style={{ height: '100%', width: '100%' }}
+                preferCanvas={true}
+            >
+                <MapUpdater trigger={isSatellite} />
                 
                 {isSatellite ? (
                     <TileLayer 
+                        key="sat"
                         url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" 
                         attribution='&copy; Esri'
+                        maxZoom={19}
                     />
                 ) : (
                     <TileLayer 
+                        key="std"
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
                         attribution='&copy; OpenStreetMap'
+                        maxZoom={19}
                     />
                 )}
                 
