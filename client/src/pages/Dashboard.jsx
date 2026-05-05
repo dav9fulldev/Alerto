@@ -172,6 +172,19 @@ const Dashboard = ({ lang = 'fr' }) => {
                                         <div className="t-badge health">
                                             <HeartPulse size={12} /> {r.health_services_status > 50 ? 'Opérationnel' : 'HS'} ({r.health_services_status}%)
                                         </div>
+                                        
+                                        {/* AI & SAFETY INSIGHTS */}
+                                        {r.ai_suggested_level && (
+                                            <div className="t-badge ai-insight">
+                                                <BarChart3 size={12} /> IA: {r.ai_suggested_level.toUpperCase()}
+                                            </div>
+                                        )}
+                                        {r.is_flagged && (
+                                            <div className="t-badge safety-flag">
+                                                <ShieldAlert size={12} /> SÉCURITÉ / NSFW
+                                            </div>
+                                        )}
+
                                         {r.debris_present === 'yes' && (
                                             <div className="t-badge debris">
                                                 <Trash size={12} /> DÉBRIS PRÉSENTS

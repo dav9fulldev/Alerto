@@ -68,6 +68,18 @@
 .stat-icon.critical { background: #fee2e2; color: #ef4444; }
 .stat-icon.duplicates { background: #fef3c7; color: #f59e0b; }
 
+.stat-icon.t-badge.elec { background: #e0f2fe; color: #0369a1; }
+.t-badge.health { background: #fce7f3; color: #be185d; }
+.t-badge.debris { background: #fef3c7; color: #92400e; }
+.t-badge.ai-insight { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+.t-badge.safety-flag { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-weight: 800; animation: pulse 2s infinite; }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
 .stat-value {
     font-size: 1.5rem;
     font-weight: 800;
