@@ -29,6 +29,17 @@ const MapAutoFixer = ({ trigger }) => {
     return null;
 };
 
+const MapBoundsSetter = ({ reports }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (reports && reports.length > 0 && map) {
+            const bounds = L.latLngBounds(reports.map(r => [r.location.coordinates[1], r.location.coordinates[0]]));
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+        }
+    }, [reports, map]);
+    return null;
+};
+
 const PublicMap = () => {
     const { t, lang } = useTranslation();
     const [reports, setReports] = useState([]);
@@ -96,10 +107,11 @@ const PublicMap = () => {
                 <span>{isSatellite ? 'Standard' : 'Satellite'}</span>
             </button>
 
-            <MapContainer key={`${isSatellite ? 'sat' : 'std'}`} center={center} zoom={13} zoomControl={false} style={{ height: '100%', width: '100%' }} preferCanvas={true}>
+            <MapContainer key={`${isSatellite ? 'sat' : 'std'}`} center={center} zoom={13} zoomControl={false} style={{ height: '100%', width: '100%' }} preferCanvas={false}>
                 <MapAutoFixer trigger={isSatellite} />
+                <MapBoundsSetter reports={reports} />
                 {isSatellite ? (
-                    <TileLayer url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}" attribution='&copy; Google' maxZoom={20} />
+                    <TileLayer url="https://mt1.google.com/vt/lyrs=y,h&x={x}&y={y}&z={z}" attribution='&copy; Google' maxZoom={20} />
                 ) : (
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' maxZoom={19} />
                 )}
@@ -122,6 +134,19 @@ const PublicMap = () => {
                     </Marker>
                 ))}
             </MapContainer>
+
+            <div className="map-controls-vertical">
+                <button className="ctrl-btn" onClick={fetchReports} title="Rafraîchir">
+                    <RefreshCw size={20} />
+                </button>
+                <button className="ctrl-btn" onClick={() => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition((pos) => setCenter([pos.coords.latitude, pos.coords.longitude]));
+                    }
+                }} title="Ma position">
+                    <Navigation size={20} />
+                </button>
+            </div>
 
             <div className="map-legend-fab">
                 <div className="legend-item"><span className="dot red"></span> {t.options?.damage?.complet || 'COMPLET'}</div>
