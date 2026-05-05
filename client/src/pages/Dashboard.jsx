@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { BarChart3, AlertTriangle, CheckCircle2, Download, Table, Trash2, MapPin, Zap, HeartPulse, Trash, ExternalLink } from 'lucide-react';
+import { BarChart3, AlertTriangle, CheckCircle2, Download, Table, Trash2, MapPin, Zap, HeartPulse, Trash, ExternalLink, ShieldAlert } from 'lucide-react';
 import './Dashboard.css';
 
 import { API_BASE } from '../services/api';
