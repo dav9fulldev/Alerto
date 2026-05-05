@@ -1,156 +1,141 @@
 import React, { useState, useEffect } from 'react';
-import SubmitReport from './pages/SubmitReport';
-import MapView from './pages/MapView';
-import Dashboard from './pages/Dashboard';
-import PnudLogin from './pages/PnudLogin';
-import { Map as MapIcon, BarChart3, LogOut, HelpCircle } from 'lucide-react';
-import HelpGuide from './pages/HelpGuide';
 import './App.css';
+import SubmitReport from './pages/SubmitReport';
+import MyReports from './pages/MyReports';
+import PublicMap from './pages/PublicMap';
+import HelpCenter from './pages/HelpCenter';
+import PnudLogin from './pages/PnudLogin';
+import Dashboard from './pages/Dashboard';
 import { LanguageProvider, useTranslation } from './services/i18n';
+import { 
+  AlertCircle, 
+  Map as MapIcon, 
+  Clock, 
+  HelpCircle, 
+  Globe
+} from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 
 function AppContent() {
   const [path, setPath] = useState(window.location.pathname);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
-  const [user, setUser] = useState(null);
-  const [adminView, setAdminView] = useState('dash');
+  const [activeTab, setActiveTab] = useState('map'); // map, report, history, help
   const { lang, setLang } = useTranslation();
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('alerto_token'));
 
-  // Vérifier si un utilisateur est déjà connecté au chargement
+  // Initialize Local User ID
   useEffect(() => {
-    const savedToken = localStorage.getItem('alerto_token');
-    const savedUser = localStorage.getItem('alerto_user');
-    if (savedToken && savedUser) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(savedUser));
+    if (!localStorage.getItem('alerto_user_id')) {
+      localStorage.setItem('alerto_user_id', uuidv4());
     }
     
-    const handleLocationChange = () => setPath(window.location.pathname);
-    window.addEventListener('popstate', handleLocationChange);
-    return () => window.removeEventListener('popstate', handleLocationChange);
+    const handlePopState = () => setPath(window.location.pathname);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const handleLoginSuccess = (userData) => {
+  const handleLoginSuccess = () => {
     setIsAuthenticated(true);
-    setUser(userData);
+    setPath('/pnud');
+    window.history.pushState({}, '', '/pnud');
   };
 
   const handleLogout = () => {
     localStorage.removeItem('alerto_token');
-    localStorage.removeItem('alerto_user');
     setIsAuthenticated(false);
-    setUser(null);
-    window.history.pushState({}, '', '/');
     setPath('/');
+    window.history.pushState({}, '', '/');
   };
 
-  const LangSwitcher = () => {
-    const isAdmin = path === '/pnud';
-    const options = isAdmin 
-      ? [{ v: 'fr', l: '🇫🇷' }, { v: 'en', l: '🇬🇧' }]
-      : [
-          { v: 'fr', l: '🇫🇷' }, { v: 'en', l: '🇬🇧' }, { v: 'es', l: '🇪🇸' }, 
-          { v: 'ar', l: '🇸🇦' }, { v: 'zh', l: '🇨🇳' }, { v: 'ru', l: '🇷🇺' }
-        ];
-
-    return (
-      <select className="lang-select" value={lang} onChange={(e) => setLang(e.target.value)}>
-        {options.map(opt => <option key={opt.v} value={opt.v}>{opt.l}</option>)}
-      </select>
-    );
-  };
-
-  // --- VUE PNUD ---
+  // --- ADMIN VIEW (PNUD) ---
   if (path === '/pnud') {
     if (!isAuthenticated) {
-      return <PnudLogin 
-                onBack={() => { window.history.pushState({}, '', '/'); setPath('/'); }} 
-                onLoginSuccess={handleLoginSuccess} 
-             />;
+      return <PnudLogin onBack={() => { setPath('/'); window.history.pushState({}, '', '/'); }} onLoginSuccess={handleLoginSuccess} />;
     }
-
-    return (
-      <div className="app-container">
-        <header className="admin-header">
-           <div className="user-info-badge">
-             👤 {user?.username}
-           </div>
-           <LangSwitcher />
-        </header>
-        {adminView === 'map' && <MapView lang={lang} />}
-        {adminView === 'dash' && <Dashboard lang={lang} />}
-        
-        <nav className="bottom-nav admin-nav">
-          <button 
-            className={adminView === 'map' ? 'active' : ''} 
-            onClick={() => setAdminView('map')}
-          >
-            <MapIcon size={18} />
-            <span>Carte SIG</span>
-          </button>
-          <button 
-            className={adminView === 'dash' ? 'active' : ''} 
-            onClick={() => setAdminView('dash')}
-          >
-            <BarChart3 size={18} />
-            <span>Analyses</span>
-          </button>
-          <button 
-            className="logout-btn"
-            onClick={handleLogout}
-          >
-            <LogOut size={18} />
-            <span>Sortir</span>
-          </button>
-        </nav>
-
-        {/* Bouton d'Aide Flottant (Admin) */}
-        <button 
-          className="floating-help-btn" 
-          onClick={() => setShowHelp(true)}
-          style={{
-            position: 'fixed', bottom: '90px', right: '20px',
-            width: '50px', height: '50px', borderRadius: '50%',
-            backgroundColor: '#f43f5e', color: 'white',
-            border: 'none', boxShadow: '0 4px 12px rgba(244, 63, 94, 0.4)',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 900
-          }}
-        >
-          <HelpCircle size={24} />
-        </button>
-
-        {showHelp && <HelpGuide lang={lang} onClose={() => setShowHelp(false)} />}
-      </div>
-    );
+    return <Dashboard lang={lang} onLogout={handleLogout} />;
   }
 
-  // --- VUE PAR DÉFAUT (CITOYEN) ---
+  // --- CITIZEN VIEW (MAIN) ---
   return (
     <div className="app-container">
-      <header className="citoyen-header">
-          <LangSwitcher />
-      </header>
-      <SubmitReport lang={lang} />
+      {/* Global Language Switcher (Floating) */}
+      <div className="global-lang-overlay">
+        <select value={lang} onChange={(e) => setLang(e.target.value)} className="minimal-select">
+          <option value="fr">FR</option>
+          <option value="en">EN</option>
+          <option value="es">ES</option>
+          <option value="ar">AR</option>
+          <option value="zh">ZH</option>
+          <option value="ru">RU</option>
+        </select>
+      </div>
       
-      {/* Bouton d'Aide Flottant */}
-      <button 
-        className="floating-help-btn" 
-        onClick={() => setShowHelp(true)}
-        title={lang === 'fr' ? 'Besoin d\'aide ?' : 'Need help?'}
-        style={{
-          position: 'fixed', bottom: '90px', right: '20px',
-          width: '50px', height: '50px', borderRadius: '50%',
-          backgroundColor: '#f43f5e', color: 'white',
-          border: 'none', boxShadow: '0 4px 12px rgba(244, 63, 94, 0.4)',
-          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 900, transition: 'transform 0.2s ease'
-        }}
-      >
-        <HelpCircle size={24} />
-      </button>
+      <main className="main-content">
+        {activeTab === 'map' && <PublicMap lang={lang} />}
+        {activeTab === 'report' && <SubmitReport lang={lang} />}
+        {activeTab === 'history' && <MyReports lang={lang} />}
+        {activeTab === 'help' && (
+          <div className="help-page-wrapper">
+             <HelpCenter lang={lang} />
+             <div style={{padding: '0 20px 40px'}}>
+               <button className="admin-access-btn" onClick={() => { setPath('/pnud'); window.history.pushState({}, '', '/pnud'); }}>
+                 Accès Admin / PNUD
+               </button>
+             </div>
+          </div>
+        )}
+      </main>
 
-      {showHelp && <HelpGuide lang={lang} onClose={() => setShowHelp(false)} />}
+      <nav className="bottom-nav">
+        <button className={`nav-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => setActiveTab('map')}>
+          <MapIcon className="nav-icon" />
+          <span>Explorer</span>
+        </button>
+        <button className={`nav-item ${activeTab === 'report' ? 'active' : ''}`} onClick={() => setActiveTab('report')}>
+          <AlertCircle className="nav-icon" />
+          <span>Signaler</span>
+        </button>
+        <button className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
+          <Clock className="nav-icon" />
+          <span>Mes Alertes</span>
+        </button>
+        <button className={`nav-item ${activeTab === 'help' ? 'active' : ''}`} onClick={() => setActiveTab('help')}>
+          <HelpCircle className="nav-icon" />
+          <span>Aide</span>
+        </button>
+      </nav>
+
+      <style>{`
+        .global-lang-overlay {
+          position: fixed;
+          top: 15px;
+          right: 15px;
+          z-index: 2000;
+        }
+        .minimal-select {
+          background: white;
+          border: 1px solid #e2e8f0;
+          padding: 8px 12px;
+          border-radius: 12px;
+          font-weight: 700;
+          font-size: 0.75rem;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+          outline: none;
+        }
+        .admin-access-btn {
+          width: 100%;
+          padding: 15px;
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          color: #64748b;
+          font-weight: 700;
+          font-size: 0.9rem;
+          cursor: pointer;
+        }
+        .main-content {
+          min-height: 100vh;
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,0 +1,113 @@
+.history-container {
+    padding: 0 0 20px;
+}
+
+.history-list {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.history-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: transform 0.2s ease;
+}
+
+.history-card:active {
+    transform: scale(0.98);
+}
+
+.card-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 70px;
+}
+
+.status-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.status-badge.sent { background: #ecfdf5; color: #10b981; }
+.status-badge.pending { background: #fffbeb; color: #f59e0b; }
+.status-badge.failed { background: #fef2f2; color: #ef4444; }
+
+.card-main {
+    flex: 1;
+    overflow: hidden;
+}
+
+.crisis-type-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--primary);
+    background: #e0f2fe;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+}
+
+.location-summary {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 5px;
+}
+
+.date-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.empty-history {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 40px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.empty-icon-bg {
+    width: 80px;
+    height: 80px;
+    background: #f1f5f9;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.empty-history h3 {
+    color: var(--text-main);
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.empty-history p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}

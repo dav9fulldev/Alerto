@@ -1,638 +1,359 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './SubmitReport.css';
-import { MapPin, Send, Loader2, Camera, X } from 'lucide-react';
+import { MapPin, Camera, X, Check, Info, Phone, Mail, Loader2, ChevronRight, AlertTriangle, Zap, HeartPulse, Trash } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import axios from 'axios';
 import { saveReportOffline } from '../services/storage';
 import { syncOfflineData } from '../services/sync';
 import { API_BASE } from '../services/api';
 import { translations } from '../services/i18n';
 
+// Fix Leaflet icon issue
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+let DefaultIcon = L.icon({
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
 const API_URL = `${API_BASE}/reports/`;
+
+const ChangeView = ({ center }) => {
+  const map = useMap();
+  map.setView(center, 15);
+  return null;
+};
 
 const SubmitReport = ({ lang = 'fr' }) => {
     const t = translations[lang] || translations.fr;
-    const isRTL = lang === 'ar';
     const [formStep, setFormStep] = useState(1);
-    const [isOnline, setIsOnline] = useState(navigator.onLine);
-    const [offlineCount, setOfflineCount] = useState(0);
     const [loading, setLoading] = useState(false);
     const [location, setLocation] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
-    const [videoPreview, setVideoPreview] = useState(null);
     const [selectedImageFile, setSelectedImageFile] = useState(null);
-    const [selectedVideoFile, setSelectedVideoFile] = useState(null);
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+
     const [formData, setFormData] = useState({
         description: '',
-        damage_level: 'minime',
-        infrastructure_type: 'Infrastructures résidentielles (maisons, appartements)',
+        damage_level: 1, 
+        infrastructure_type: 'Résidentiel',
         infrastructure_name: '',
         crisis_type: 'Inondation',
+        crisis_type_other: '',
         debris_present: 'no',
-        text_location: '',
-        image_url: '',
-        electricity_status: '',
-        health_services_status: '',
-        urgent_needs: [],
-        urgent_needs_other: ''
+        text_location: 'Recherche de votre position...',
+        contact_phone: '',
+        contact_email: '',
+        allow_contact: true,
+        electricity_status: 50,
+        health_services_status: 50,
+        urgent_needs: []
     });
+
+    const crisisOptions = [
+        { id: 'Inondation', icon: '💧', label: lang === 'fr' ? 'Inondation' : 'Flood' },
+        { id: 'Incendie', icon: '🔥', label: lang === 'fr' ? 'Incendie' : 'Fire' },
+        { id: 'Accident', icon: '🚗', label: lang === 'fr' ? 'Accident' : 'Accident' },
+        { id: 'Séisme', icon: '🏠', label: lang === 'fr' ? 'Séisme' : 'Earthquake' },
+        { id: 'Conflit', icon: '⚔️', label: lang === 'fr' ? 'Conflit' : 'Conflict' },
+        { id: 'Explosion', icon: '💥', label: lang === 'fr' ? 'Explosion' : 'Explosion' },
+        { id: 'Autre', icon: '➕', label: lang === 'fr' ? 'Autre' : 'Other' }
+    ];
 
     useEffect(() => {
         const handleStatus = () => setIsOnline(navigator.onLine);
         window.addEventListener('online', handleStatus);
         window.addEventListener('offline', handleStatus);
-
         getGPS();
         if (navigator.onLine) syncOfflineData();
-
         return () => {
             window.removeEventListener('online', handleStatus);
             window.removeEventListener('offline', handleStatus);
         };
     }, []);
 
-    const [gpsError, setGpsError] = useState(null);
-
     const getGPS = () => {
         if ("geolocation" in navigator) {
-            setGpsError(null);
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
                     const { latitude, longitude } = position.coords;
                     setLocation({ lat: latitude, lng: longitude });
-                    setGpsError(null);
-
-                    // Reverse Geocoding via Nominatim
                     try {
-                        const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-                        if (response.data && response.data.display_name) {
-                            setFormData(prev => ({ ...prev, text_location: response.data.display_name }));
+                        const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                        if (res.data && res.data.display_name) {
+                            setFormData(prev => ({ ...prev, text_location: res.data.display_name }));
                         }
-                    } catch (error) {
-                        console.error("Erreur Geocoding:", error);
-                    }
+                    } catch (e) { console.error(e); }
                 },
-                (error) => {
-                    console.error("Erreur GPS:", error);
-                    if (error.code === 1) {
-                        setGpsError(lang === 'fr' ? "Accès GPS refusé. Veuillez l'activer dans les réglages de votre navigateur." : "GPS Access denied. Please enable it in your browser settings.");
-                    } else {
-                        setGpsError(lang === 'fr' ? "Impossible de récupérer votre position." : "Unable to retrieve your location.");
-                    }
-                },
+                (err) => console.error(err),
                 { enableHighAccuracy: true, timeout: 5000 }
             );
         }
     };
 
-    const handleImageChange = (e) => {
+    const handleImageCapture = (e) => {
         const file = e.target.files[0];
         if (file) {
             setSelectedImageFile(file);
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
-            };
+            reader.onloadend = () => setImagePreview(reader.result);
             reader.readAsDataURL(file);
         }
+    };
+
+    const saveToLocalHistory = (report) => {
+        const history = JSON.parse(localStorage.getItem('alerto_my_reports') || '[]');
+        const newEntry = {
+            ...report,
+            id: Date.now(),
+            date: new Date().toISOString(),
+            crisis: report.crisis_type === 'Autre' ? report.crisis_type_other : report.crisis_type,
+            status: navigator.onLine ? 'sent' : 'pending',
+            location: report.text_location
+        };
+        localStorage.setItem('alerto_my_reports', JSON.stringify([newEntry, ...history]));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        let finalImageUrl = formData.image_url;
-        let finalVideoUrl = "";
-
-        // Si on a une photo/vidéo en mémoire locale (blob ou dataURL), on l'upload d'abord
-        const uploadFile = async (fileToUpload, name) => {
-            if (!fileToUpload) return null;
-            try {
-                const uploadFormData = new FormData();
-                uploadFormData.append('file', fileToUpload);
-
-                console.log(`📡 Envoi du fichier ${name} au serveur...`);
-                const res = await axios.post(`${API_BASE}/reports/upload`, uploadFormData);
-                console.log("✅ Serveur a reçu le fichier :", res.data.url);
-                return res.data.url;
-            } catch (err) {
-                console.error("❌ ERREUR UPLOAD :", err);
-                return null;
-            }
-        };
-
-        console.log("🛠️ DÉBUT SOUMISSION - Fichiers détectés :", {
-            image: !!selectedImageFile,
-            video: !!selectedVideoFile
-        });
-
+        let imageUrl = "";
         if (selectedImageFile) {
-            console.log("📸 Tentative d'upload Image Physique...");
-            const uploadedUrl = await uploadFile(selectedImageFile, "photo_sinistre.jpg");
-            if (uploadedUrl) {
-                finalImageUrl = uploadedUrl;
-            }
-        }
-
-        if (selectedVideoFile) {
-            console.log("🎥 Tentative d'upload Vidéo Physique...");
-            const uploadedVideoUrl = await uploadFile(selectedVideoFile, "video_sinistre.webm");
-            if (uploadedVideoUrl) {
-                finalVideoUrl = uploadedVideoUrl;
-            }
+            const uploadData = new FormData();
+            uploadData.append('file', selectedImageFile);
+            try {
+                const res = await axios.post(`${API_BASE}/reports/upload`, uploadData);
+                imageUrl = res.data.url;
+            } catch (err) { console.error("Upload failed", err); }
         }
 
         const payload = {
             ...formData,
-            image_url: finalImageUrl,
-            video_url: finalVideoUrl,
+            image_url: imageUrl,
+            damage_level: formData.damage_level === 1 ? 'minime' : formData.damage_level === 2 ? 'partiel' : 'complet',
             location: {
                 type: "Point",
                 coordinates: location ? [location.lng, location.lat] : [0, 0]
-            }
+            },
+            user_id: localStorage.getItem('alerto_user_id')
         };
+
+        saveToLocalHistory(payload);
 
         if (navigator.onLine) {
             try {
                 await axios.post(API_URL, payload);
-                alert(t.online_success);
+                alert("✅ Signalement envoyé !");
                 resetForm();
             } catch (error) {
-                await fallbackToOffline(payload);
+                await saveReportOffline(payload);
+                alert("📡 Erreur réseau. Sauvegardé localement.");
             }
         } else {
-            await fallbackToOffline(payload);
+            await saveReportOffline(payload);
+            alert("📡 Mode Hors-ligne : Sauvegardé localement.");
         }
         setLoading(false);
-    };
-
-    const fallbackToOffline = async (payload) => {
-        await saveReportOffline(payload);
-        alert(t.offline_success);
-        resetForm();
     };
 
     const resetForm = () => {
         setFormData({
             description: '',
-            damage_level: 'minime',
+            damage_level: 1,
             infrastructure_type: 'Résidentiel',
+            infrastructure_name: '',
             crisis_type: 'Inondation',
-            debris_present: false,
+            crisis_type_other: '',
+            debris_present: 'no',
             text_location: '',
-            image_url: ''
+            contact_phone: '',
+            contact_email: '',
+            allow_contact: true,
+            electricity_status: 50,
+            health_services_status: 50,
+            urgent_needs: []
         });
-        setLocation(null);
         setImagePreview(null);
-        setVideoPreview(null);
         setSelectedImageFile(null);
-        setSelectedVideoFile(null);
-    };
-
-    const [showCamera, setShowCamera] = useState(false);
-    const videoRef = useRef(null);
-    const canvasRef = useRef(null);
-
-    const startCamera = async () => {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert(lang === 'fr'
-                ? "Caméra bloquée : Votre navigateur nécessite une connexion sécurisée (HTTPS) ou localhost pour accéder à l'appareil photo."
-                : "Camera blocked: Your browser requires a secure connection (HTTPS) or localhost to access the camera.");
-            return;
-        }
-        setShowCamera(true);
-
-        // Laisser 300ms à React pour afficher l'élément <video> dans le DOM
-        setTimeout(async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "environment" },
-                    audio: true
-                });
-                streamRef.current = stream;
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                }
-            } catch (err) {
-                console.error("Erreur caméra:", err);
-                setShowCamera(false);
-            }
-        }, 300);
-    };
-
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [captureMode, setCaptureMode] = useState('photo');
-    const [isRecording, setIsRecording] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(90);
-    const mediaRecorderRef = useRef(null);
-    const streamRef = useRef(null);
-    const timerRef = useRef(null);
-    const videoChunks = useRef([]);
-
-    const capturePhoto = () => {
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        if (video && canvas) {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-
-            // On genere un FICHIER reel pour l'envoi
-            canvas.toBlob((blob) => {
-                if (blob) {
-                    const file = new File([blob], "photo_capturee.jpg", { type: "image/jpeg" });
-                    setSelectedImageFile(file);
-                }
-            }, 'image/jpeg');
-
-            const dataUrl = canvas.toDataURL('image/jpeg');
-            setImagePreview(dataUrl);
-            stopCamera();
-
-            // Analyse d'Image Autonome (Simulation)
-            setIsAnalyzing(true);
-            setTimeout(() => {
-                setIsAnalyzing(false);
-                const isComplexImage = Math.random() > 0.4;
-                if (isComplexImage) {
-                    setFormData(prev => ({ ...prev, damage_level: "partiel", infrastructure_type: "Gouvernemental" }));
-                    alert(lang === 'fr'
-                        ? "🤖 IA : Détection autonome d'anomalies structurelles [Confiance : 88%]"
-                        : "🤖 AI: Autonomous detection of structural anomalies [Confidence: 88%]");
-                }
-            }, 3000);
-        }
-    };
-
-    const startRecording = () => {
-        const stream = streamRef.current;
-
-        if (!stream) {
-            console.error("Flux caméra indisponible dans streamRef");
-            return;
-        }
-
-        setIsRecording(true);
-        setTimeLeft(90);
-        videoChunks.current = [];
-
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
-
-        mediaRecorder.ondataavailable = (e) => {
-            if (e.data.size > 0) {
-                videoChunks.current.push(e.data);
-            }
-        };
-
-        mediaRecorder.onstop = () => {
-            clearInterval(timerRef.current);
-            const blob = new Blob(videoChunks.current, { type: 'video/webm' });
-            const videoUrl = URL.createObjectURL(blob);
-            setVideoPreview(videoUrl);
-            setFormData(prev => ({ ...prev, video_url: "video_temoignage.webm" }));
-            alert(lang === 'fr' ? "📹 Vidéo (1m30 max) capturée !" : "📹 Video (1m30 max) captured!");
-            stopCamera();
-        };
-
-        mediaRecorder.start();
-
-        // Compte à rebours
-        timerRef.current = setInterval(() => {
-            setTimeLeft((prev) => {
-                if (prev <= 1) {
-                    stopRecording();
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-    };
-
-    const stopRecording = () => {
-        setIsRecording(false);
-        if (mediaRecorderRef.current) {
-            mediaRecorderRef.current.onstop = () => {
-                clearInterval(timerRef.current);
-                const blob = new Blob(videoChunks.current, { type: 'video/webm' });
-                const file = new File([blob], "video_temoignage.webm", { type: 'video/webm' });
-                setSelectedVideoFile(file); // ON SAUVEGARDE LE FICHIER REEL
-
-                const videoUrl = URL.createObjectURL(blob);
-                setVideoPreview(videoUrl);
-                stopCamera();
-            };
-            mediaRecorderRef.current.stop();
-        }
-    };
-
-
-    const stopCamera = () => {
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
-            streamRef.current = null;
-        }
-        setShowCamera(false);
-        setIsRecording(false);
-        clearInterval(timerRef.current);
-    };
-
-    const handleDescriptionChange = (val) => {
-        setFormData({ ...formData, description: val });
-
-        const text = val.toLowerCase();
-        let suggestion = 'minime';
-
-        if (text.includes('détruit') || text.includes('effondré') || text.includes('mort') || text.includes('total')) {
-            suggestion = 'complet';
-        } else if (text.includes('fissure') || text.includes('cassé') || text.includes('partiel') || text.includes('réparable')) {
-            suggestion = 'partiel';
-        }
-
-        if (suggestion !== formData.damage_level) {
-            setFormData(prev => ({ ...prev, damage_level: suggestion }));
-        }
+        setFormStep(1);
     };
 
     return (
-        <div className={`report-container ${isRTL ? 'rtl' : ''}`}>
-            <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-
-            {!isOnline && (
-                <div className="offline-banner">
-                    ⚠️ {lang === 'fr' ? 'Mode Hors-Ligne Actif' : 'Offline Mode Active'}
-                </div>
-            )}
-
-            {showCamera && (
-                <div className="camera-overlay">
-                    <div className="camera-mode-tabs">
-                        <button
-                            className={`mode-tab ${captureMode === 'photo' ? 'active' : ''}`}
-                            onClick={() => setCaptureMode('photo')}
-                        >
-                            {lang === 'fr' ? 'PHOTO' : 'PHOTO'}
-                        </button>
-                        <button
-                            className={`mode-tab ${captureMode === 'video' ? 'active' : ''}`}
-                            onClick={() => setCaptureMode('video')}
-                        >
-                            {lang === 'fr' ? 'VIDÉO' : 'VIDEO'}
-                        </button>
-                    </div>
-
-                    {isRecording && (
-                        <div className="recording-timer">
-                            {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+        <div className="report-container">
+            {!isOnline && <div className="offline-banner-top">📡 Mode Hors-Ligne</div>}
+            
+            <div className="report-card">
+                <div className="mini-map-container">
+                    {location ? (
+                        <MapContainer center={[location.lat, location.lng]} zoom={15} zoomControl={false} style={{ height: '100%', width: '100%' }}>
+                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                            <Marker position={[location.lat, location.lng]} />
+                            <ChangeView center={[location.lat, location.lng]} />
+                        </MapContainer>
+                    ) : (
+                        <div className="map-placeholder">
+                           <Loader2 className="spinner" />
+                           <span>Localisation...</span>
                         </div>
                     )}
-
-                    <video ref={videoRef} autoPlay playsInline muted className="camera-feed"></video>
-
-                    <div className="camera-controls">
-                        <button onClick={stopCamera} className="cam-btn cancel">✕</button>
-
-                        {captureMode === 'photo' ? (
-                            <button onClick={capturePhoto} className="cam-btn capture">
-                                <div className="inner-circle"></div>
-                            </button>
-                        ) : (
-                            <button
-                                onClick={isRecording ? stopRecording : startRecording}
-                                className={`cam-btn record ${isRecording ? 'recording' : ''}`}
-                            >
-                                <div className="record-circle"></div>
-                            </button>
-                        )}
+                    <div className="address-overlay">
+                        <MapPin size={16} color="#0ea5e9" />
+                        <span className="address-text">{formData.text_location}</span>
                     </div>
                 </div>
-            )}
 
-            <div className="report-card">
-                <div className="header">
-                    <h1>{t.title}</h1>
-                    <p>{t.subtitle}</p>
-                </div>
-
-                <form onSubmit={(e) => {
-                    e.preventDefault();
-                    if (formStep === 1) {
-                        setFormStep(2);
-                    } else {
-                        handleSubmit(e);
-                    }
-                }}>
-                    {formStep === 1 && (
-                        <>
-                            <div className="step-indicator-container">
-                                <p className="step-text">
-                                    {lang === 'fr' ? 'Étape 1/2' : lang === 'en' ? 'Step 1/2' : lang === 'es' ? 'Paso 1/2' : lang === 'ar' ? 'الخطوة 1/2' : lang === 'zh' ? '第 1/2 步' : 'Шаг 1/2'}
-                                </p>
-                                <div className="progress-bar-bg">
-                                    <div className="progress-bar-fill step-1"></div>
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label>{t.take_photo}</label>
-                                {!imagePreview && !videoPreview ? (
-                                    <div className="photo-upload-placeholder" onClick={startCamera}>
-                                        <Camera size={40} />
-                                        <span>{captureMode === 'photo' ? t.take_photo : (lang === 'fr' ? 'ENREGISTRER VIDÉO' : 'RECORD VIDEO')}</span>
-                                    </div>
-                                ) : (
-                                    <div className="photo-preview-container">
-                                        {isAnalyzing && (
-                                            <div className="ai-scanning-overlay">
-                                                <div className="scan-line"></div>
-                                                <span>ANALYSE IA...</span>
-                                            </div>
-                                        )}
-                                        {imagePreview && <img src={imagePreview} alt="Preview" className="photo-preview" />}
-                                        {videoPreview && (
-                                            <video src={videoPreview} controls className="photo-preview" />
-                                        )}
-                                        <button type="button" className="remove-photo" onClick={() => {
-                                            setImagePreview(null);
-                                            setVideoPreview(null);
-                                        }}>
-                                            <X size={16} />
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="form-group">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <label>{t.description_label}</label>
-                                    {formData.description.length > 5 && (
-                                        <span className="ai-badge">🤖 IA Active</span>
-                                    )}
-                                </div>
-                                <textarea
-                                    required
-                                    placeholder={t.description_placeholder}
-                                    value={formData.description}
-                                    onChange={(e) => handleDescriptionChange(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label>{t.damage_label}</label>
-                                <div className="damage-grid">
-                                    {Object.entries(t.options.damage).map(([key, label]) => (
-                                        <div
-                                            key={key}
-                                            className={`damage-option ${formData.damage_level === key ? 'active' : ''}`}
-                                            onClick={() => setFormData({ ...formData, damage_level: key })}
+                <div className="form-body">
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        if (formStep === 1) setFormStep(2);
+                        else handleSubmit(e);
+                    }}>
+                        {formStep === 1 ? (
+                            <>
+                                <h2 className="form-section-title">Nouvelle Alerte</h2>
+                                
+                                <label className="input-label">Type de Crise</label>
+                                <div className="crisis-grid">
+                                    {crisisOptions.map(opt => (
+                                        <div 
+                                            key={opt.id} 
+                                            className={`crisis-item ${formData.crisis_type === opt.id ? 'active' : ''}`}
+                                            onClick={() => setFormData({...formData, crisis_type: opt.id})}
                                         >
-                                            {label}
+                                            <div className="crisis-icon-bg">{opt.icon}</div>
+                                            <span>{opt.label}</span>
                                         </div>
                                     ))}
                                 </div>
-                            </div>
 
-                            <div className="form-group">
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <label>{t.infrastructure_label}</label>
-                                        <select
-                                            value={formData.infrastructure_type}
-                                            onChange={(e) => setFormData({ ...formData, infrastructure_type: e.target.value })}
-                                        >
-                                            {t.options.infra.map(item => <option key={item}>{item}</option>)}
-                                        </select>
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <label>{t.crisis_label}</label>
-                                        <select
-                                            value={formData.crisis_type}
-                                            onChange={(e) => setFormData({ ...formData, crisis_type: e.target.value })}
-                                        >
-                                            {t.options.crisis.map(item => <option key={item}>{item}</option>)}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="form-group">
-                                <div className="gps-status">
-                                    <MapPin size={14} color={location ? "#10b981" : "#f43f5e"} />
-                                    <span>{location ? `${t.gps_active} (${location.lat.toFixed(4)})` : t.gps_searching}</span>
-                                    {!location && (
-                                        <button type="button" onClick={getGPS} className="mini-gps-btn">
-                                            📍 {lang === 'fr' ? 'Réessayer' : 'Retry'}
-                                        </button>
-                                    )}
-                                </div>
-                                {gpsError && (
-                                    <p className="gps-error-hint" style={{ color: '#f43f5e', fontSize: '11px', margin: '5px 0' }}>
-                                        ⚠️ {gpsError}
-                                    </p>
-                                )}
-                                <div className="input-with-button">
-                                    <input
-                                        placeholder={t.location_label}
-                                        value={formData.text_location}
-                                        onChange={(e) => setFormData({ ...formData, text_location: e.target.value })}
+                                {formData.crisis_type === 'Autre' && (
+                                    <input 
+                                        type="text" 
+                                        className="input-modern" 
+                                        placeholder="Quelle crise ?"
+                                        value={formData.crisis_type_other}
+                                        onChange={(e) => setFormData({...formData, crisis_type_other: e.target.value})}
+                                        required
                                     />
-                                    <button type="button" onClick={getGPS} className="gps-refresh-btn">
-                                        <MapPin size={18} />
-                                    </button>
-                                </div>
-                            </div>
-                        </>
-                    )}
+                                )}
 
-                    {formStep === 2 && (
-                        <>
-                            <div className="step-indicator-container">
-                                <p className="step-text">
-                                    {lang === 'fr' ? 'Étape 2/2' : lang === 'en' ? 'Step 2/2' : lang === 'es' ? 'Paso 2/2' : lang === 'ar' ? 'الخطوة 2/2' : lang === 'zh' ? '第 2/2 步' : 'Шаг 2/2'}
-                                </p>
-                                <div className="progress-bar-bg">
-                                    <div className="progress-bar-fill step-2"></div>
-                                </div>
-                            </div>
-                            <div className="form-group modular-section">
-                                <h3>📋 {t.needs}</h3>
-
-                                <label>{t.electricity}</label>
-                                <select
-                                    value={formData.electricity_status || ''}
-                                    onChange={(e) => setFormData({ ...formData, electricity_status: e.target.value })}
-                                >
-                                    <option value="">{t.select_placeholder}</option>
-                                    {Object.entries(t.options.elec).map(([key, label]) => (
-                                        <option key={key} value={key}>{label}</option>
-                                    ))}
-                                </select>
-
-                                <label>{t.health}</label>
-                                <select
-                                    value={formData.health_services_status || ''}
-                                    onChange={(e) => setFormData({ ...formData, health_services_status: e.target.value })}
-                                >
-                                    <option value="">{t.select_placeholder}</option>
-                                    {Object.entries(t.options.health).map(([key, label]) => (
-                                        <option key={key} value={key}>{label}</option>
-                                    ))}
-                                </select>
-
-                                <label style={{ marginTop: '15px', display: 'block', fontWeight: 'bold', color: '#f472b6' }}>
-                                    🆘 {lang === 'fr' ? 'Besoins les plus urgents' : lang === 'en' ? 'Most urgent needs' : lang === 'es' ? 'Necesidades más urgentes' : lang === 'ar' ? 'الاحتياجات الأكثر إلحاحا' : lang === 'zh' ? '最紧急的需求' : 'Самые неотложные потребности'}
-                                </label>
-                                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginBottom: '10px' }}>
-                                    {lang === 'fr' ? 'Sélectionnez tous les besoins applicables' : lang === 'en' ? 'Select all applicable needs' : lang === 'es' ? 'Seleccione todas las necesidades aplicables' : lang === 'ar' ? 'اختر جميع الاحتياجات المعمول بها' : lang === 'zh' ? '选择所有适用的需求' : 'Выберите все применимые потребности'}
-                                </p>
-                                <div className="checkboxes-grid">
-                                    {Object.entries(t.options.urgent_needs).filter(([key]) => key !== 'other').map(([key, label]) => (
-                                        <label key={key}>
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.urgent_needs.includes(key)}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                        setFormData({ ...formData, urgent_needs: [...formData.urgent_needs, key] });
-                                                    } else {
-                                                        setFormData({ ...formData, urgent_needs: formData.urgent_needs.filter(n => n !== key) });
-                                                    }
-                                                }}
-                                            />
-                                            <span>{label}</span>
-                                        </label>
-                                    ))}
+                                <div className="input-group">
+                                    <label className="input-label">Type d'Infrastructure</label>
+                                    <select 
+                                        className="input-modern"
+                                        value={formData.infrastructure_type}
+                                        onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}
+                                    >
+                                        <option>Résidentiel</option>
+                                        <option>Commercial</option>
+                                        <option>Gouvernemental</option>
+                                        <option>Services Publics</option>
+                                        <option>Transport</option>
+                                        <option>Communautaire</option>
+                                    </select>
                                 </div>
 
-                                <label style={{ marginTop: '15px', display: 'block', fontWeight: '500', marginBottom: '8px' }}>
-                                    {t.options.urgent_needs.other}
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder={lang === 'fr' ? 'Précisez si autre...' : lang === 'en' ? 'Please specify if other...' : lang === 'es' ? 'Por favor especifique si otro...' : lang === 'ar' ? 'يرجى التحديد إذا كان آخر...' : lang === 'zh' ? '请说明是否为其他...' : 'Пожалуйста укажите если другое...'}
-                                    value={formData.urgent_needs_other || ''}
-                                    onChange={(e) => setFormData({ ...formData, urgent_needs_other: e.target.value })}
-                                    style={{ width: '100%', padding: '10px', marginBottom: '15px', backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', color: 'white', fontFamily: 'inherit', fontSize: '14px' }}
-                                />
-                            </div>
-                        </>
-                    )}
+                                <label className="input-label">Preuve Visuelle</label>
+                                <div className="photo-box" onClick={() => document.getElementById('photo-input').click()}>
+                                    {imagePreview ? (
+                                        <img src={imagePreview} alt="Preview" />
+                                    ) : (
+                                        <>
+                                            <Camera size={32} />
+                                            <span style={{fontSize: '0.8rem'}}>Capturer une photo</span>
+                                        </>
+                                    )}
+                                    <input id="photo-input" type="file" accept="image/*" capture="environment" hidden onChange={handleImageCapture} />
+                                </div>
 
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                        {formStep === 2 && (
-                            <button
-                                type="button"
-                                onClick={() => setFormStep(1)}
-                                className="submit-btn"
-                                style={{ flex: 1, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
-                            >
-                                {lang === 'fr' ? '← RETOUR' : lang === 'en' ? '← BACK' : lang === 'es' ? '← VOLVER' : lang === 'ar' ? '← رجوع' : lang === 'zh' ? '← 返回' : '← НАЗАД'}
-                            </button>
+                                <div style={{marginTop: '20px'}}>
+                                    <label className="input-label">Description</label>
+                                    <textarea 
+                                        className="input-modern" 
+                                        rows="3" 
+                                        placeholder="Décrivez les dégâts..."
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                        required
+                                    />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <h2 className="form-section-title">Analyse Tactique</h2>
+                                
+                                <div className="slider-group">
+                                    <label className="input-label"><Zap size={14}/> Électricité</label>
+                                    <input type="range" min="0" max="100" value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: parseInt(e.target.value)})} />
+                                    <div className="slider-labels"><span>Coupé</span><span>Stable</span></div>
+                                </div>
+
+                                <div className="slider-group">
+                                    <label className="input-label"><HeartPulse size={14}/> Santé</label>
+                                    <input type="range" min="0" max="100" value={formData.health_services_status} onChange={(e) => setFormData({...formData, health_services_status: parseInt(e.target.value)})} />
+                                    <div className="slider-labels"><span>Indispo.</span><span>OK</span></div>
+                                </div>
+
+                                <div className="input-group">
+                                    <label className="input-label"><Trash size={14}/> Débris à déblayer ?</label>
+                                    <select 
+                                        className="input-modern"
+                                        value={formData.debris_present}
+                                        onChange={(e) => setFormData({...formData, debris_present: e.target.value})}
+                                    >
+                                        <option value="no">Non, accès dégagé</option>
+                                        <option value="yes">Oui, accès bloqué</option>
+                                    </select>
+                                </div>
+
+                                <div className="contact-card-modern">
+                                    <p className="card-subtitle">Contact pour les secours</p>
+                                    <div className="input-with-icon">
+                                        <Phone size={14} className="input-icon" />
+                                        <input type="tel" className="input-modern-clean" placeholder="Numéro de téléphone" value={formData.contact_phone} onChange={(e) => setFormData({...formData, contact_phone: e.target.value})} />
+                                    </div>
+                                    <label className="checkbox-label">
+                                        <input type="checkbox" checked={formData.allow_contact} onChange={(e) => setFormData({...formData, allow_contact: e.target.checked})} />
+                                        J'accepte d'être contacté
+                                    </label>
+                                </div>
+                            </>
                         )}
-                        <button type="submit" className={`submit-btn ${!isOnline ? 'offline' : ''}`} disabled={loading} style={{ flex: 1 }}>
-                            {loading ? '...' : (formStep === 1 ? (lang === 'fr' ? 'SUIVANT →' : lang === 'en' ? 'NEXT →' : lang === 'es' ? 'SIGUIENTE →' : lang === 'ar' ? 'التالي →' : lang === 'zh' ? '下一步 →' : 'ДАЛЕЕ →') : t.submit_btn)}
-                        </button>
-                    </div>
-                </form>
+
+                        <div className="btn-row">
+                            {formStep === 2 && (
+                                <button type="button" className="btn-back" onClick={() => setFormStep(1)}>
+                                    Retour
+                                </button>
+                            )}
+                            <button type="submit" className="btn-primary" disabled={loading}>
+                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? 'Suivant' : 'Envoyer')}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
+
+            <style>{`
+                .offline-banner-top { background: #fffbeb; color: #f59e0b; text-align: center; padding: 10px; font-size: 0.75rem; font-weight: 800; border-radius: 12px; margin-bottom: 15px; border: 1px solid #fef3c7; }
+                .input-group { margin-bottom: 15px; }
+                .input-label { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 8px; }
+                .btn-row { display: flex; gap: 12px; margin-top: 25px; }
+                .btn-back { flex: 1; padding: 16px; border-radius: 16px; border: 1px solid #e2e8f0; background: white; font-weight: 700; color: #64748b; cursor: pointer; }
+                .contact-card-modern { background: #f8fafc; padding: 15px; border-radius: 20px; border: 1px solid #e2e8f0; margin-top: 20px; }
+                .card-subtitle { font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 12px; }
+                .input-with-icon { position: relative; margin-bottom: 12px; }
+                .input-icon { position: absolute; left: 12px; top: 12px; color: #94a3b8; }
+                .input-modern-clean { width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 0.9rem; }
+                .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; color: #64748b; font-weight: 600; cursor: pointer; }
+                .spinner { animation: spin 1s linear infinite; }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            `}</style>
         </div>
     );
 };

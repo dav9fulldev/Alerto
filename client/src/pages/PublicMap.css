@@ -1,0 +1,138 @@
+.public-map-container {
+    height: 100vh;
+    width: 100%;
+    position: relative;
+    background: #f1f5f9;
+}
+
+.map-header-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.map-search-mock {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #94a3b8;
+    font-weight: 500;
+    font-size: 0.9rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.custom-div-icon {
+    background: none !important;
+    border: none !important;
+}
+
+.marker-pin {
+    width: 34px;
+    height: 34px;
+    background: white;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border: 2px solid #0ea5e9;
+    font-size: 18px;
+}
+
+.marker-pin > div {
+    transform: rotate(45deg);
+}
+
+.map-legend-fab {
+    position: absolute;
+    bottom: 90px;
+    left: 20px;
+    background: white;
+    padding: 12px;
+    border-radius: 16px;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dot.red { background: #ef4444; }
+.dot.orange { background: #f59e0b; }
+.dot.green { background: #10b981; }
+
+/* Popup Styling */
+.modern-popup .leaflet-popup-content-wrapper {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.popup-card {
+    width: 200px;
+}
+
+.popup-card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.popup-info {
+    padding: 12px;
+}
+
+.popup-badge {
+    display: inline-block;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+}
+
+.popup-info h3 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: var(--text-main);
+}
+
+.popup-loc {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.popup-desc {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: #475569;
+}

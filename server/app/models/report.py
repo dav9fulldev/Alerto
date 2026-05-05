@@ -14,17 +14,24 @@ class Report(BaseModel):
     damage_level: Literal["minime", "partiel", "complet"]
     infrastructure_type: str
     crisis_type: str
-    debris_present: bool = False
+    crisis_type_other: Optional[str] = None
+    debris_present: Optional[str] = "no"
     location: Location
     text_location: Optional[str] = None
     video_url: Optional[str] = None
     is_duplicate: bool = False
+    
+    # Contact info
     contact_phone: Optional[str] = None
+    contact_email: Optional[str] = None
+    allow_contact: bool = True
+    user_id: Optional[str] = None
+    
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
-    # Annexe 1 - Questions Modulaires
-    electricity_status: Optional[str] = None
-    health_services_status: Optional[str] = None
+    # Annexe 1 - Questions Modulaires (Sliders 0-100)
+    electricity_status: Optional[int] = 50
+    health_services_status: Optional[int] = 50
     urgent_needs: List[str] = []
     
     # NSFW Content Moderation

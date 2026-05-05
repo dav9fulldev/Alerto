@@ -40,6 +40,12 @@ async def get_stats(current_user: User = Depends(get_current_user)):
         ]
         nsfw_dist = list(reports_collection.aggregate(nsfw_pipeline))
         
+        # Répartition par débris
+        debris_pipeline = [
+            {"$group": {"_id": "$debris_present", "count": {"$sum": 1}}}
+        ]
+        debris_dist = list(reports_collection.aggregate(debris_pipeline))
+        
         return {
             "total_reports": total,
             "critical_zones": critical,
@@ -48,6 +54,7 @@ async def get_stats(current_user: User = Depends(get_current_user)):
             "nsfw_detected": nsfw_detected,
             "infrastructure_distribution": {item["_id"]: item["count"] for item in infra_dist},
             "crisis_distribution": {item["_id"]: item["count"] for item in crisis_dist},
+            "debris_summary": {item["_id"]: item["count"] for item in debris_dist},
             "nsfw_score_distribution": nsfw_dist
         }
     except Exception as e:
