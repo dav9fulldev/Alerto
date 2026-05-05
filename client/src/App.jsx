@@ -191,6 +191,10 @@ function AppContent() {
             <HelpCircle className="nav-icon" />
             <span>{t.nav.help}</span>
           </button>
+          <button className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
+            <User className="nav-icon" />
+            <span>{t.nav.profile}</span>
+          </button>
         </nav>
       </div>
 

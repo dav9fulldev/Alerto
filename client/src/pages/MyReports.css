@@ -165,3 +165,28 @@
     background: linear-gradient(90deg, #4ade80, #2dd4bf);
     border-radius: 6px;
 }
+
+.modal-scroll-content { padding: 30px; overflow-y: auto; }
+.detail-section { margin-bottom: 30px; }
+.detail-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 20px; }
+.detail-row label { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+.detail-row p { font-size: 1.1rem; font-weight: 700; color: #0f172a; }
+
+.empty-history {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 40px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.empty-icon-bg {
+    width: 100px; height: 100px;
+    background: #f0fdfa;
+    border-radius: 35px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 25px;
+    color: #2dd4bf;
+}

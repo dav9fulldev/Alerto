@@ -108,3 +108,10 @@
 
 .leaflet-control-attribution { display: none; }
 .leaflet-bar { border: none !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; border-radius: 12px !important; overflow: hidden; }
+
+.legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.7rem; font-weight: 800; color: #475569; }
+.dot { width: 12px; height: 12px; border-radius: 50%; }
+.dot.red { background: #ef4444; }
+.dot.orange { background: #f59e0b; }
+.dot.green { background: #10b981; }
+.popup-loc { font-size: 0.75rem; color: #64748b; font-weight: 600; display: flex; align-items: center; gap: 4px; }

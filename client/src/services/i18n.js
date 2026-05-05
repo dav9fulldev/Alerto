@@ -4,7 +4,7 @@ export const translations = {
     fr: {
         title: "ALERTO",
         subtitle: "Système de réponse rapide",
-        nav: { map: "Explorer", report: "Signaler", history: "Mes Alertes", help: "Aide" },
+        nav: { map: "Explorer", report: "Signaler", history: "Mes Alertes", help: "Aide", profile: "Profil" },
         submit: {
             title: "Signaler un sinistre",
             step1: "Informations de base",
@@ -94,7 +94,7 @@ export const translations = {
     en: {
         title: "ALERTO",
         subtitle: "Rapid Response System",
-        nav: { map: "Explore", report: "Report", history: "My Alerts", help: "Help" },
+        nav: { map: "Explore", report: "Report", history: "My Alerts", help: "Help", profile: "Profile" },
         submit: {
             title: "Report an Incident",
             step1: "Basic Information",
@@ -184,7 +184,7 @@ export const translations = {
     es: {
         title: "ALERTO",
         subtitle: "Sistema de respuesta rápida",
-        nav: { map: "Explorar", report: "Informar", history: "Mis Alertas", help: "Ayuda" },
+        nav: { map: "Explorar", report: "Informar", history: "Mis Alertas", help: "Ayuda", profile: "Perfil" },
         submit: {
             title: "Informar un incidente",
             step1: "Información básica",
@@ -274,7 +274,7 @@ export const translations = {
     ar: {
         title: "ALERTO",
         subtitle: "نظام الاستجابة السريعة",
-        nav: { map: "استكشاف", report: "إبلاغ", history: "تنبيهاتي", help: "مساعدة" },
+        nav: { map: "استكشاف", report: "إبلاغ", history: "تنبيهاتي", help: "مساعدة", profile: "الملف الشخصي" },
         submit: {
             title: "الإبلاغ عن حادث",
             step1: "معلومات أساسية",
@@ -364,7 +364,7 @@ export const translations = {
     zh: {
         title: "ALERTO",
         subtitle: "快速反应系统",
-        nav: { map: "探索", report: "报告", history: "我的警报", help: "帮助" },
+        nav: { map: "探索", report: "报告", history: "我的警报", help: "帮助", profile: "个人资料" },
         submit: {
             title: "报告事件",
             step1: "基本信息",
@@ -454,7 +454,7 @@ export const translations = {
     ru: {
         title: "ALERTO",
         subtitle: "Система быстрого реагирования",
-        nav: { map: "Обзор", report: "Сообщить", history: "Мои алерты", help: "Помощь" },
+        nav: { map: "Обзор", report: "Сообщить", history: "Мои алерты", help: "Помощь", profile: "Профиль" },
         submit: {
             title: "Сообщить об инциденте",
             step1: "Основная информация",
