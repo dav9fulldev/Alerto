@@ -38,7 +38,34 @@
 
 .dash-actions {
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 15px;
+}
+
+.dash-lang-switcher {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.lang-pill {
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lang-pill.active {
+    background: white;
+    color: #0ea5e9;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .dash-btn-outline {

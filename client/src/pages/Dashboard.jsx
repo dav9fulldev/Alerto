@@ -11,7 +11,7 @@ import { API_BASE } from '../services/api';
 import { useTranslation } from '../services/i18n';
 
 const Dashboard = ({ onLogout }) => {
-    const { translations, lang } = useTranslation();
+    const { translations, lang, setLang } = useTranslation();
     
     // Force Dashboard to FR or EN only
     const dashLang = (lang === 'fr') ? 'fr' : 'en';
@@ -156,6 +156,16 @@ const Dashboard = ({ onLogout }) => {
                     </div>
                 </div>
                 <div className="dash-actions">
+                    <div className="dash-lang-switcher">
+                        <button 
+                            className={`lang-pill ${dashLang === 'fr' ? 'active' : ''}`} 
+                            onClick={() => setLang('fr')}
+                        >FR</button>
+                        <button 
+                            className={`lang-pill ${dashLang === 'en' ? 'active' : ''}`} 
+                            onClick={() => setLang('en')}
+                        >EN</button>
+                    </div>
                     <button onClick={exportToCSV} className="dash-btn-outline"><Table size={16} /> {dashT.btn_csv}</button>
                     <button onClick={exportToGeoJSON} className="dash-btn-outline"><Globe size={16} /> {dashT.btn_geojson}</button>
                     <button onClick={onLogout} className="dash-btn-danger"><LogOut size={16} /> {dashT.btn_logout}</button>
