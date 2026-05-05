@@ -5,7 +5,7 @@ import {
   ChevronRight, AlertTriangle, Zap, HeartPulse, Trash,
   Droplets, Flame, Car, Home, ShieldAlert, Bomb, PlusCircle,
   Construction, Building2, Store, Landmark, Factory, Bus, Users, Palmtree,
-  Crosshair, Navigation
+  Crosshair, Navigation, Edit3
 } from 'lucide-react';
 import axios from 'axios';
 import { saveReportOffline } from '../services/storage';
@@ -20,12 +20,12 @@ const SubmitReport = ({ lang = 'fr' }) => {
     const [formStep, setFormStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [location, setLocation] = useState(null);
+    const [isManual, setIsManual] = useState(false);
     const [mediaPreview, setMediaPreview] = useState(null);
     const [mediaType, setMediaType] = useState(null); 
     const [selectedFile, setSelectedFile] = useState(null);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
-    const [showInstallPrompt, setShowInstallPrompt] = useState(false);
-    const deferredPrompt = useRef(null);
+    const [gpsError, setGpsError] = useState(false);
 
     const [formData, setFormData] = useState({
         description: '',
@@ -74,6 +74,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
     }, []);
 
     const getGPS = () => {
+        setGpsError(false);
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
@@ -81,9 +82,13 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     updateLocation(latitude, longitude);
                 },
                 () => {
+                    // Fail silently, retry low accuracy
                     navigator.geolocation.getCurrentPosition(
                         (pos) => updateLocation(pos.coords.latitude, pos.coords.longitude),
-                        null,
+                        () => {
+                            setGpsError(true);
+                            setIsManual(true);
+                        },
                         { enableHighAccuracy: false, timeout: 5000 }
                     );
                 },
@@ -94,6 +99,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     const updateLocation = async (lat, lng) => {
         setLocation({ lat, lng });
+        setGpsError(false);
         try {
             const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
             if (res.data && res.data.display_name) {
@@ -116,8 +122,9 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
-        if (!formData.crisis_type) { alert("Type de crise requis"); return; }
-        if (!location) { alert("Attente du signal GPS..."); getGPS(); return; }
+        if (!formData.crisis_type) { alert("Veuillez choisir un type de crise."); return; }
+        if (!formData.text_location) { alert("Veuillez renseigner le lieu."); return; }
+        
         setLoading(true);
 
         try {
@@ -129,13 +136,16 @@ const SubmitReport = ({ lang = 'fr' }) => {
                 mediaUrl = res.data.url;
             }
 
+            // Fallback coordinates if GPS failed (Abidjan center)
+            const coords = location ? [location.lng, location.lat] : [-4.0305, 5.3484];
+
             const payload = {
                 ...formData,
                 image_url: mediaUrl,
                 media_type: mediaType,
                 location: {
                     type: "Point",
-                    coordinates: [location.lng, location.lat]
+                    coordinates: coords
                 },
                 user_id: localStorage.getItem('alerto_user_id')
             };
@@ -149,7 +159,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             }
             resetForm();
         } catch (error) {
-            alert("Erreur");
+            alert("Erreur de soumission.");
         } finally {
             setLoading(false);
         }
@@ -176,25 +186,36 @@ const SubmitReport = ({ lang = 'fr' }) => {
         setSelectedFile(null);
         setMediaType(null);
         setFormStep(1);
+        setIsManual(false);
     };
 
     return (
         <div className="report-container">
             <div className="report-card">
-                <div className="location-section-v4">
+                <div className={`location-section-v4 ${gpsError ? 'error-bg' : ''}`}>
                     <div className="location-info-compact">
-                        <div className="loc-icon-circle">
-                            <Navigation size={20} className={!location ? 'pulse-icon' : ''} />
+                        <div className={`loc-icon-circle ${gpsError ? 'error-icon' : ''}`}>
+                            <Navigation size={20} className={(!location && !gpsError) ? 'pulse-icon' : ''} />
                         </div>
-                        <div className="loc-texts">
-                            <span className="loc-label">POSITION TACTIQUE</span>
-                            <span className="loc-address">
-                                {formData.text_location || (location ? 'Position verrouillée' : 'Acquisition GPS...')}
-                            </span>
+                        <div className="loc-texts" style={{ width: '100%' }}>
+                            <span className="loc-label">LIEU DU SINISTRE</span>
+                            {isManual ? (
+                                <input 
+                                    className="manual-loc-input"
+                                    placeholder="Saisir l'adresse ou le quartier..."
+                                    value={formData.text_location}
+                                    onChange={(e) => setFormData({...formData, text_location: e.target.value})}
+                                    autoFocus
+                                />
+                            ) : (
+                                <span className="loc-address" onClick={() => setIsManual(true)}>
+                                    {formData.text_location || (location ? 'Position verrouillée' : 'Acquisition GPS...')}
+                                </span>
+                            )}
                         </div>
                     </div>
-                    <button type="button" className="refresh-gps-btn" onClick={getGPS}>
-                        <Crosshair size={18} />
+                    <button type="button" className="edit-loc-btn" onClick={() => setIsManual(!isManual)}>
+                        {isManual ? <Check size={18} /> : <Edit3 size={18} />}
                     </button>
                 </div>
 
@@ -236,7 +257,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                     ) : (
                                         <div className="capture-placeholder">
                                             <Camera size={32} />
-                                            <span>CAPTURER PHOTO / VIDÉO</span>
+                                            <span>PHOTO / VIDÉO</span>
                                         </div>
                                     )}
                                     <input id="media-input" type="file" accept="image/*,video/*" capture="environment" hidden onChange={handleMediaCapture} />

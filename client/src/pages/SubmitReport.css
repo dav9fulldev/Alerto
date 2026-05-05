@@ -23,7 +23,10 @@
     justify-content: space-between;
     align-items: center;
     color: white;
+    transition: all 0.3s;
 }
+
+.location-section-v4.error-bg { background: #450a0a; }
 
 .location-info-compact {
     display: flex;
@@ -44,10 +47,13 @@
     color: #38bdf8;
 }
 
+.loc-icon-circle.error-icon { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+
 .loc-texts {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    flex: 1;
 }
 
 .loc-label {
@@ -63,9 +69,24 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    cursor: pointer;
 }
 
-.refresh-gps-btn {
+.manual-loc-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 4px 0;
+    width: 100%;
+    outline: none;
+}
+
+.manual-loc-input::placeholder { color: rgba(255,255,255,0.4); }
+
+.edit-loc-btn {
     background: rgba(255,255,255,0.05);
     border: none;
     width: 36px;
@@ -76,6 +97,7 @@
     justify-content: center;
     color: white;
     cursor: pointer;
+    margin-left: 10px;
 }
 
 .form-body { padding: 25px; }
