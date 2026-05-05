@@ -32,7 +32,11 @@ const MapController = ({ location, setLocation, setAddress }) => {
   const map = useMap();
   
   useEffect(() => {
-    if (location) map.setView([location.lat, location.lng], 15);
+    if (location) {
+        map.setView([location.lat, location.lng], 15);
+        // Force refresh leaflet size to fix broken tiles in some containers
+        setTimeout(() => map.invalidateSize(), 200);
+    }
   }, [location, map]);
 
   useMapEvents({
@@ -82,7 +86,6 @@ const SubmitReport = ({ lang = 'fr' }) => {
     });
 
     const icons = {
-        // Multi-language mapping
         'Séisme': <Home size={22} />, 'Inondation': <Droplets size={22} />, 'Cyclone': <Users size={22} />, 'Tsunami': <Droplets size={22} />,
         'Incendie de forêt': <Flame size={22} />, 'Explosion': <Bomb size={22} />, 'Incident chimique': <ShieldAlert size={22} />,
         'Conflit': <ShieldAlert size={22} />, 'Troubles civils': <Users size={22} />, 'Autre': <PlusCircle size={22} />,
@@ -94,7 +97,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         'Conflicto': <ShieldAlert size={22} />, 'Disturbios civiles': <Users size={22} />, 'Otro': <PlusCircle size={22} />,
         'زلزال': <Home size={22} />, 'فيضان': <Droplets size={22} />, 'إعصار': <Users size={22} />, 'حريق غابات': <Flame size={22} />, 'انفجار': <Bomb size={22} />, 'حادث كيميائي': <ShieldAlert size={22} />, 'صراع': <ShieldAlert size={22} />, 'اضطرابات مدنية': <Users size={22} />,
         '地震': <Home size={22} />, '洪水': <Droplets size={22} />, '飓风 / 台风': <Users size={22} />, '海啸': <Droplets size={22} />, '森林火灾': <Flame size={22} />, '爆炸': <Bomb size={22} />, '化学事故': <ShieldAlert size={22} />, '冲突': <ShieldAlert size={22} />, '内乱': <Users size={22} />,
-        'Землетрясение': <Home size={22} />, 'Наводнение': <Droplets size={22} />, 'Ураган / Циклон': <Users size={22} />, 'Цунами': <Droplets size={22} />, 'Лесной пожар': <Flame size={22} />, 'Взрыв': <Bomb size={22} />, 'Химический инцидент': <ShieldAlert size={22} />, 'Конфlict': <ShieldAlert size={22} />, 'Гражданские беспорядки': <Users size={22} />
+        'Землетрясение': <Home size={22} />, 'Наводнение': <Droplets size={22} />, 'Ураган / Циклон': <Users size={22} />, 'Цунами': <Droplets size={22} />, 'Лесной пожар': <Flame size={22} />, 'Взрыв': <Bomb size={22} />, 'Химический инцидент': <ShieldAlert size={22} />, 'Конфликт': <ShieldAlert size={22} />, 'Гражданские беспорядки': <Users size={22} />
     };
 
     useEffect(() => {
@@ -109,7 +112,6 @@ const SubmitReport = ({ lang = 'fr' }) => {
         window.addEventListener('offline', handleStatus);
         window.addEventListener('beforeinstallprompt', handleBeforeInstall);
         
-        // Silent background GPS capture
         getGPS();
         if (navigator.onLine) syncOfflineData();
         
@@ -128,14 +130,13 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     updateLocation(latitude, longitude);
                 },
                 () => {
-                    // Fail silently, user can still pick on map
                     navigator.geolocation.getCurrentPosition(
                         (pos) => updateLocation(pos.coords.latitude, pos.coords.longitude),
                         null,
                         { enableHighAccuracy: false, timeout: 5000 }
                     );
                 },
-                { enableHighAccuracy: true, timeout: 3000 }
+                { enableHighAccuracy: true, timeout: 5000 }
             );
         }
     };
@@ -164,8 +165,8 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
-        if (!formData.crisis_type) { alert("Veuillez choisir un type de crise."); return; }
-        if (!location) { alert("Veuillez sélectionner un lieu sur la carte."); return; }
+        if (!formData.crisis_type) { alert("Type de crise requis"); return; }
+        if (!location) { alert("Lieu requis"); return; }
         setLoading(true);
 
         try {
@@ -197,7 +198,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             }
             resetForm();
         } catch (error) {
-            alert("Erreur réseau.");
+            alert("Erreur de soumission");
         } finally {
             setLoading(false);
         }
@@ -230,19 +231,19 @@ const SubmitReport = ({ lang = 'fr' }) => {
         <div className="report-container">
             <div className="report-card">
                 <div className="mini-map-container">
-                    <MapContainer center={location ? [location.lat, location.lng] : [5.3484, -4.0305]} zoom={13} zoomControl={false} style={{ height: '100%', width: '100%' }}>
+                    <MapContainer center={location ? [location.lat, location.lng] : [5.3484, -4.0305]} zoom={14} zoomControl={false} style={{ height: '100%', width: '100%' }}>
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         {location && <Marker position={[location.lat, location.lng]} />}
                         <MapController location={location} setLocation={setLocation} setAddress={(addr) => setFormData(p => ({...p, text_location: addr}))} />
                     </MapContainer>
                     
-                    <button type="button" className="gps-fab" onClick={getGPS} title="Recentrer">
-                        <Crosshair size={20} />
+                    <button type="button" className="gps-fab" onClick={getGPS} title="Recalibrer">
+                        <Crosshair size={22} />
                     </button>
 
                     <div className="address-overlay-v3">
-                        <MapPin size={12} color="#0ea5e9" />
-                        <span className="address-text">{formData.text_location || (location ? 'Lieu sélectionné' : 'Appuyez sur la carte')}</span>
+                        <MapPin size={14} color="#3b82f6" />
+                        <span className="address-text">{formData.text_location || 'Localisation terrain...'}</span>
                     </div>
                 </div>
 
@@ -264,7 +265,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                                 className={`crisis-item ${formData.crisis_type === label ? 'active' : ''}`}
                                                 onClick={() => setFormData({...formData, crisis_type: label})}
                                             >
-                                                <div className="crisis-icon-bg">{icons[label] || <PlusCircle size={20} />}</div>
+                                                <div className="crisis-icon-bg">{icons[label] || <PlusCircle size={22} />}</div>
                                                 <span>{label}</span>
                                             </div>
                                         );
@@ -283,27 +284,27 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                         mediaType === 'video' ? <video src={mediaPreview} className="preview-media" controls /> : <img src={mediaPreview} alt="Preview" className="preview-media" />
                                     ) : (
                                         <div className="capture-placeholder">
-                                            <Camera size={28} />
-                                            <span>Prendre Photo/Vidéo</span>
+                                            <Camera size={32} />
+                                            <span>CAPTURER PHOTO / VIDÉO</span>
                                         </div>
                                     )}
                                     <input id="media-input" type="file" accept="image/*,video/*" capture="environment" hidden onChange={handleMediaCapture} />
                                 </div>
 
-                                <div style={{marginTop: '20px'}}>
+                                <div style={{marginTop: '25px'}}>
                                     <label className="input-label">{t.description_label}</label>
                                     <textarea className="input-modern" rows="3" placeholder={t.description_placeholder} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required />
                                 </div>
                             </>
                         ) : (
                             <>
-                                <h2 className="form-section-title">Analyse PNUD</h2>
+                                <h2 className="form-section-title">Analyse Tactique</h2>
                                 <div className="slider-group">
-                                    <label className="input-label"><Zap size={14}/> Électricité</label>
+                                    <label className="input-label"><Zap size={14}/> État de l'Électricité</label>
                                     <input type="range" min="0" max="100" value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: parseInt(e.target.value)})} />
                                 </div>
                                 <div className="slider-group">
-                                    <label className="input-label"><HeartPulse size={14}/> Santé</label>
+                                    <label className="input-label"><HeartPulse size={14}/> Services de Santé</label>
                                     <input type="range" min="0" max="100" value={formData.health_services_status} onChange={(e) => setFormData({...formData, health_services_status: parseInt(e.target.value)})} />
                                 </div>
                             </>
@@ -312,7 +313,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                         <div className="btn-row">
                             {formStep === 2 && <button type="button" className="btn-back" onClick={() => setFormStep(1)}>Retour</button>}
                             <button type="submit" className="btn-primary" disabled={loading}>
-                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? 'Suivant' : 'Envoyer')}
+                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? 'SUIVANT' : 'ENVOYER LE RAPPORT')}
                             </button>
                         </div>
                     </form>
