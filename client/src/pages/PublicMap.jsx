@@ -16,8 +16,9 @@ const MapAutoFixer = ({ trigger }) => {
     const fixMap = useCallback(() => {
         if (map) {
             map.invalidateSize();
-            setTimeout(() => map.invalidateSize(), 100);
-            setTimeout(() => map.invalidateSize(), 500);
+            setTimeout(() => map.invalidateSize(), 200);
+            setTimeout(() => map.invalidateSize(), 1000);
+            setTimeout(() => map.invalidateSize(), 3000);
         }
     }, [map]);
     useEffect(() => {
