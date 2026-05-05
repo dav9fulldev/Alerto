@@ -22,6 +22,24 @@ export const translations = {
         electricity: "État de l'électricité",
         health: "Services de Santé",
         needs: "Besoins les plus urgents",
+        dashboard: {
+            title: "Plateforme ALERTO PNUD",
+            subtitle: "Surveillance tactique et évaluation des dommages",
+            stat_total: "RAPPORTS TOTAUX",
+            stat_critical: "DÉGÂTS COMPLETS",
+            stat_reliability: "FIABILITÉ IA",
+            stat_flagged: "SIGNALÉS",
+            chart_sectors: "Secteurs Impactés",
+            feed_tactical: "Flux Tactique",
+            feed_security: "Revue de Sécurité",
+            tab_all: "Tous",
+            tab_flagged: "Signalés",
+            btn_csv: "CSV",
+            btn_geojson: "GeoJSON",
+            btn_logout: "Déconnexion",
+            btn_approve: "Marquer comme sûr",
+            loading: "Analyse des flux tactiques..."
+        },
         options: {
             damage: { minime: "MINIME", partiel: "PARTIEL", complet: "COMPLET" },
             infra: [
@@ -35,46 +53,25 @@ export const translations = {
                 "Autre"
             ],
             crisis: [
-                "--- Risques Naturels ---",
-                "Tremblement de terre",
-                "Inondation",
-                "Tsunami",
-                "Ouragan / Cyclone",
-                "Feu de forêt",
-                "--- Risques Technologiques ---",
-                "Explosion",
-                "Incident chimique",
-                "--- Crises d'origine humaine ---",
-                "Conflit",
-                "Troubles civils"
+                "--- Risques Naturels ---", "Tremblement de terre", "Inondation", "Tsunami", "Ouragan / Cyclone", "Feu de forêt",
+                "--- Risques Technologiques ---", "Explosion", "Incident chimique",
+                "--- Crises d'origine humaine ---", "Conflit", "Troubles civils"
             ],
             debris: { yes: "Oui, débris présents", no: "Non, pas de débris" },
             elec: {
-                aucun: "Aucun dommage observé",
-                mineur: "Dommages mineurs (interruptions rapidement réparables)",
-                modere: "Dommages modérés (pannes partielles)",
-                important: "Dommages importants (pannes prolongées)",
-                detruit: "Complètement détruit",
-                inconnu: "Inconnu/ne peut être évalué"
+                aucun: "Aucun dommage observé", mineur: "Dommages mineurs", modere: "Dommages modérés",
+                important: "Dommages importants", detruit: "Complètement détruit", inconnu: "Inconnu"
             },
             health: {
-                fonctionnel: "Entièrement fonctionnel",
-                partiel: "Partiellement fonctionnel",
-                perturbe: "Fortement perturbé",
-                HS: "Ne fonctionne pas du tout",
-                inconnu: "Inconnu"
+                fonctionnel: "Entièrement fonctionnel", partiel: "Partiellement fonctionnel",
+                perturbe: "Fortement perturbé", HS: "Ne fonctionne pas", inconnu: "Inconnu"
             },
             urgent_needs: {
-                food: "Aide alimentaire et eau potable",
-                financial: "Aide financière ou en espèces",
-                health: "Accès aux soins de santé et aux médicaments essentiels",
-                shelter: "Abri, réparation de logement ou hébergement temporaire",
-                livelihood: "Rétablissement des moyens de subsistance ou des sources de revenus",
-                wash: "Eau, assainissement et hygiène (toilettes, installations sanitaires)",
-                services: "Rétablissement des services et infrastructures de base",
-                psycho: "Services de protection et soutien psychosocial",
-                authorities: "Soutien des autorités locales et des organisations communautaires",
-                other: "Autre, veuillez préciser"
+                food: "Aide alimentaire et eau potable", financial: "Aide financière ou en espèces",
+                health: "Accès aux soins de santé", shelter: "Abri ou réparation",
+                livelihood: "Moyens de subsistance", wash: "Eau, assainissement et hygiène",
+                services: "Services de base", psycho: "Soutien psychosocial",
+                authorities: "Soutien des autorités", other: "Autre"
             }
         }
     },
@@ -86,9 +83,9 @@ export const translations = {
         description_placeholder: "Describe the damage...",
         damage_label: "Damage Level",
         infrastructure_label: "Infrastructure Type",
-        infrastructure_name_label: "Infrastructure Name/Details",
+        infrastructure_name_label: "Infrastructure Name",
         crisis_label: "Nature of Crisis",
-        debris_label: "Is there debris to be removed on or near the site?",
+        debris_label: "Is there debris to be removed?",
         location_label: "Exact Location",
         submit_btn: "SUBMIT REPORT",
         gps_active: "GPS Active",
@@ -99,125 +96,113 @@ export const translations = {
         electricity: "Electricity Status",
         health: "Health Services",
         needs: "Most urgent needs",
+        dashboard: {
+            title: "ALERTO UNDP Platform",
+            subtitle: "Tactical monitoring and damage assessment",
+            stat_total: "TOTAL REPORTS",
+            stat_critical: "COMPLETE DAMAGE",
+            stat_reliability: "AI RELIABILITY",
+            stat_flagged: "FLAGGED",
+            chart_sectors: "Impacted Sectors",
+            feed_tactical: "Tactical Feed",
+            feed_security: "Security Review",
+            tab_all: "All",
+            tab_flagged: "Flagged",
+            btn_csv: "CSV",
+            btn_geojson: "GeoJSON",
+            btn_logout: "Logout",
+            btn_approve: "Mark as Safe",
+            loading: "Analyzing tactical feeds..."
+        },
         options: {
             damage: { minime: "MINIMAL", partiel: "PARTIAL", complet: "COMPLETE" },
             infra: [
-                "Residential infrastructures (houses and apartments)",
-                "Commercial infrastructures (markets, shopping centers, stores, hotels, banks, etc.)",
-                "Government buildings (administrative buildings, courthouses, police stations, etc.)",
-                "Public utility infrastructures (water pumps, power plants, etc.)",
-                "Transport and communication infrastructures (roads, bridges, stations, antennas, etc.)",
-                "Community infrastructures (schools, hospitals, community halls, etc.)",
-                "Public spaces / Leisure infrastructures (stadiums, playgrounds, religious buildings, etc.)",
-                "Other"
+                "Residential infrastructures", "Commercial infrastructures", "Government buildings",
+                "Public utility infrastructures", "Transport and communication", "Community infrastructures",
+                "Public spaces / Leisure", "Other"
             ],
             crisis: [
-                "-- Natural Hazards",
-                "Earthquake",
-                "Flood",
-                "Tsunami",
-                "Hurricane / Cyclone",
-                "Wildfire",
-                "-- Technological Hazards",
-                "Explosion",
-                "Chemical Incident",
-                "-- Human-induced Crises",
-                "Conflict",
-                "Civil Unrest"
+                "-- Natural Hazards", "Earthquake", "Flood", "Tsunami", "Hurricane / Cyclone", "Wildfire",
+                "-- Technological Hazards", "Explosion", "Chemical Incident",
+                "-- Human Crises", "Conflict", "Civil Unrest"
             ],
             debris: { yes: "Yes, debris present", no: "No debris" },
             elec: {
-                aucun: "No damage observed",
-                mineur: "Minor damage (service interruptions but quickly repairable)",
-                modere: "Moderate damage (partial outages requiring repairs)",
-                important: "Major damage (major infrastructure damaged, prolonged outages)",
-                detruit: "Completely destroyed",
-                inconnu: "Unknown/cannot evaluate"
+                aucun: "No damage", mineur: "Minor damage", modere: "Moderate damage",
+                important: "Major damage", detruit: "Completely destroyed", inconnu: "Unknown"
             },
             health: {
-                fonctionnel: "Fully functional",
-                partiel: "Partially functional",
-                perturbe: "Strongly disrupted",
-                HS: "Not functioning at all",
-                inconnu: "Unknown"
+                fonctionnel: "Fully functional", partiel: "Partially functional",
+                perturbe: "Strongly disrupted", HS: "Not functioning", inconnu: "Unknown"
             },
             urgent_needs: {
-                food: "Food and water assistance",
-                financial: "Financial or cash assistance",
-                health: "Access to healthcare and essential medicines",
-                shelter: "Shelter, housing repairs or temporary accommodation",
-                livelihood: "Restoring livelihoods or sources of income",
-                wash: "Water, sanitation and hygiene (toilets, sanitary facilities)",
-                services: "Restoration of basic services and infrastructure",
-                psycho: "Protection services and psychosocial support",
-                authorities: "Support from local authorities and community organizations",
-                other: "Other, please specify"
+                food: "Food and water", financial: "Financial assistance", health: "Healthcare access",
+                shelter: "Shelter/Repair", livelihood: "Livelihoods", wash: "Water/Sanitation",
+                services: "Basic services", psycho: "Psychosocial support",
+                authorities: "Authority support", other: "Other"
             }
         }
     },
     es: {
         title: "ALERTO",
         subtitle: "Sistema de respuesta rápida",
-        take_photo: "Tomar una foto",
+        take_photo: "Tomar foto",
         description_label: "Descripción del daño",
         description_placeholder: "Describa el daño...",
         damage_label: "Nivel de daño",
         infrastructure_label: "Tipo de infraestructura",
+        infrastructure_name_label: "Nombre de la infraestructura",
         crisis_label: "Naturaleza de la crisis",
+        debris_label: "¿Hay escombros para remover?",
         location_label: "Ubicación exacta",
-        submit_btn: "ENVIAR",
+        submit_btn: "ENVIAR INFORME",
         gps_active: "GPS Activo",
         gps_searching: "Buscando GPS...",
-        online_success: "¡Informe enviado en línea!",
-        offline_success: "Desconectado: Informe guardado localmente.",
+        online_success: "¡Informe enviado!",
+        offline_success: "Informe guardado localmente.",
         select_placeholder: "Seleccionar...",
-        electricity: "Estado de electricidad",
+        electricity: "Estado eléctrico",
         health: "Servicios de salud",
         needs: "Necesidades urgentes",
+        dashboard: {
+            title: "Plataforma ALERTO PNUD",
+            subtitle: "Monitoreo táctico y evaluación de daños",
+            stat_total: "INFORMES TOTALES",
+            stat_critical: "DAÑO COMPLETO",
+            stat_reliability: "FIABILIDAD IA",
+            stat_flagged: "MARCADOS",
+            chart_sectors: "Sectores Impactados",
+            feed_tactical: "Flujo Táctico",
+            feed_security: "Revisión de Seguridad",
+            tab_all: "Todos",
+            tab_flagged: "Marcados",
+            btn_csv: "CSV",
+            btn_geojson: "GeoJSON",
+            btn_logout: "Cerrar Sesión",
+            btn_approve: "Marcar como Seguro",
+            loading: "Analizando flujos tácticos..."
+        },
         options: {
             damage: { minime: "MÍNIMO", partiel: "PARCIAL", complet: "COMPLETO" },
             infra: ["Residencial", "Comercial", "Gubernamental", "Servicios públicos", "Transporte", "Comunitario", "Espacios públicos", "Otro"],
             crisis: [
-                "--- Riesgos Naturales ---",
-                "Terremoto",
-                "Inundación",
-                "Huracán / Ciclón",
-                "Tsunami",
-                "Incendio forestal",
-                "--- Riesgos Tecnológicos ---",
-                "Explosión",
-                "Incidente químico",
-                "--- Crises de origen humano ---",
-                "Conflicto",
-                "Disturbios civiles",
-                "Otro"
+                "--- Riesgos Naturales ---", "Terremoto", "Inundación", "Tsunami", "Huracán / Ciclón", "Incendio",
+                "--- Riesgos Tecnológicos ---", "Explosión", "Incidente químico",
+                "--- Crisis Humanas ---", "Conflicto", "Disturbios"
             ],
             elec: {
-                aucun: "Ningún daño observado",
-                mineur: "Daño menor (interrupciones reparables rápidamente)",
-                modere: "Daño moderado (cortes parciales)",
-                important: "Daño importante (infraestructura dañada)",
-                detruit: "Completamente destruido",
-                inconnu: "Desconocido/no puede evaluarse"
+                aucun: "Sin daños", mineur: "Daños menores", modere: "Daños moderados",
+                important: "Daños importantes", detruit: "Destruido", inconnu: "Desconocido"
             },
             health: {
-                fonctionnel: "Completamente funcional",
-                partiel: "Parcialmente funcional",
-                perturbe: "Fuertemente perturbado",
-                HS: "No funciona en absoluto",
-                inconnu: "Desconocido"
+                fonctionnel: "Funcional", partiel: "Parcialmente funcional",
+                perturbe: "Perturbado", HS: "No funciona", inconnu: "Desconocido"
             },
             urgent_needs: {
-                food: "Asistencia alimentaria y agua potable",
-                financial: "Asistencia financiera o en efectivo",
-                health: "Acceso a atención médica y medicamentos esenciales",
-                shelter: "Alojamiento, reparación de vivienda o alojamiento temporal",
-                livelihood: "Restablecimiento de medios de vida o fuentes de ingresos",
-                wash: "Agua, saneamiento e higiene (sanitarios, instalaciones)",
-                services: "Restablecimiento de servicios e infraestructuras básicas",
-                psycho: "Servicios de protección y apoyo psicosocial",
-                authorities: "Apoyo de autoridades locales y organizaciones comunitarias",
-                other: "Otro, por favor especifique"
+                food: "Alimentos y agua", financial: "Ayuda financiera", health: "Salud",
+                shelter: "Refugio", livelihood: "Medios de vida", wash: "Agua y saneamiento",
+                services: "Servicios básicos", psycho: "Apoyo psicosocial",
+                authorities: "Autoridades", other: "Otro"
             }
         }
     },
@@ -225,65 +210,48 @@ export const translations = {
         title: "ALERTO",
         subtitle: "نظام الاستجابة السريعة",
         take_photo: "التقط صورة",
-        description_label: "وصف الضرر",
-        description_placeholder: "صِف الضرر...",
+        description_label: "وصف الأضرار",
+        description_placeholder: "صِف الأضرار...",
         damage_label: "مستوى الضرر",
         infrastructure_label: "نوع البنية التحتية",
+        infrastructure_name_label: "اسم المنشأة",
         crisis_label: "طبيعة الأزمة",
+        debris_label: "هل توجد حطام؟",
         location_label: "الموقع الدقيق",
-        submit_btn: "إرسال",
-        gps_active: "نظام تحديد المواقع نشط",
-        gps_searching: "البحث عن نظام تحديد المواقع...",
-        online_success: "تم إرسال التقرير عبر الإنترنت!",
-        offline_success: "غير متصل: تم حفظ التقرير محليًا.",
+        submit_btn: "إرسال التقرير",
+        gps_active: "GPS نشط",
+        gps_searching: "البحث عن GPS...",
+        online_success: "تم الإرسال بنجاح!",
+        offline_success: "تم الحفظ محلياً.",
         select_placeholder: "اختر...",
         electricity: "حالة الكهرباء",
         health: "الخدمات الصحية",
-        needs: "الاحتياجات الأكثر إلحاحا",
+        needs: "الاحتياجات العاجلة",
+        dashboard: {
+            title: "منصة ALERTO لبرنامج الأمم المتحدة الإنمائي",
+            subtitle: "الرصد التكتيكي وتقييم الأضرار",
+            stat_total: "إجمالي التقارير",
+            stat_critical: "أضرار كاملة",
+            stat_reliability: "موثوقية الذكاء الاصطناعي",
+            stat_flagged: "تم الإبلاغ عنها",
+            chart_sectors: "القطاعات المتأثرة",
+            feed_tactical: "التغذية التكتيكية",
+            feed_security: "المراجعة الأمنية",
+            tab_all: "الكل",
+            tab_flagged: "المبلغ عنها",
+            btn_csv: "CSV",
+            btn_geojson: "GeoJSON",
+            btn_logout: "تسجيل الخروج",
+            btn_approve: "وضع علامة كآمن",
+            loading: "تحليل التغذية التكتيكية..."
+        },
         options: {
             damage: { minime: "أدنى", partiel: "جزئي", complet: "كامل" },
             infra: ["سكني", "تجاري", "حكومي", "خدمات عامة", "النقل", "مجتمعي", "أماكن عامة", "آخر"],
-            crisis: [
-                "--- المخاطر الطبيعية ---",
-                "زلزال",
-                "فيضان",
-                "إعصار",
-                "تسونامي",
-                "حريق غابات",
-                "--- المخاطر التكنولوجية ---",
-                "انفجار",
-                "حادث كيميائي",
-                "--- الأزمات التي من صنع الإنسان ---",
-                "صراع",
-                "اضطرابات مدنية"
-            ],
-            elec: {
-                aucun: "لا أضرار ملاحظة",
-                mineur: "أضرار طفيفة (انقطاعات يمكن إصلاحها بسرعة)",
-                modere: "أضرار معتدلة (انقطاعات جزئية)",
-                important: "أضرار كبيرة (بنية تحتية مدمرة)",
-                detruit: "مدمر تماماً",
-                inconnu: "غير معروف/لا يمكن تقييمه"
-            },
-            health: {
-                fonctionnel: "يعمل بكامل الطاقة",
-                partiel: "يعمل بشكل جزئي",
-                perturbe: "مضطرب بشدة",
-                HS: "لا يعمل على الإطلاق",
-                inconnu: "غير معروف"
-            },
-            urgent_needs: {
-                food: "المساعدات الغذائية والمياه النظيفة",
-                financial: "المساعدات المالية أو النقدية",
-                health: "الوصول إلى الرعاية الصحية والأدوية الأساسية",
-                shelter: "المأوى أو إصلاح المنزل أو الإقامة المؤقتة",
-                livelihood: "استعادة سبل العيش أو مصادر الدخل",
-                wash: "المياه والصرف الصحي والنظافة",
-                services: "استعادة الخدمات والبنية التحتية الأساسية",
-                psycho: "خدمات الحماية والدعم النفسي",
-                authorities: "دعم السلطات المحلية والمنظمات المجتمعية",
-                other: "آخر، يرجى التحديد"
-            }
+            crisis: ["زلزال", "فيضان", "تسونامي", "إعصار", "حريق غابات", "انفجار", "حادث كيميائي", "صراع", "اضطرابات"],
+            elec: { aucun: "لا توجد أضرار", mineur: "أضرار طفيفة", modere: "أضرار متوسطة", important: "أضرار جسيمة", detruit: "مدمر تماما", inconnu: "غير معروف" },
+            health: { fonctionnel: "يعمل", partiel: "يعمل جزئيا", perturbe: "معطل بشدة", HS: "خارج الخدمة", inconnu: "غير معروف" },
+            urgent_needs: { food: "طعام وماء", financial: "مساعدات مالية", health: "رعاية صحية", shelter: "مأوى", livelihood: "سبل عيش", wash: "صرف صحي", services: "خدمات أساسية", psycho: "دعم نفسي", authorities: "دعم السلطات", other: "آخر" }
         }
     },
     zh: {
@@ -291,64 +259,47 @@ export const translations = {
         subtitle: "快速反应系统",
         take_photo: "拍照",
         description_label: "损害描述",
-        description_placeholder: "描述损害情况...",
+        description_placeholder: "请描述损害情况...",
         damage_label: "损害程度",
         infrastructure_label: "基础设施类型",
+        infrastructure_name_label: "基础设施名称",
         crisis_label: "危机性质",
+        debris_label: "现场是否有碎片？",
         location_label: "准确位置",
-        submit_btn: "发送",
+        submit_btn: "提交报告",
         gps_active: "GPS 已激活",
         gps_searching: "正在搜索 GPS...",
-        online_success: "报告已在线发送！",
+        online_success: "报告已在线提交！",
         offline_success: "离线：报告已在本地保存。",
-        select_placeholder: "选择...",
+        select_placeholder: "请选择...",
         electricity: "电力状况",
         health: "医疗服务",
         needs: "最紧急需求",
+        dashboard: {
+            title: "ALERTO 联合国开发计划署平台",
+            subtitle: "战术监测与损害评估",
+            stat_total: "报告总数",
+            stat_critical: "完全损坏",
+            stat_reliability: "AI 可信度",
+            stat_flagged: "已标记",
+            chart_sectors: "受影响领域",
+            feed_tactical: "战术流",
+            feed_security: "安全审查",
+            tab_all: "全部",
+            tab_flagged: "已标记",
+            btn_csv: "CSV",
+            btn_geojson: "GeoJSON",
+            btn_logout: "登出",
+            btn_approve: "标记为安全",
+            loading: "正在分析战术流..."
+        },
         options: {
             damage: { minime: "最小", partiel: "部分", complet: "完全" },
             infra: ["住宅", "商业", "政府", "公共服务", "交通", "社区", "公共空间", "其他"],
-            crisis: [
-                "--- 自然灾害 ---",
-                "地震",
-                "洪水",
-                "飓风 / 台风",
-                "海啸",
-                "森林火灾",
-                "--- 技术风险 ---",
-                "爆炸",
-                "化学事故",
-                "--- 人为危机 ---",
-                "冲突",
-                "内乱"
-            ],
-            elec: {
-                aucun: "未观察到损害",
-                mineur: "轻微损害(可快速修复)",
-                modere: "中等损害(部分停电)",
-                important: "重大损害(主要基础设施受损)",
-                detruit: "完全毁坏",
-                inconnu: "未知/无法评估"
-            },
-            health: {
-                fonctionnel: "完全正常",
-                partiel: "部分正常",
-                perturbe: "严重中断",
-                HS: "完全停止",
-                inconnu: "未知"
-            },
-            urgent_needs: {
-                food: "食物和饮用水援助",
-                financial: "财务或现金援助",
-                health: "获得医疗保健和基本药物",
-                shelter: "避难所、住房维修或临时住所",
-                livelihood: "恢复生计或收入来源",
-                wash: "水、卫生设施和卫生(厕所等)",
-                services: "恢复基本服务和基础设施",
-                psycho: "保护服务和心理社会支持",
-                authorities: "地方当局和社区组织的支持",
-                other: "其他，请说明"
-            }
+            crisis: ["地震", "洪水", "海啸", "飓风", "火灾", "爆炸", "化学品", "冲突", "骚乱"],
+            elec: { aucun: "无损", mineur: "轻微", modere: "中等", important: "严重", detruit: "完全毁坏", inconnu: "未知" },
+            health: { fonctionnel: "正常", partiel: "部分", perturbe: "严重中断", HS: "停止服务", inconnu: "未知" },
+            urgent_needs: { food: "食水援助", financial: "资金援助", health: "医疗服务", shelter: "避难所", livelihood: "生计恢复", wash: "卫生设施", services: "基本服务", psycho: "心理支持", authorities: "官方支持", other: "其他" }
         }
     },
     ru: {
@@ -359,9 +310,11 @@ export const translations = {
         description_placeholder: "Опишите повреждения...",
         damage_label: "Уровень повреждений",
         infrastructure_label: "Тип инфраструктуры",
+        infrastructure_name_label: "Название инфраструктуры",
         crisis_label: "Характер кризиса",
+        debris_label: "Есть ли обломки на объекте?",
         location_label: "Точное местоположение",
-        submit_btn: "ОТПРАВИТЬ",
+        submit_btn: "ОТПРАВИТЬ ОТЧЕТ",
         gps_active: "GPS Активен",
         gps_searching: "Поиск GPS...",
         online_success: "Отчет отправлен онлайн!",
@@ -370,50 +323,31 @@ export const translations = {
         electricity: "Статус электроснабжения",
         health: "Медицинские услуги",
         needs: "Самые насущные потребности",
+        dashboard: {
+            title: "Платформа ALERTO ПРООН",
+            subtitle: "Тактический мониторинг и оценка ущерба",
+            stat_total: "ВСЕГО ОТЧЕТОВ",
+            stat_critical: "ПОЛНЫЕ ПОВРЕЖДЕНИЯ",
+            stat_reliability: "НАДЕЖНОСТЬ ИИ",
+            stat_flagged: "ОТМЕЧЕНО",
+            chart_sectors: "Затронутые сектора",
+            feed_tactical: "Тактический поток",
+            feed_security: "Проверка безопасности",
+            tab_all: "Все",
+            tab_flagged: "Отмечено",
+            btn_csv: "CSV",
+            btn_geojson: "GeoJSON",
+            btn_logout: "Выход",
+            btn_approve: "Отметить как безопасное",
+            loading: "Анализ тактических потоков..."
+        },
         options: {
             damage: { minime: "МИНИМАЛЬНЫЙ", partiel: "ЧАСТИЧНЫЙ", complet: "ПОЛНЫЙ" },
             infra: ["Жилой", "Коммерческий", "Государственный", "Госуслуги", "Транспорт", "Общественный", "Публичные места", "Другое"],
-            crisis: [
-                "--- Природные риски ---",
-                "Землетрясение",
-                "Наводнение",
-                "Ураган / Циклон",
-                "Цунами",
-                "Лесной пожар",
-                "--- Технологические риски ---",
-                "Взрыв",
-                "Химический инцидент",
-                "--- Кризисы антропогенного характера ---",
-                "Конфликт",
-                "Гражданские беспорядки"
-            ],
-            elec: {
-                aucun: "Нет наблюдаемого ущерба",
-                mineur: "Незначительный ущерб (быстро поправимые перебои)",
-                modere: "Умеренный ущерб (частичные отключения)",
-                important: "Серьезный ущерб (поврежденная инфраструктура)",
-                detruit: "Полностью разрушено",
-                inconnu: "Неизвестно/невозможно оценить"
-            },
-            health: {
-                fonctionnel: "Полностью работает",
-                partiel: "Частично работает",
-                perturbe: "Сильно нарушено",
-                HS: "Не работает вообще",
-                inconnu: "Неизвестно"
-            },
-            urgent_needs: {
-                food: "Продовольственная и питьевая вода помощь",
-                financial: "Финансовая или денежная помощь",
-                health: "Доступ к медицинской помощи и основным лекарствам",
-                shelter: "Жилье, ремонт дома или временное жилье",
-                livelihood: "Восстановление средств к существованию",
-                wash: "Вода, санитария и гигиена",
-                services: "Восстановление базовых услуг и инфраструктуры",
-                psycho: "Услуги защиты и психосоциальная поддержка",
-                authorities: "Поддержка местных органов власти и общественных организаций",
-                other: "Другое, пожалуйста укажите"
-            }
+            crisis: ["Землетрясение", "Наводнение", "Цунами", "Ураган", "Пожар", "Взрыв", "Химическая авария", "Конфликт", "Беспорядки"],
+            elec: { aucun: "Нет повреждений", mineur: "Незначительные", modere: "Умеренные", important: "Серьезные", detruit: "Разрушено", inconnu: "Неизвестно" },
+            health: { fonctionnel: "Работает", partiel: "Частично", perturbe: "Нарушено", HS: "Не работает", inconnu: "Неизвестно" },
+            urgent_needs: { food: "Еда и вода", financial: "Денежная помощь", health: "Медицина", shelter: "Жилье", livelihood: "Средства к жизни", wash: "Санитария", services: "Базовые услуги", psycho: "Психологическая поддержка", authorities: "Поддержка властей", other: "Другое" }
         }
     }
 };
@@ -429,7 +363,6 @@ export const LanguageProvider = ({ children }) => {
 
     const t = translations[lang] || translations['fr'];
 
-    // On utilise React.createElement pour eviter le JSX dans un fichier .js
     return React.createElement(LanguageContext.Provider, { value: { t, lang, setLang } }, children);
 };
 
