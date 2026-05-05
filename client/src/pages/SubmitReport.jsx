@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './SubmitReport.css';
 import { 
-  MapPin, Camera, X, Check, Info, Phone, Mail, Loader2, 
+  MapPin, Camera, Video, X, Check, Info, Phone, Mail, Loader2, 
   ChevronRight, AlertTriangle, Zap, HeartPulse, Trash,
   Droplets, Flame, Car, Home, ShieldAlert, Bomb, PlusCircle,
   Construction, Building2, Store, Landmark, Factory, Bus, Users, Palmtree
@@ -38,8 +38,9 @@ const SubmitReport = ({ lang = 'fr' }) => {
     const [formStep, setFormStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [location, setLocation] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
-    const [selectedImageFile, setSelectedImageFile] = useState(null);
+    const [mediaPreview, setMediaPreview] = useState(null);
+    const [mediaType, setMediaType] = useState(null); // 'image' or 'video'
+    const [selectedFile, setSelectedFile] = useState(null);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [showInstallPrompt, setShowInstallPrompt] = useState(false);
     const deferredPrompt = useRef(null);
@@ -97,10 +98,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         if (!deferredPrompt.current) return;
         deferredPrompt.current.prompt();
         const { outcome } = await deferredPrompt.current.userChoice;
-        if (outcome === 'accepted') {
-            console.log('User accepted install');
-            setShowInstallPrompt(false);
-        }
+        if (outcome === 'accepted') setShowInstallPrompt(false);
         deferredPrompt.current = null;
     };
 
@@ -123,12 +121,14 @@ const SubmitReport = ({ lang = 'fr' }) => {
         }
     };
 
-    const handleImageCapture = (e) => {
+    const handleMediaCapture = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setSelectedImageFile(file);
+            setSelectedFile(file);
+            const type = file.type.startsWith('video') ? 'video' : 'image';
+            setMediaType(type);
             const reader = new FileReader();
-            reader.onloadend = () => setImagePreview(reader.result);
+            reader.onloadend = () => setMediaPreview(reader.result);
             reader.readAsDataURL(file);
         }
     };
@@ -138,18 +138,19 @@ const SubmitReport = ({ lang = 'fr' }) => {
         setLoading(true);
 
         try {
-            let imageUrl = "";
-            if (selectedImageFile) {
+            let mediaUrl = "";
+            if (selectedFile) {
                 const uploadData = new FormData();
-                uploadData.append('file', selectedImageFile);
+                uploadData.append('file', selectedFile);
                 const res = await axios.post(`${API_BASE}/reports/upload`, uploadData);
-                imageUrl = res.data.url;
+                mediaUrl = res.data.url;
             }
 
             const payload = {
                 ...formData,
-                image_url: imageUrl,
-                damage_level: formData.damage_level === 1 ? 'minime' : formData.damage_level === 2 ? 'partiel' : 'complet',
+                image_url: mediaUrl,
+                media_type: mediaType,
+                damage_level: formData.damage_level,
                 location: {
                     type: "Point",
                     coordinates: location ? [location.lng, location.lat] : [0, 0]
@@ -170,8 +171,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             }
             resetForm();
         } catch (error) {
-            console.error("Submission error", error);
-            alert("Erreur lors de l'envoi.");
+            alert("Erreur réseau. Signalement mis en attente.");
         } finally {
             setLoading(false);
         }
@@ -194,8 +194,9 @@ const SubmitReport = ({ lang = 'fr' }) => {
             health_services_status: 50,
             urgent_needs: []
         });
-        setImagePreview(null);
-        setSelectedImageFile(null);
+        setMediaPreview(null);
+        setSelectedFile(null);
+        setMediaType(null);
         setFormStep(1);
     };
 
@@ -203,7 +204,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         <div className="report-container">
             {showInstallPrompt && (
                 <div className="install-banner">
-                    <span>Installer ALERTO pour un accès hors-ligne rapide</span>
+                    <span>Installer ALERTO (Accès Direct & Offline)</span>
                     <button onClick={handleInstallClick}>Installer</button>
                     <X size={16} onClick={() => setShowInstallPrompt(false)} />
                 </div>
@@ -220,7 +221,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     ) : (
                         <div className="map-placeholder">
                            <Loader2 className="spinner" />
-                           <span>{t.gps_searching}</span>
+                           <span>GPS ACTIF...</span>
                         </div>
                     )}
                     <div className="address-overlay">
@@ -258,23 +259,30 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                         value={formData.infrastructure_type}
                                         onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}
                                     >
-                                        {t.options && t.options.infra ? t.options.infra.map(opt => (
+                                        {t.options?.infra?.map(opt => (
                                             <option key={opt} value={opt}>{opt}</option>
-                                        )) : <option>Chargement...</option>}
+                                        ))}
                                     </select>
                                 </div>
 
-                                <label className="input-label">{t.take_photo}</label>
-                                <div className="photo-box" onClick={() => document.getElementById('photo-input').click()}>
-                                    {imagePreview ? (
-                                        <img src={imagePreview} alt="Preview" />
+                                <label className="input-label">Capture Temps Réel (Photo/Vidéo)</label>
+                                <div className="photo-box" onClick={() => document.getElementById('media-input').click()}>
+                                    {mediaPreview ? (
+                                        mediaType === 'video' ? (
+                                            <video src={mediaPreview} className="preview-media" controls />
+                                        ) : (
+                                            <img src={mediaPreview} alt="Preview" className="preview-media" />
+                                        )
                                     ) : (
-                                        <>
-                                            <Camera size={32} color="#94a3b8" />
-                                            <span style={{fontSize: '0.8rem', color: '#94a3b8'}}>{t.take_photo}</span>
-                                        </>
+                                        <div className="capture-placeholder">
+                                            <div className="icon-row">
+                                                <Camera size={32} />
+                                                <Video size={32} />
+                                            </div>
+                                            <span>Cliquer pour capturer en direct</span>
+                                        </div>
                                     )}
-                                    <input id="photo-input" type="file" accept="image/*" capture="environment" hidden onChange={handleImageCapture} />
+                                    <input id="media-input" type="file" accept="image/*,video/*" capture="environment" hidden onChange={handleMediaCapture} />
                                 </div>
 
                                 <div style={{marginTop: '20px'}}>
@@ -291,17 +299,17 @@ const SubmitReport = ({ lang = 'fr' }) => {
                             </>
                         ) : (
                             <>
-                                <h2 className="form-section-title">{t.needs}</h2>
+                                <h2 className="form-section-title">Analyse Tactique (PNUD)</h2>
                                 <div className="slider-group">
                                     <label className="input-label"><Zap size={14}/> {t.electricity}</label>
                                     <input type="range" min="0" max="100" value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: parseInt(e.target.value)})} />
-                                    <div className="slider-labels"><span>0%</span><span>100%</span></div>
+                                    <div className="slider-labels"><span>0% (Coupé)</span><span>100% (Stable)</span></div>
                                 </div>
 
                                 <div className="slider-group">
                                     <label className="input-label"><HeartPulse size={14}/> {t.health}</label>
                                     <input type="range" min="0" max="100" value={formData.health_services_status} onChange={(e) => setFormData({...formData, health_services_status: parseInt(e.target.value)})} />
-                                    <div className="slider-labels"><span>0%</span><span>100%</span></div>
+                                    <div className="slider-labels"><span>Indisponible</span><span>Opérationnel</span></div>
                                 </div>
 
                                 <div className="input-group">
@@ -319,11 +327,11 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                 <div className="contact-card-modern">
                                     <div className="input-with-icon">
                                         <Phone size={14} className="input-icon" />
-                                        <input type="tel" className="input-modern-clean" placeholder="Contact Téléphone" value={formData.contact_phone} onChange={(e) => setFormData({...formData, contact_phone: e.target.value})} />
+                                        <input type="tel" className="input-modern-clean" placeholder="Numéro Urgence" value={formData.contact_phone} onChange={(e) => setFormData({...formData, contact_phone: e.target.value})} />
                                     </div>
                                     <label className="checkbox-label">
                                         <input type="checkbox" checked={formData.allow_contact} onChange={(e) => setFormData({...formData, allow_contact: e.target.checked})} />
-                                        Autoriser le contact des secours
+                                        Autoriser le contact des secours (ONU/PNUD)
                                     </label>
                                 </div>
                             </>
@@ -332,11 +340,11 @@ const SubmitReport = ({ lang = 'fr' }) => {
                         <div className="btn-row">
                             {formStep === 2 && (
                                 <button type="button" className="btn-back" onClick={() => setFormStep(1)}>
-                                    {lang === 'fr' ? 'Précédent' : 'Back'}
+                                    Retour
                                 </button>
                             )}
                             <button type="submit" className="btn-primary" disabled={loading}>
-                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? (lang === 'fr' ? 'Suivant' : 'Next') : t.submit_btn)}
+                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? 'Suivant' : t.submit_btn)}
                             </button>
                         </div>
                     </form>

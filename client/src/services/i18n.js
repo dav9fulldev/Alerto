@@ -177,7 +177,7 @@ export const translations = {
         options: {
             damage: { minime: "MÍNIMO", partiel: "PARCIAL", complet: "COMPLETO" },
             infra: ["Residencial", "Comercial", "Gubernamental", "Servicios públicos", "Transporte", "Comunitario", "Espacios públicos", "Otro"],
-            crisis: ["Terremoto", "Inundación", "Huracán", "Tsunami", "Incendio forestal", "Conflicto", "Explosión"],
+            crisis: ["Séisme", "Inondation", "Cyclone", "Tsunami", "Incendie de forêt", "Explosion", "Incident chimique", "Conflit", "Troubles civils", "Autre"],
             elec: {
                 aucun: "Ningún daño observado",
                 mineur: "Daño menor (interrupciones reparables rápidamente)",
