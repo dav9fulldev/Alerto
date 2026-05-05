@@ -250,6 +250,25 @@ async def delete_report(report_id: str, current_user: User = Depends(get_current
             raise
         raise HTTPException(status_code=400, detail="Invalid report ID format")
 
+@router.patch("/{report_id}/moderate")
+async def moderate_report(report_id: str, action: dict, current_user: User = Depends(get_current_user)):
+    """Action de modération : Approuver ou marquer comme sûr (Sécurisé)"""
+    try:
+        if reports_collection is None:
+            raise HTTPException(status_code=500, detail="Database connection failed")
+        
+        status = action.get("is_flagged", False)
+        result = reports_collection.update_one(
+            {"_id": ObjectId(report_id)},
+            {"$set": {"is_flagged": status, "moderated_by": current_user.username}}
+        )
+        
+        if result.matched_count:
+            return {"message": "Report status updated", "is_flagged": status}
+        raise HTTPException(status_code=404, detail="Report not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.post("/sync-offline")
 async def sync_reports(payload: dict):
     """Synchronise les rapports hors ligne (Public)"""

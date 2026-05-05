@@ -67,6 +67,22 @@ const Dashboard = ({ lang = 'fr' }) => {
         } catch (err) { alert(err.message); }
     };
 
+    const handleModerate = async (id, isFlagged) => {
+        const token = localStorage.getItem('alerto_token');
+        try {
+            await axios.patch(`${API_BASE}/reports/${id}/moderate`, 
+                { is_flagged: isFlagged },
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            setReports(reports.map(r => r._id === id ? { ...r, is_flagged: isFlagged } : r));
+            // Update stats too
+            setStats(prev => ({
+                ...prev,
+                nsfw_flagged: isFlagged ? prev.nsfw_flagged + 1 : prev.nsfw_flagged - 1
+            }));
+        } catch (err) { alert(err.message); }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             const token = localStorage.getItem('alerto_token');
@@ -177,7 +193,18 @@ const Dashboard = ({ lang = 'fr' }) => {
                                             <span className="feed-type-tag">{r.crisis_type}</span>
                                             <span className="feed-time-tag">{new Date(r.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                                         </div>
-                                        <button className="delete-btn" onClick={() => handleDeleteReport(r._id)}><Trash2 size={14}/></button>
+                                        <div className="feed-actions">
+                                            {r.is_flagged && (
+                                                <button 
+                                                    className="mod-btn approve" 
+                                                    title="Marquer comme sûr"
+                                                    onClick={() => handleModerate(r._id, false)}
+                                                >
+                                                    <CheckCircle2 size={14} />
+                                                </button>
+                                            )}
+                                            <button className="delete-btn" onClick={() => handleDeleteReport(r._id)}><Trash2 size={14}/></button>
+                                        </div>
                                     </div>
 
                                     <h4 className="infra-title">{r.infrastructure_name || normalizeInfra(r.infrastructure_type)}</h4>

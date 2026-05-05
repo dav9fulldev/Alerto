@@ -103,7 +103,8 @@ function AppContent() {
              <HelpCenter lang={lang} />
              <div style={{padding: '0 20px 40px'}}>
                <button className="admin-access-btn" onClick={() => { setPath('/pnud'); window.history.pushState({}, '', '/pnud'); }}>
-                 Accès Admin / PNUD
+                 <ShieldCheck size={18} style={{marginRight: '10px'}} />
+                 Accès Admin / PNUD (Sécurisé)
                </button>
              </div>
           </div>

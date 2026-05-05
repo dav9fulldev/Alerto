@@ -317,13 +317,13 @@ async def validate_image_safety(image_path: str) -> Dict:
     if result["is_flagged"]:
         action = "reject"
         message = f"Image flagged as NSFW (score: {result['nsfw_score']:.2f})"
-        
-        # Optionally blur before storage
         if BLUR_NSFW:
             blur_image(image_path)
     elif result["is_nsfw"]:
         action = "flag"
         message = f"Image marked for review (score: {result['nsfw_score']:.2f})"
+        if BLUR_NSFW:
+            blur_image(image_path)
     else:
         action = "accept"
         message = "Image passed safety check"
