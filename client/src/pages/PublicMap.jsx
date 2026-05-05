@@ -1,30 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl } from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
 import { API_BASE } from '../services/api';
-import { AlertTriangle, MapPin, Navigation, Droplets, Flame, Car, Home, ShieldAlert, Bomb, PlusCircle } from 'lucide-react';
+import { 
+  AlertTriangle, MapPin, Navigation, Droplets, Flame, Car, Home, 
+  ShieldAlert, Bomb, PlusCircle, Layers, Mountain, Wind, Trees
+} from 'lucide-react';
 import { translations } from '../services/i18n';
 import './PublicMap.css';
 import { renderToStaticMarkup } from 'react-dom/server';
+
+const MapUpdater = () => {
+    const map = useMap();
+    useEffect(() => {
+        setTimeout(() => map.invalidateSize(), 500);
+    }, [map]);
+    return null;
+};
 
 const PublicMap = ({ lang = 'fr' }) => {
     const t = translations[lang] || translations.fr;
     const [reports, setReports] = useState([]);
     const [center, setCenter] = useState([5.3484, -4.0305]); // Abidjan default
+    const [isSatellite, setIsSatellite] = useState(false);
 
     const icons = {
+        'Tremblement de terre': <Mountain size={20} color="white" />,
         'Inondation': <Droplets size={20} color="white" />,
-        'Incendie': <Flame size={20} color="white" />,
-        'Accident': <Car size={20} color="white" />,
-        'Séisme': <Home size={20} color="white" />,
-        'Conflit': <ShieldAlert size={20} color="white" />,
+        'Ouragan / Cyclone': <Wind size={20} color="white" />,
+        'Feu de forêt': <Trees size={20} color="white" />,
         'Explosion': <Bomb size={20} color="white" />,
-        'Autre': <PlusCircle size={20} color="white" />,
+        'Incident chimique': <ShieldAlert size={20} color="white" />,
+        'Conflit': <ShieldAlert size={20} color="white" />,
+        'Troubles civils': <PlusCircle size={20} color="white" />,
+        'Earthquake': <Mountain size={20} color="white" />,
         'Flood': <Droplets size={20} color="white" />,
-        'Fire': <Flame size={20} color="white" />,
-        'Earthquake': <Home size={20} color="white" />,
-        'Conflict': <ShieldAlert size={20} color="white" />
+        'Hurricane / Cyclone': <Wind size={20} color="white" />,
+        'Wildfire': <Trees size={20} color="white" />
     };
 
     const getDamageColor = (level) => {
@@ -38,24 +51,24 @@ const PublicMap = ({ lang = 'fr' }) => {
         const iconMarkup = renderToStaticMarkup(
             <div style={{ 
                 backgroundColor: color, 
-                width: '32px', 
-                height: '32px', 
+                width: '34px', 
+                height: '34px', 
                 borderRadius: '50%', 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                 border: '2px solid white'
             }}>
-                {icons[type] || <AlertTriangle size={16} color="white" />}
+                {icons[type] || <AlertTriangle size={18} color="white" />}
             </div>
         );
         
         return L.divIcon({
             className: 'custom-leaflet-icon',
             html: iconMarkup,
-            iconSize: [32, 32],
-            iconAnchor: [16, 32]
+            iconSize: [34, 34],
+            iconAnchor: [17, 34]
         });
     };
 
@@ -64,7 +77,8 @@ const PublicMap = ({ lang = 'fr' }) => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => setCenter([pos.coords.latitude, pos.coords.longitude]),
-                (err) => console.error(err)
+                null,
+                { enableHighAccuracy: true }
             );
         }
     }, []);
@@ -83,12 +97,32 @@ const PublicMap = ({ lang = 'fr' }) => {
             <header className="map-header-overlay">
                 <div className="map-search-mock">
                     <Navigation size={18} color="#0ea5e9" />
-                    <span>{lang === 'fr' ? 'Explorer les alertes...' : 'Explore alerts...'}</span>
+                    <span className="search-text">{t.title} - Explorer</span>
+                </div>
+                <div className="map-lang-badge">
+                    {lang.toUpperCase()}
                 </div>
             </header>
 
+            <button className={`sat-toggle-btn ${isSatellite ? 'active' : ''}`} onClick={() => setIsSatellite(!isSatellite)}>
+                <Layers size={20} />
+                <span>{isSatellite ? 'Standard' : 'Satellite'}</span>
+            </button>
+
             <MapContainer center={center} zoom={13} zoomControl={false} style={{ height: '100vh', width: '100%' }}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <MapUpdater />
+                
+                {isSatellite ? (
+                    <TileLayer 
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" 
+                        attribution='&copy; Esri'
+                    />
+                ) : (
+                    <TileLayer 
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
+                        attribution='&copy; OpenStreetMap'
+                    />
+                )}
                 
                 {reports.map((report) => (
                     <Marker 
@@ -98,13 +132,13 @@ const PublicMap = ({ lang = 'fr' }) => {
                     >
                         <Popup className="modern-popup">
                             <div className="popup-card">
-                                {report.image_url && <img src={report.image_url.startsWith('http') ? report.image_url : `${API_BASE}${report.image_url}`} alt="Evidence" />}
+                                {report.image_url && <img src={report.image_url.startsWith('http') ? report.image_url : `${API_BASE}${report.image_url}`} alt="Sinistre" />}
                                 <div className="popup-info">
                                     <div className="popup-badge" style={{ background: getDamageColor(report.damage_level) }}>
                                         {t.options?.damage?.[report.damage_level] || report.damage_level?.toUpperCase()}
                                     </div>
                                     <h3>{report.crisis_type}</h3>
-                                    <p className="popup-loc"><MapPin size={12} /> {report.text_location}</p>
+                                    <p className="popup-loc"><MapPin size={12} /> {report.text_location || 'Lieu non spécifié'}</p>
                                     <p className="popup-desc">{report.description}</p>
                                 </div>
                             </div>
