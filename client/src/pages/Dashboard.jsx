@@ -16,6 +16,7 @@ const Dashboard = ({ lang = 'fr' }) => {
         infrastructure_distribution: {}
     });
     const [viewMode, setViewMode] = useState('all'); // 'all' or 'flagged'
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedMedia, setSelectedMedia] = useState(null);
 
