@@ -13,42 +13,37 @@
     border: 1px solid #e2e8f0;
     max-width: 500px;
     margin: 0 auto;
-    position: relative; /* Ensure card is the reference */
+    position: relative;
 }
 
 .mini-map-container {
-    height: 180px;
+    height: 160px;
     width: 100%;
     position: relative;
     background: #f1f5f9;
-    overflow: hidden; /* Prevent map leaking */
 }
 
-.map-placeholder {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    color: #64748b;
-    font-size: 0.75rem;
-    font-weight: 700;
+.gps-status-text {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.address-overlay {
+.address-overlay-v2 {
     position: absolute;
     bottom: 10px;
     left: 10px;
     right: 10px;
     background: white;
-    padding: 8px 12px;
-    border-radius: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
 .address-text {
@@ -60,22 +55,27 @@
     text-overflow: ellipsis;
 }
 
-.form-body {
-    padding: 20px;
-}
-
-.form-section-title {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 15px;
-}
+.form-body { padding: 20px; }
+.form-section-title { font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 15px; }
 
 .crisis-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+}
+
+.grid-category-header {
+    grid-column: span 3;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    padding-left: 5px;
+    border-left: 3px solid #e2e8f0;
 }
 
 .crisis-item {
@@ -88,23 +88,20 @@
     border: 2px solid transparent;
     border-radius: 16px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.crisis-item.active {
-    background: #e0f2fe;
-    border-color: #0ea5e9;
-}
+.crisis-item.active { background: #e0f2fe; border-color: #0ea5e9; transform: translateY(-2px); }
 
 .crisis-icon-bg {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     background: white;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .crisis-item span {
@@ -114,31 +111,32 @@
     text-align: center;
 }
 
-.input-group { margin-bottom: 15px; }
-.input-label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 8px; }
-.input-modern { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 0.85rem; outline: none; }
+.input-group { margin-bottom: 18px; }
+.input-label { display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase; }
+.input-modern { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 0.85rem; outline: none; }
 
 .photo-box {
     width: 100%;
     height: 140px;
     border: 2px dashed #cbd5e1;
-    border-radius: 16px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
     background: #f8fafc;
+    overflow: hidden;
 }
 
 .preview-media { width: 100%; height: 100%; object-fit: cover; }
 
 .btn-primary {
     width: 100%;
-    padding: 14px;
+    padding: 16px;
     background: linear-gradient(135deg, #0ea5e9, #6366f1);
     color: white;
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     font-weight: 800;
-    box-shadow: 0 5px 15px rgba(14, 165, 233, 0.2);
+    font-size: 0.95rem;
+    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.25);
 }
