@@ -13,7 +13,8 @@ import {
   Clock, 
   HelpCircle, 
   Globe,
-  RefreshCw
+  RefreshCw,
+  ShieldCheck
 } from 'lucide-react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { v4 as uuidv4 } from 'uuid';
