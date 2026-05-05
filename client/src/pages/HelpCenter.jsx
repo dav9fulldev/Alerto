@@ -38,23 +38,25 @@ const HelpCenter = () => {
             </header>
 
             <div className="help-content">
-                {sections.map((section, idx) => (
-                    <div key={idx} className="help-section">
-                        <div className="section-title">
-                            {section.icon}
-                            <span>{section.title}</span>
+                <div className="help-grid">
+                    {sections.map((section, idx) => (
+                        <div key={idx} className="help-section">
+                            <div className="section-title">
+                                {section.icon}
+                                <span>{section.title}</span>
+                            </div>
+                            <div className="section-list modern-card">
+                                {section.items.map((item, i) => (
+                                    <div key={i} className="help-item">
+                                        <div className="help-item-icon">?</div>
+                                        <span className="help-item-text">{item}</span>
+                                        <ChevronRight size={16} color="#cbd5e1" />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                        <div className="section-list modern-card">
-                            {section.items.map((item, i) => (
-                                <div key={i} className="help-item">
-                                    <div className="help-item-icon">?</div>
-                                    <span className="help-item-text">{item}</span>
-                                    <ChevronRight size={16} color="#cbd5e1" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
 
                 <div className="contact-support-card">
                     <div className="support-icon-bg">

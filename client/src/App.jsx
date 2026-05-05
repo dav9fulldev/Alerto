@@ -91,53 +91,89 @@ function AppContent() {
         </div>
       )}
       
-      {/* Global Language Switcher (Floating) */}
-      <div className="global-lang-overlay">
-        <select value={lang} onChange={(e) => setLang(e.target.value)} className="minimal-select">
-          <option value="fr">FR</option>
-          <option value="en">EN</option>
-          <option value="es">ES</option>
-          <option value="ar">AR</option>
-          <option value="zh">ZH</option>
-          <option value="ru">RU</option>
-        </select>
-      </div>
-      
-      <main className="main-content">
-        {activeTab === 'map' && <PublicMap lang={lang} />}
-        {activeTab === 'report' && <SubmitReport lang={lang} />}
-        {activeTab === 'history' && <MyReports lang={lang} />}
-        {activeTab === 'help' && (
-          <div className="help-page-wrapper">
-             <HelpCenter lang={lang} />
-             <div style={{padding: '0 20px 40px'}}>
-               <button className="admin-access-btn" onClick={() => { setPath('/pnud'); window.history.pushState({}, '', '/pnud'); }}>
-                 <ShieldCheck size={18} style={{marginRight: '10px'}} />
-                 Accès Admin / PNUD (Sécurisé)
-               </button>
-             </div>
-          </div>
-        )}
-      </main>
+      {/* Sidebar for Desktop (>= 768px) */}
+      <aside className="desktop-sidebar">
+        <div className="sidebar-logo">
+          <ShieldCheck size={32} color="#0ea5e9" />
+          <span>ALERTO</span>
+        </div>
+        <nav className="sidebar-nav">
+          <button className={`side-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => setActiveTab('map')}>
+            <MapIcon size={20} /> <span>{t.nav.map}</span>
+          </button>
+          <button className={`side-item ${activeTab === 'report' ? 'active' : ''}`} onClick={() => setActiveTab('report')}>
+            <AlertCircle size={20} /> <span>{t.nav.report}</span>
+          </button>
+          <button className={`side-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
+            <Clock size={20} /> <span>{t.nav.history}</span>
+          </button>
+          <button className={`side-item ${activeTab === 'help' ? 'active' : ''}`} onClick={() => setActiveTab('help')}>
+            <HelpCircle size={20} /> <span>{t.nav.help}</span>
+          </button>
+        </nav>
+        
+        <div className="sidebar-footer">
+          <select value={lang} onChange={(e) => setLang(e.target.value)} className="side-select">
+            <option value="fr">Français (FR)</option>
+            <option value="en">English (EN)</option>
+            <option value="es">Español (ES)</option>
+            <option value="ar">العربية (AR)</option>
+            <option value="zh">中文 (ZH)</option>
+            <option value="ru">Русский (RU)</option>
+          </select>
+        </div>
+      </aside>
 
-      <nav className="bottom-nav">
-        <button className={`nav-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => setActiveTab('map')}>
-          <MapIcon className="nav-icon" />
-          <span>{t.nav.map}</span>
-        </button>
-        <button className={`nav-item ${activeTab === 'report' ? 'active' : ''}`} onClick={() => setActiveTab('report')}>
-          <AlertCircle className="nav-icon" />
-          <span>{t.nav.report}</span>
-        </button>
-        <button className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
-          <Clock className="nav-icon" />
-          <span>{t.nav.history}</span>
-        </button>
-        <button className={`nav-item ${activeTab === 'help' ? 'active' : ''}`} onClick={() => setActiveTab('help')}>
-          <HelpCircle className="nav-icon" />
-          <span>{t.nav.help}</span>
-        </button>
-      </nav>
+      <div className="layout-main">
+        {/* Global Language Switcher (Mobile Only) */}
+        <div className="mobile-lang-overlay">
+          <select value={lang} onChange={(e) => setLang(e.target.value)} className="minimal-select">
+            <option value="fr">FR</option>
+            <option value="en">EN</option>
+            <option value="es">ES</option>
+            <option value="ar">AR</option>
+            <option value="zh">ZH</option>
+            <option value="ru">RU</option>
+          </select>
+        </div>
+        
+        <main className="main-content">
+          {activeTab === 'map' && <PublicMap lang={lang} />}
+          {activeTab === 'report' && <SubmitReport lang={lang} />}
+          {activeTab === 'history' && <MyReports lang={lang} />}
+          {activeTab === 'help' && (
+            <div className="help-page-wrapper">
+               <HelpCenter lang={lang} />
+               <div style={{padding: '0 20px 40px'}}>
+                 <button className="admin-access-btn" onClick={() => { setPath('/pnud'); window.history.pushState({}, '', '/pnud'); }}>
+                   <ShieldCheck size={18} style={{marginRight: '10px'}} />
+                   Accès Admin / PNUD (Sécurisé)
+                 </button>
+               </div>
+            </div>
+          )}
+        </main>
+
+        {/* Bottom Nav (Mobile Only) */}
+        <nav className="bottom-nav">
+          <button className={`nav-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => setActiveTab('map')}>
+            <MapIcon className="nav-icon" />
+            <span>{t.nav.map}</span>
+          </button>
+          <button className={`nav-item ${activeTab === 'report' ? 'active' : ''}`} onClick={() => setActiveTab('report')}>
+            <AlertCircle className="nav-icon" />
+            <span>{t.nav.report}</span>
+          </button>
+          <button className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
+            <Clock className="nav-icon" />
+            <span>{t.nav.history}</span>
+          </button>
+          <button className={`nav-item ${activeTab === 'help' ? 'active' : ''}`} onClick={() => setActiveTab('help')}>
+            <HelpCircle className="nav-icon" />
+            <span>{t.nav.help}</span>
+          </button>
+        </nav>
+      </div>
 
       <style>{`
         .global-lang-overlay {
