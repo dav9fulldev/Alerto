@@ -28,22 +28,19 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 const API_URL = `${API_BASE}/reports/`;
 
-// Component to handle map clicks and centering
 const MapController = ({ location, setLocation, setAddress }) => {
   const map = useMap();
   
-  // Update view when location changes (auto GPS)
   useEffect(() => {
     if (location) map.setView([location.lat, location.lng], 15);
   }, [location, map]);
 
-  // Handle map clicks for manual selection
   useMapEvents({
     click: async (e) => {
       const { lat, lng } = e.latlng;
       setLocation({ lat, lng });
       try {
-        setAddress("Localisation manuelle...");
+        setAddress("Localisation...");
         const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
         if (res.data && res.data.display_name) {
           setAddress(res.data.display_name);
@@ -66,7 +63,6 @@ const SubmitReport = ({ lang = 'fr' }) => {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [showInstallPrompt, setShowInstallPrompt] = useState(false);
     const deferredPrompt = useRef(null);
-    const [gpsError, setGpsError] = useState(null);
 
     const [formData, setFormData] = useState({
         description: '',
@@ -76,7 +72,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         crisis_type: '',
         crisis_type_other: '',
         debris_present: 'no',
-        text_location: t.gps_searching || 'Recherche GPS...',
+        text_location: '',
         contact_phone: '',
         contact_email: '',
         allow_contact: true,
@@ -86,30 +82,19 @@ const SubmitReport = ({ lang = 'fr' }) => {
     });
 
     const icons = {
-        // FR
+        // Multi-language mapping
         'Séisme': <Home size={22} />, 'Inondation': <Droplets size={22} />, 'Cyclone': <Users size={22} />, 'Tsunami': <Droplets size={22} />,
         'Incendie de forêt': <Flame size={22} />, 'Explosion': <Bomb size={22} />, 'Incident chimique': <ShieldAlert size={22} />,
         'Conflit': <ShieldAlert size={22} />, 'Troubles civils': <Users size={22} />, 'Autre': <PlusCircle size={22} />,
-        // EN
         'Earthquake': <Home size={22} />, 'Flood': <Droplets size={22} />, 'Hurricane / Cyclone': <Users size={22} />,
         'Wildfire': <Flame size={22} />, 'Chemical Incident': <ShieldAlert size={22} />, 'Conflict': <ShieldAlert size={22} />,
         'Civil Unrest': <Users size={22} />, 'Other': <PlusCircle size={22} />,
-        // ES
         'Terremoto': <Home size={22} />, 'Inundación': <Droplets size={22} />, 'Huracán / Ciclón': <Users size={22} />,
         'Incendio forestal': <Flame size={22} />, 'Explosión': <Bomb size={22} />, 'Incidente químico': <ShieldAlert size={22} />,
         'Conflicto': <ShieldAlert size={22} />, 'Disturbios civiles': <Users size={22} />, 'Otro': <PlusCircle size={22} />,
-        // AR
-        'زلزال': <Home size={22} />, 'فيضان': <Droplets size={22} />, 'إعصار': <Users size={22} />,
-        'حريق غابات': <Flame size={22} />, 'انفجار': <Bomb size={22} />, 'حادث كيميائي': <ShieldAlert size={22} />,
-        'صراع': <ShieldAlert size={22} />, 'اضطرابات مدنية': <Users size={22} />,
-        // ZH
-        '地震': <Home size={22} />, '洪水': <Droplets size={22} />, '飓风 / 台风': <Users size={22} />,
-        '海啸': <Droplets size={22} />, '森林火灾': <Flame size={22} />, '爆炸': <Bomb size={22} />,
-        '化学事故': <ShieldAlert size={22} />, '冲突': <ShieldAlert size={22} />, '内乱': <Users size={22} />,
-        // RU
-        'Землетрясение': <Home size={22} />, 'Наводнение': <Droplets size={22} />, 'Ураган / Циклон': <Users size={22} />,
-        'Цунами': <Droplets size={22} />, 'Лесной пожар': <Flame size={22} />, 'Взрыв': <Bomb size={22} />,
-        'Химический инцидент': <ShieldAlert size={22} />, 'Конфликт': <ShieldAlert size={22} />, 'Гражданские беспорядки': <Users size={22} />
+        'زلزال': <Home size={22} />, 'فيضان': <Droplets size={22} />, 'إعصار': <Users size={22} />, 'حريق غابات': <Flame size={22} />, 'انفجار': <Bomb size={22} />, 'حادث كيميائي': <ShieldAlert size={22} />, 'صراع': <ShieldAlert size={22} />, 'اضطرابات مدنية': <Users size={22} />,
+        '地震': <Home size={22} />, '洪水': <Droplets size={22} />, '飓风 / 台风': <Users size={22} />, '海啸': <Droplets size={22} />, '森林火灾': <Flame size={22} />, '爆炸': <Bomb size={22} />, '化学事故': <ShieldAlert size={22} />, '冲突': <ShieldAlert size={22} />, '内乱': <Users size={22} />,
+        'Землетрясение': <Home size={22} />, 'Наводнение': <Droplets size={22} />, 'Ураган / Циклон': <Users size={22} />, 'Цунами': <Droplets size={22} />, 'Лесной пожар': <Flame size={22} />, 'Взрыв': <Bomb size={22} />, 'Химический инцидент': <ShieldAlert size={22} />, 'Конфlict': <ShieldAlert size={22} />, 'Гражданские беспорядки': <Users size={22} />
     };
 
     useEffect(() => {
@@ -124,6 +109,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         window.addEventListener('offline', handleStatus);
         window.addEventListener('beforeinstallprompt', handleBeforeInstall);
         
+        // Silent background GPS capture
         getGPS();
         if (navigator.onLine) syncOfflineData();
         
@@ -135,29 +121,21 @@ const SubmitReport = ({ lang = 'fr' }) => {
     }, []);
 
     const getGPS = () => {
-        setGpsError(null);
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
                     const { latitude, longitude } = position.coords;
                     updateLocation(latitude, longitude);
                 },
-                (err) => {
-                    console.warn("High accuracy GPS failed, retrying with low accuracy...", err);
-                    // Retry with low accuracy
+                () => {
+                    // Fail silently, user can still pick on map
                     navigator.geolocation.getCurrentPosition(
-                        async (position) => {
-                            const { latitude, longitude } = position.coords;
-                            updateLocation(latitude, longitude);
-                        },
-                        (err2) => {
-                            setGpsError(true);
-                            setFormData(prev => ({ ...prev, text_location: "GPS indisponible. Cliquez sur la carte." }));
-                        },
-                        { enableHighAccuracy: false, timeout: 10000 }
+                        (pos) => updateLocation(pos.coords.latitude, pos.coords.longitude),
+                        null,
+                        { enableHighAccuracy: false, timeout: 5000 }
                     );
                 },
-                { enableHighAccuracy: true, timeout: 5000 }
+                { enableHighAccuracy: true, timeout: 3000 }
             );
         }
     };
@@ -186,8 +164,8 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
-        if (!formData.crisis_type) { alert("Type de crise requis"); return; }
-        if (!location) { alert("Position requise (cliquez sur la carte si le GPS échoue)"); return; }
+        if (!formData.crisis_type) { alert("Veuillez choisir un type de crise."); return; }
+        if (!location) { alert("Veuillez sélectionner un lieu sur la carte."); return; }
         setLoading(true);
 
         try {
@@ -219,7 +197,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             }
             resetForm();
         } catch (error) {
-            alert("Erreur. Rapport mis en attente.");
+            alert("Erreur réseau.");
         } finally {
             setLoading(false);
         }
@@ -258,23 +236,13 @@ const SubmitReport = ({ lang = 'fr' }) => {
                         <MapController location={location} setLocation={setLocation} setAddress={(addr) => setFormData(p => ({...p, text_location: addr}))} />
                     </MapContainer>
                     
-                    {!location && (
-                        <div className="map-overlay-searching">
-                            <Loader2 className="spinner" />
-                            <span>{t.gps_searching}</span>
-                            <p style={{fontSize: '0.6rem', marginTop: '5px'}}>Ou cliquez sur la carte</p>
-                        </div>
-                    )}
-
-                    <div className="map-actions-btns">
-                        <button type="button" className="recenter-btn" onClick={getGPS} title="Recalibrer GPS">
-                            <Crosshair size={18} />
-                        </button>
-                    </div>
+                    <button type="button" className="gps-fab" onClick={getGPS} title="Recentrer">
+                        <Crosshair size={20} />
+                    </button>
 
                     <div className="address-overlay-v3">
-                        <MapPin size={14} color="#0ea5e9" />
-                        <span className="address-text">{formData.text_location}</span>
+                        <MapPin size={12} color="#0ea5e9" />
+                        <span className="address-text">{formData.text_location || (location ? 'Lieu sélectionné' : 'Appuyez sur la carte')}</span>
                     </div>
                 </div>
 
@@ -316,7 +284,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                     ) : (
                                         <div className="capture-placeholder">
                                             <Camera size={28} />
-                                            <span>Capture Directe (Photo/Vidéo)</span>
+                                            <span>Prendre Photo/Vidéo</span>
                                         </div>
                                     )}
                                     <input id="media-input" type="file" accept="image/*,video/*" capture="environment" hidden onChange={handleMediaCapture} />
@@ -329,7 +297,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                             </>
                         ) : (
                             <>
-                                <h2 className="form-section-title">Détails Terrain</h2>
+                                <h2 className="form-section-title">Analyse PNUD</h2>
                                 <div className="slider-group">
                                     <label className="input-label"><Zap size={14}/> Électricité</label>
                                     <input type="range" min="0" max="100" value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: parseInt(e.target.value)})} />
