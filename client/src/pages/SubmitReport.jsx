@@ -11,12 +11,12 @@ import axios from 'axios';
 import { saveReportOffline } from '../services/storage';
 import { syncOfflineData } from '../services/sync';
 import { API_BASE } from '../services/api';
-import { translations } from '../services/i18n';
+import { useTranslation } from '../services/i18n';
 
 const API_URL = `${API_BASE}/reports/`;
 
-const SubmitReport = ({ lang = 'fr' }) => {
-    const t = translations[lang] || translations.fr;
+const SubmitReport = () => {
+    const { t, lang } = useTranslation();
     const [formStep, setFormStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [location, setLocation] = useState(null);
@@ -45,81 +45,24 @@ const SubmitReport = ({ lang = 'fr' }) => {
     });
 
     const icons = {
-        // FR
-        'Tremblement de terre': <Mountain size={24} />,
-        'Inondation': <Droplets size={24} />,
-        'Tsunami': <Waves size={24} />,
-        'Ouragan / Cyclone': <Wind size={24} />,
-        'Feu de forêt': <Trees size={24} />,
-        'Explosion': <Bomb size={24} />,
-        'Incident chimique': <Factory size={24} />,
-        'Conflit': <ShieldAlert size={24} />,
-        'Troubles civils': <Users size={24} />,
-        
-        // EN
-        'Earthquake': <Mountain size={24} />,
-        'Flood': <Droplets size={24} />,
-        'Hurricane / Cyclone': <Wind size={24} />,
-        'Wildfire': <Flame size={24} />,
-        'Chemical Incident': <Factory size={24} />,
-        'Conflict': <ShieldAlert size={24} />,
-        'Civil Unrest': <Users size={24} />,
-        
-        // ES
-        'Terremoto': <Mountain size={24} />,
-        'Inundación': <Droplets size={24} />,
-        'Huracán / Ciclón': <Wind size={24} />,
-        'Incendio forestal': <Trees size={24} />,
-        'Explosión': <Bomb size={24} />,
-        'Incidente químico': <Factory size={24} />,
-        'Conflicto': <ShieldAlert size={24} />,
-        'Disturbios civiles': <Users size={24} />,
-        
-        // AR
-        'زلزال': <Mountain size={24} />,
-        'فيضان': <Droplets size={24} />,
-        'إعصار': <Wind size={24} />,
-        'حريق غابات': <Trees size={24} />,
-        'انفجار': <Bomb size={24} />,
-        'حادث كيميائي': <Factory size={24} />,
-        'صراع': <ShieldAlert size={24} />,
-        'اضطرابات مدنية': <Users size={24} />,
-        
-        // ZH
-        '地震': <Mountain size={24} />,
-        '洪水': <Droplets size={24} />,
-        '飓风 / 台风': <Wind size={24} />,
-        '海啸': <Waves size={24} />,
-        '森林火灾': <Trees size={24} />,
-        '爆炸': <Bomb size={24} />,
-        '化学事故': <Factory size={24} />,
-        '冲突': <ShieldAlert size={24} />,
-        '内乱': <Users size={24} />,
-        
-        // RU
-        'Землетрясение': <Mountain size={24} />,
-        'Наводнение': <Droplets size={24} />,
-        'Ураган / Циклон': <Wind size={24} />,
-        'Цунами': <Waves size={24} />,
-        'Лесной пожар': <Trees size={24} />,
-        'Взрыв': <Bomb size={24} />,
-        'Химический инцидент': <Factory size={24} />,
-        'Конфликт': <ShieldAlert size={24} />,
-        'Гражданские беспорядки': <Users size={24} />,
-        
-        'Autre': <PlusCircle size={24} />,
-        'Other': <PlusCircle size={24} />,
-        'Otro': <PlusCircle size={24} />
+        'Tremblement de terre': <Mountain size={24} />, 'Earthquake': <Mountain size={24} />, 'Terremoto': <Mountain size={24} />, 'زلزال': <Mountain size={24} />, '地震': <Mountain size={24} />, 'Землетрясение': <Mountain size={24} />,
+        'Inondation': <Droplets size={24} />, 'Flood': <Droplets size={24} />, 'Inundación': <Droplets size={24} />, 'فيضان': <Droplets size={24} />, '洪水': <Droplets size={24} />, 'Наводнение': <Droplets size={24} />,
+        'Tsunami': <Waves size={24} />, 'Tsunami': <Waves size={24} />, 'Tsunami': <Waves size={24} />, 'تسونامي': <Waves size={24} />, '海啸': <Waves size={24} />, 'Цунами': <Waves size={24} />,
+        'Ouragan / Cyclone': <Wind size={24} />, 'Hurricane / Cyclone': <Wind size={24} />, 'Huracán / Ciclón': <Wind size={24} />, 'إعصار': <Wind size={24} />, '飓风 / 台风': <Wind size={24} />, 'Ураган / Циклон': <Wind size={24} />,
+        'Feu de forêt': <Trees size={24} />, 'Wildfire': <Flame size={24} />, 'Incendio forestal': <Trees size={24} />, 'حريق غابات': <Trees size={24} />, '森林火灾': <Trees size={24} />, 'Лесной пожар': <Trees size={24} />,
+        'Explosion': <Bomb size={24} />, 'Explosion': <Bomb size={24} />, 'Explosión': <Bomb size={24} />, 'انفجار': <Bomb size={24} />, '爆炸': <Bomb size={24} />, 'Взрыв': <Bomb size={24} />,
+        'Incident chimique': <Factory size={24} />, 'Chemical Incident': <Factory size={24} />, 'Incidente químico': <Factory size={24} />, 'حادث كيميائي': <Factory size={24} />, '化学事故': <Factory size={24} />, 'Химический инцидент': <Factory size={24} />,
+        'Conflit': <ShieldAlert size={24} />, 'Conflict': <ShieldAlert size={24} />, 'Conflicto': <ShieldAlert size={24} />, 'صراع': <ShieldAlert size={24} />, '冲突': <ShieldAlert size={24} />, 'Конфликт': <ShieldAlert size={24} />,
+        'Troubles civils': <Users size={24} />, 'Civil Unrest': <Users size={24} />, 'Disturbios civiles': <Users size={24} />, 'اضطرابات مدنية': <Users size={24} />, '内乱': <Users size={24} />, 'Гражданские беспорядки': <Users size={24} />,
+        'Autre': <PlusCircle size={24} />, 'Other': <PlusCircle size={24} />, 'Otro': <PlusCircle size={24} />
     };
 
     useEffect(() => {
         const handleStatus = () => setIsOnline(navigator.onLine);
         window.addEventListener('online', handleStatus);
         window.addEventListener('offline', handleStatus);
-        
         getGPS();
         if (navigator.onLine) syncOfflineData();
-        
         return () => {
             window.removeEventListener('online', handleStatus);
             window.removeEventListener('offline', handleStatus);
@@ -130,17 +73,11 @@ const SubmitReport = ({ lang = 'fr' }) => {
         setGpsError(false);
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const { latitude, longitude } = position.coords;
-                    updateLocation(latitude, longitude);
-                },
+                async (position) => updateLocation(position.coords.latitude, position.coords.longitude),
                 () => {
                     navigator.geolocation.getCurrentPosition(
                         (pos) => updateLocation(pos.coords.latitude, pos.coords.longitude),
-                        () => {
-                            setGpsError(true);
-                            setIsManual(true);
-                        },
+                        () => { setGpsError(true); setIsManual(true); },
                         { enableHighAccuracy: false, timeout: 5000 }
                     );
                 },
@@ -174,11 +111,10 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
-        if (!formData.crisis_type) { alert("Veuillez choisir un type de crise."); return; }
-        if (!formData.text_location) { alert("Veuillez renseigner le lieu."); return; }
+        if (!formData.crisis_type) { alert(t.submit.err_crisis); return; }
+        if (!formData.text_location) { alert(t.submit.err_loc); return; }
         
         setLoading(true);
-
         try {
             let mediaUrl = "";
             if (selectedFile) {
@@ -188,16 +124,11 @@ const SubmitReport = ({ lang = 'fr' }) => {
                 mediaUrl = res.data.url;
             }
 
-            const coords = location ? [location.lng, location.lat] : [-4.0305, 5.3484];
-
             const payload = {
                 ...formData,
                 image_url: mediaUrl,
                 media_type: mediaType,
-                location: {
-                    type: "Point",
-                    coordinates: coords
-                },
+                location: { type: "Point", coordinates: location ? [location.lng, location.lat] : [-4.0305, 5.3484] },
                 user_id: localStorage.getItem('alerto_user_id')
             };
 
@@ -210,7 +141,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             }
             resetForm();
         } catch (error) {
-            alert("Erreur de soumission.");
+            alert(t.submit.err_submit);
         } finally {
             setLoading(false);
         }
@@ -249,18 +180,18 @@ const SubmitReport = ({ lang = 'fr' }) => {
                             <Navigation size={20} className={(!location && !gpsError) ? 'pulse-icon' : ''} />
                         </div>
                         <div className="loc-texts" style={{ width: '100%' }}>
-                            <span className="loc-label">LIEU DU SINISTRE</span>
+                            <span className="loc-label">{t.submit.loc_label}</span>
                             {isManual ? (
                                 <input 
                                     className="manual-loc-input"
-                                    placeholder="Saisir l'adresse ou le quartier..."
+                                    placeholder={t.submit.loc_placeholder}
                                     value={formData.text_location}
                                     onChange={(e) => setFormData({...formData, text_location: e.target.value})}
                                     autoFocus
                                 />
                             ) : (
                                 <span className="loc-address" onClick={() => setIsManual(true)}>
-                                    {formData.text_location || (location ? 'Position verrouillée' : 'Acquisition GPS...')}
+                                    {formData.text_location || (location ? t.submit.loc_locked : t.submit.loc_searching)}
                                 </span>
                             )}
                         </div>
@@ -280,19 +211,16 @@ const SubmitReport = ({ lang = 'fr' }) => {
                             <>
                                 <h2 className="form-section-title">{t.crisis_label}</h2>
                                 <div className="crisis-grid">
-                                    {t.options?.crisis?.map((label, idx) => {
-                                        if (label.startsWith('---')) return <div key={idx} className="grid-category-header">{label.replace(/---/g, '')}</div>;
-                                        return (
-                                            <div 
-                                                key={idx} 
-                                                className={`crisis-item ${formData.crisis_type === label ? 'active' : ''}`}
-                                                onClick={() => setFormData({...formData, crisis_type: label})}
-                                            >
-                                                <div className="crisis-icon-bg">{icons[label] || <PlusCircle size={22} />}</div>
-                                                <span>{label}</span>
-                                            </div>
-                                        );
-                                    })}
+                                    {t.options?.crisis?.map((label, idx) => (
+                                        <div 
+                                            key={idx} 
+                                            className={`crisis-item ${formData.crisis_type === label ? 'active' : ''}`}
+                                            onClick={() => setFormData({...formData, crisis_type: label})}
+                                        >
+                                            <div className="crisis-icon-bg">{icons[label] || <PlusCircle size={22} />}</div>
+                                            <span>{label}</span>
+                                        </div>
+                                    ))}
                                 </div>
 
                                 <div className="input-group">
@@ -308,7 +236,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                     ) : (
                                         <div className="capture-placeholder">
                                             <Camera size={32} />
-                                            <span>PHOTO / VIDÉO</span>
+                                            <span>{t.submit.capture_label}</span>
                                         </div>
                                     )}
                                     <input id="media-input" type="file" accept="image/*,video/*" capture="environment" hidden onChange={handleMediaCapture} />
@@ -321,22 +249,22 @@ const SubmitReport = ({ lang = 'fr' }) => {
                             </>
                         ) : (
                             <>
-                                <h2 className="form-section-title">Analyse PNUD</h2>
+                                <h2 className="form-section-title">{t.submit.step2}</h2>
                                 <div className="slider-group">
-                                    <label className="input-label"><Zap size={14}/> Électricité</label>
+                                    <label className="input-label"><Zap size={14}/> {t.electricity}</label>
                                     <input type="range" min="0" max="100" value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: parseInt(e.target.value)})} />
                                 </div>
                                 <div className="slider-group">
-                                    <label className="input-label"><HeartPulse size={14}/> Santé</label>
+                                    <label className="input-label"><HeartPulse size={14}/> {t.health}</label>
                                     <input type="range" min="0" max="100" value={formData.health_services_status} onChange={(e) => setFormData({...formData, health_services_status: parseInt(e.target.value)})} />
                                 </div>
                             </>
                         )}
 
                         <div className="btn-row">
-                            {formStep === 2 && <button type="button" className="btn-back" onClick={() => setFormStep(1)}>Retour</button>}
+                            {formStep === 2 && <button type="button" className="btn-back" onClick={() => setFormStep(1)}>{t.submit.btn_back}</button>}
                             <button type="submit" className="btn-primary" disabled={loading}>
-                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? 'SUIVANT' : 'ENVOYER LE RAPPORT')}
+                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? t.submit.btn_next : t.submit.btn_submit)}
                             </button>
                         </div>
                     </form>

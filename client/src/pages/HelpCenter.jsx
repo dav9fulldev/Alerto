@@ -1,47 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, HelpCircle, Phone, Globe, ChevronRight, FileText, Settings, ShieldCheck } from 'lucide-react';
+import React from 'react';
+import { HelpCircle, Phone, ChevronRight, FileText, Settings, ShieldCheck } from 'lucide-react';
 import './HelpCenter.css';
+import { useTranslation } from '../services/i18n';
 
-const HelpCenter = ({ lang = 'fr' }) => {
+const HelpCenter = () => {
+    const { t } = useTranslation();
+    const helpT = t.help;
+
     const sections = [
         {
-            title: "Guide du Citoyen",
+            title: helpT.citizen_guide,
             icon: <FileText size={20} />,
-            items: [
-                "Comment envoyer un signalement ?",
-                "Est-ce que ça fonctionne sans internet ?",
-                "Mes données sont-elles anonymes ?"
-            ]
+            items: [helpT.q1, helpT.q2, helpT.q3]
         },
         {
-            title: "Guide des Autorités (PNUD)",
+            title: helpT.admin_guide,
             icon: <ShieldCheck size={20} />,
-            items: [
-                "Comment lire le Dashboard ?",
-                "Comment utiliser la carte SIG ?",
-                "Pourquoi donner accès à mon GPS ?"
-            ]
+            items: [helpT.q4, helpT.q5, helpT.q6]
         },
         {
-            title: "Transparence & Données",
+            title: helpT.transparency,
             icon: <Settings size={20} />,
-            items: [
-                "Où sont stockées les données ?",
-                "Comment supprimer mon historique ?",
-                "RGPD et Protection des victimes"
-            ]
+            items: [helpT.q7, helpT.q8, helpT.q9]
         }
     ];
 
     return (
         <div className="help-container">
             <header className="page-header help-header">
-                <h1>Centre d'Aide</h1>
-                <p>Trouvez des réponses et contactez l'assistance technique.</p>
+                <h1>{helpT.title}</h1>
+                <p>{helpT.subtitle}</p>
                 
                 <div className="search-bar-mock">
                     <HelpCircle size={18} color="#94a3b8" />
-                    <span>Rechercher de l'aide...</span>
+                    <span>{helpT.search}</span>
                 </div>
             </header>
 
@@ -69,9 +61,9 @@ const HelpCenter = ({ lang = 'fr' }) => {
                         <Phone size={24} color="white" />
                     </div>
                     <div className="support-info">
-                        <h3>Besoin d'assistance technique ?</h3>
-                        <p>Nos équipes sont disponibles 24/7 pour vous aider.</p>
-                        <button className="contact-btn">Contacter le PNUD</button>
+                        <h3>{helpT.support_title}</h3>
+                        <p>{helpT.support_subtitle}</p>
+                        <button className="contact-btn">{helpT.support_btn}</button>
                     </div>
                 </div>
             </div>

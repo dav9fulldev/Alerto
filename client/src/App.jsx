@@ -123,19 +123,19 @@ function AppContent() {
       <nav className="bottom-nav">
         <button className={`nav-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => setActiveTab('map')}>
           <MapIcon className="nav-icon" />
-          <span>Explorer</span>
+          <span>{t.nav.map}</span>
         </button>
         <button className={`nav-item ${activeTab === 'report' ? 'active' : ''}`} onClick={() => setActiveTab('report')}>
           <AlertCircle className="nav-icon" />
-          <span>Signaler</span>
+          <span>{t.nav.report}</span>
         </button>
         <button className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
           <Clock className="nav-icon" />
-          <span>Mes Alertes</span>
+          <span>{t.nav.history}</span>
         </button>
         <button className={`nav-item ${activeTab === 'help' ? 'active' : ''}`} onClick={() => setActiveTab('help')}>
           <HelpCircle className="nav-icon" />
-          <span>Aide</span>
+          <span>{t.nav.help}</span>
         </button>
       </nav>
 
