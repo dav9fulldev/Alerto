@@ -50,26 +50,28 @@
     font-weight: 900;
     pointer-events: auto;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: none; /* Hidden by default on desktop, sidebar has it */
 }
 
 .sat-toggle-btn {
     position: absolute;
-    top: 90px;
+    top: 20px; /* Moved up to align with search mock if needed or just be higher */
     right: 20px;
     z-index: 1000;
     background: white;
     border: none;
-    padding: 12px 18px;
-    border-radius: 14px;
+    padding: 14px 20px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    gap: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 0.85rem;
-    color: #1e293b;
+    color: #0f172a;
     transition: all 0.2s;
+    border: 1px solid var(--border);
 }
 
 .sat-toggle-btn.active { background: #0f172a; color: white; }
@@ -91,8 +93,10 @@
 
 /* Adjust legend position on mobile to not overlap bottom nav */
 @media (max-width: 767px) {
+    .map-lang-badge { display: block; }
+    .sat-toggle-btn { top: 90px; }
     .map-legend-fab { bottom: 90px; }
-    .public-map-container { height: calc(100vh - 70px); }
+    .public-map-container { height: calc(100vh - 75px); }
 }
 
 .popup-card { width: 240px; overflow: hidden; border-radius: 18px; }

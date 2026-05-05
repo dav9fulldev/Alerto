@@ -223,28 +223,30 @@ const SubmitReport = () => {
                                     ))}
                                 </div>
 
-                                <div className="input-group">
-                                    <label className="input-label">{t.infrastructure_label}</label>
-                                    <select className="input-modern" value={formData.infrastructure_type} onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}>
-                                        {t.options?.infra?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                                    </select>
-                                </div>
+                                <div className="photo-input-container">
+                                    <div className="input-group">
+                                        <label className="input-label">{t.infrastructure_label}</label>
+                                        <select className="input-modern" value={formData.infrastructure_type} onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}>
+                                            {t.options?.infra?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                        </select>
+                                    </div>
 
-                                <div className="photo-box" onClick={() => document.getElementById('media-input').click()}>
-                                    {mediaPreview ? (
-                                        mediaType === 'video' ? <video src={mediaPreview} className="preview-media" controls /> : <img src={mediaPreview} alt="Preview" className="preview-media" />
-                                    ) : (
-                                        <div className="capture-placeholder">
-                                            <Camera size={32} />
-                                            <span>{t.submit.capture_label}</span>
-                                        </div>
-                                    )}
-                                    <input id="media-input" type="file" accept="image/*,video/*" capture="environment" hidden onChange={handleMediaCapture} />
-                                </div>
+                                    <div className="photo-box" onClick={() => document.getElementById('media-input').click()}>
+                                        {mediaPreview ? (
+                                            mediaType === 'video' ? <video src={mediaPreview} className="preview-media" controls /> : <img src={mediaPreview} alt="Preview" className="preview-media" />
+                                        ) : (
+                                            <div className="capture-placeholder">
+                                                <Camera size={32} />
+                                                <span>{t.submit.capture_label}</span>
+                                            </div>
+                                        )}
+                                        <input id="media-input" type="file" accept="image/*,video/*" capture="environment" hidden onChange={handleMediaCapture} />
+                                    </div>
 
-                                <div style={{marginTop: '25px'}}>
-                                    <label className="input-label">{t.description_label}</label>
-                                    <textarea className="input-modern" rows="3" placeholder={t.description_placeholder} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required />
+                                    <div className="input-group-full">
+                                        <label className="input-label">{t.description_label}</label>
+                                        <textarea className="input-modern" rows="3" placeholder={t.description_placeholder} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required />
+                                    </div>
                                 </div>
                             </>
                         ) : (
