@@ -5,56 +5,15 @@ import {
   ChevronRight, AlertTriangle, Zap, HeartPulse, Trash,
   Droplets, Flame, Car, Home, ShieldAlert, Bomb, PlusCircle,
   Construction, Building2, Store, Landmark, Factory, Bus, Users, Palmtree,
-  Crosshair
+  Crosshair, Navigation
 } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
 import axios from 'axios';
 import { saveReportOffline } from '../services/storage';
 import { syncOfflineData } from '../services/sync';
 import { API_BASE } from '../services/api';
 import { translations } from '../services/i18n';
 
-// Fix Leaflet icon issue
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-let DefaultIcon = L.icon({
-    iconUrl: markerIcon,
-    shadowUrl: markerShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
-});
-L.Marker.prototype.options.icon = DefaultIcon;
-
 const API_URL = `${API_BASE}/reports/`;
-
-const MapController = ({ location, setLocation, setAddress }) => {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (location) {
-        map.setView([location.lat, location.lng], 15);
-        // Force refresh leaflet size to fix broken tiles in some containers
-        setTimeout(() => map.invalidateSize(), 200);
-    }
-  }, [location, map]);
-
-  useMapEvents({
-    click: async (e) => {
-      const { lat, lng } = e.latlng;
-      setLocation({ lat, lng });
-      try {
-        setAddress("Localisation...");
-        const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-        if (res.data && res.data.display_name) {
-          setAddress(res.data.display_name);
-        }
-      } catch (err) { console.error(err); }
-    },
-  });
-
-  return null;
-};
 
 const SubmitReport = ({ lang = 'fr' }) => {
     const t = translations[lang] || translations.fr;
@@ -102,15 +61,8 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     useEffect(() => {
         const handleStatus = () => setIsOnline(navigator.onLine);
-        const handleBeforeInstall = (e) => {
-            e.preventDefault();
-            deferredPrompt.current = e;
-            setShowInstallPrompt(true);
-        };
-
         window.addEventListener('online', handleStatus);
         window.addEventListener('offline', handleStatus);
-        window.addEventListener('beforeinstallprompt', handleBeforeInstall);
         
         getGPS();
         if (navigator.onLine) syncOfflineData();
@@ -118,7 +70,6 @@ const SubmitReport = ({ lang = 'fr' }) => {
         return () => {
             window.removeEventListener('online', handleStatus);
             window.removeEventListener('offline', handleStatus);
-            window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
         };
     }, []);
 
@@ -166,7 +117,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
         if (!formData.crisis_type) { alert("Type de crise requis"); return; }
-        if (!location) { alert("Lieu requis"); return; }
+        if (!location) { alert("Attente du signal GPS..."); getGPS(); return; }
         setLoading(true);
 
         try {
@@ -198,7 +149,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             }
             resetForm();
         } catch (error) {
-            alert("Erreur de soumission");
+            alert("Erreur");
         } finally {
             setLoading(false);
         }
@@ -230,21 +181,21 @@ const SubmitReport = ({ lang = 'fr' }) => {
     return (
         <div className="report-container">
             <div className="report-card">
-                <div className="mini-map-container">
-                    <MapContainer center={location ? [location.lat, location.lng] : [5.3484, -4.0305]} zoom={14} zoomControl={false} style={{ height: '100%', width: '100%' }}>
-                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        {location && <Marker position={[location.lat, location.lng]} />}
-                        <MapController location={location} setLocation={setLocation} setAddress={(addr) => setFormData(p => ({...p, text_location: addr}))} />
-                    </MapContainer>
-                    
-                    <button type="button" className="gps-fab" onClick={getGPS} title="Recalibrer">
-                        <Crosshair size={22} />
-                    </button>
-
-                    <div className="address-overlay-v3">
-                        <MapPin size={14} color="#3b82f6" />
-                        <span className="address-text">{formData.text_location || 'Localisation terrain...'}</span>
+                <div className="location-section-v4">
+                    <div className="location-info-compact">
+                        <div className="loc-icon-circle">
+                            <Navigation size={20} className={!location ? 'pulse-icon' : ''} />
+                        </div>
+                        <div className="loc-texts">
+                            <span className="loc-label">POSITION TACTIQUE</span>
+                            <span className="loc-address">
+                                {formData.text_location || (location ? 'Position verrouillée' : 'Acquisition GPS...')}
+                            </span>
+                        </div>
                     </div>
+                    <button type="button" className="refresh-gps-btn" onClick={getGPS}>
+                        <Crosshair size={18} />
+                    </button>
                 </div>
 
                 <div className="form-body">
@@ -298,13 +249,13 @@ const SubmitReport = ({ lang = 'fr' }) => {
                             </>
                         ) : (
                             <>
-                                <h2 className="form-section-title">Analyse Tactique</h2>
+                                <h2 className="form-section-title">Analyse PNUD</h2>
                                 <div className="slider-group">
-                                    <label className="input-label"><Zap size={14}/> État de l'Électricité</label>
+                                    <label className="input-label"><Zap size={14}/> Électricité</label>
                                     <input type="range" min="0" max="100" value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: parseInt(e.target.value)})} />
                                 </div>
                                 <div className="slider-group">
-                                    <label className="input-label"><HeartPulse size={14}/> Services de Santé</label>
+                                    <label className="input-label"><HeartPulse size={14}/> Santé</label>
                                     <input type="range" min="0" max="100" value={formData.health_services_status} onChange={(e) => setFormData({...formData, health_services_status: parseInt(e.target.value)})} />
                                 </div>
                             </>
