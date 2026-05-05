@@ -22,7 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 function AppContent() {
   const [path, setPath] = useState(window.location.pathname);
   const [activeTab, setActiveTab] = useState('map'); // map, report, history, help
-  const { lang, setLang } = useTranslation();
+  const { t, lang, setLang } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('alerto_token'));
 
   const {
