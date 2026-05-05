@@ -86,16 +86,30 @@ const SubmitReport = ({ lang = 'fr' }) => {
     });
 
     const icons = {
-        'Séisme': <Home size={22} />,
-        'Inondation': <Droplets size={22} />,
-        'Cyclone': <Users size={22} />,
-        'Tsunami': <Droplets size={22} />,
-        'Incendie de forêt': <Flame size={22} />,
-        'Explosion': <Bomb size={22} />,
-        'Incident chimique': <ShieldAlert size={22} />,
-        'Conflit': <ShieldAlert size={22} />,
-        'Troubles civils': <Users size={22} />,
-        'Autre': <PlusCircle size={22} />
+        // FR
+        'Séisme': <Home size={22} />, 'Inondation': <Droplets size={22} />, 'Cyclone': <Users size={22} />, 'Tsunami': <Droplets size={22} />,
+        'Incendie de forêt': <Flame size={22} />, 'Explosion': <Bomb size={22} />, 'Incident chimique': <ShieldAlert size={22} />,
+        'Conflit': <ShieldAlert size={22} />, 'Troubles civils': <Users size={22} />, 'Autre': <PlusCircle size={22} />,
+        // EN
+        'Earthquake': <Home size={22} />, 'Flood': <Droplets size={22} />, 'Hurricane / Cyclone': <Users size={22} />,
+        'Wildfire': <Flame size={22} />, 'Chemical Incident': <ShieldAlert size={22} />, 'Conflict': <ShieldAlert size={22} />,
+        'Civil Unrest': <Users size={22} />, 'Other': <PlusCircle size={22} />,
+        // ES
+        'Terremoto': <Home size={22} />, 'Inundación': <Droplets size={22} />, 'Huracán / Ciclón': <Users size={22} />,
+        'Incendio forestal': <Flame size={22} />, 'Explosión': <Bomb size={22} />, 'Incidente químico': <ShieldAlert size={22} />,
+        'Conflicto': <ShieldAlert size={22} />, 'Disturbios civiles': <Users size={22} />, 'Otro': <PlusCircle size={22} />,
+        // AR
+        'زلزال': <Home size={22} />, 'فيضان': <Droplets size={22} />, 'إعصار': <Users size={22} />,
+        'حريق غابات': <Flame size={22} />, 'انفجار': <Bomb size={22} />, 'حادث كيميائي': <ShieldAlert size={22} />,
+        'صراع': <ShieldAlert size={22} />, 'اضطرابات مدنية': <Users size={22} />,
+        // ZH
+        '地震': <Home size={22} />, '洪水': <Droplets size={22} />, '飓风 / 台风': <Users size={22} />,
+        '海啸': <Droplets size={22} />, '森林火灾': <Flame size={22} />, '爆炸': <Bomb size={22} />,
+        '化学事故': <ShieldAlert size={22} />, '冲突': <ShieldAlert size={22} />, '内乱': <Users size={22} />,
+        // RU
+        'Землетрясение': <Home size={22} />, 'Наводнение': <Droplets size={22} />, 'Ураган / Циклон': <Users size={22} />,
+        'Цунами': <Droplets size={22} />, 'Лесной пожар': <Flame size={22} />, 'Взрыв': <Bomb size={22} />,
+        'Химический инцидент': <ShieldAlert size={22} />, 'Конфликт': <ShieldAlert size={22} />, 'Гражданские беспорядки': <Users size={22} />
     };
 
     useEffect(() => {

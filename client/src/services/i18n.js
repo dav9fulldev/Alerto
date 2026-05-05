@@ -177,7 +177,21 @@ export const translations = {
         options: {
             damage: { minime: "MÍNIMO", partiel: "PARCIAL", complet: "COMPLETO" },
             infra: ["Residencial", "Comercial", "Gubernamental", "Servicios públicos", "Transporte", "Comunitario", "Espacios públicos", "Otro"],
-            crisis: ["Séisme", "Inondation", "Cyclone", "Tsunami", "Incendie de forêt", "Explosion", "Incident chimique", "Conflit", "Troubles civils", "Autre"],
+            crisis: [
+                "--- Riesgos Naturales ---",
+                "Terremoto",
+                "Inundación",
+                "Huracán / Ciclón",
+                "Tsunami",
+                "Incendio forestal",
+                "--- Riesgos Tecnológicos ---",
+                "Explosión",
+                "Incidente químico",
+                "--- Crises de origen humano ---",
+                "Conflicto",
+                "Disturbios civiles",
+                "Otro"
+            ],
             elec: {
                 aucun: "Ningún daño observado",
                 mineur: "Daño menor (interrupciones reparables rápidamente)",
@@ -229,7 +243,20 @@ export const translations = {
         options: {
             damage: { minime: "أدنى", partiel: "جزئي", complet: "كامل" },
             infra: ["سكني", "تجاري", "حكومي", "خدمات عامة", "النقل", "مجتمعي", "أماكن عامة", "آخر"],
-            crisis: ["زلزال", "فيضان", "إعصار", "تسونامي", "حريق غابات", "صراع", "انفجار"],
+            crisis: [
+                "--- المخاطر الطبيعية ---",
+                "زلزال",
+                "فيضان",
+                "إعصار",
+                "تسونامي",
+                "حريق غابات",
+                "--- المخاطر التكنولوجية ---",
+                "انفجار",
+                "حادث كيميائي",
+                "--- الأزمات التي من صنع الإنسان ---",
+                "صراع",
+                "اضطرابات مدنية"
+            ],
             elec: {
                 aucun: "لا أضرار ملاحظة",
                 mineur: "أضرار طفيفة (انقطاعات يمكن إصلاحها بسرعة)",
@@ -281,7 +308,20 @@ export const translations = {
         options: {
             damage: { minime: "最小", partiel: "部分", complet: "完全" },
             infra: ["住宅", "商业", "政府", "公共服务", "交通", "社区", "公共空间", "其他"],
-            crisis: ["地震", "洪水", "飓风", "海啸", "森林火灾", "冲突", "爆炸"],
+            crisis: [
+                "--- 自然灾害 ---",
+                "地震",
+                "洪水",
+                "飓风 / 台风",
+                "海啸",
+                "森林火灾",
+                "--- 技术风险 ---",
+                "爆炸",
+                "化学事故",
+                "--- 人为危机 ---",
+                "冲突",
+                "内乱"
+            ],
             elec: {
                 aucun: "未观察到损害",
                 mineur: "轻微损害(可快速修复)",
@@ -333,7 +373,20 @@ export const translations = {
         options: {
             damage: { minime: "МИНИМАЛЬНЫЙ", partiel: "ЧАСТИЧНЫЙ", complet: "ПОЛНЫЙ" },
             infra: ["Жилой", "Коммерческий", "Государственный", "Госуслуги", "Транспорт", "Общественный", "Публичные места", "Другое"],
-            crisis: ["Землетрясение", "Наводнение", "Ураган", "Цунами", "Лесной пожар", "Конфликт", "Взрыв"],
+            crisis: [
+                "--- Природные риски ---",
+                "Землетрясение",
+                "Наводнение",
+                "Ураган / Циклон",
+                "Цунами",
+                "Лесной пожар",
+                "--- Технологические риски ---",
+                "Взрыв",
+                "Химический инцидент",
+                "--- Кризисы антропогенного характера ---",
+                "Конфликт",
+                "Гражданские беспорядки"
+            ],
             elec: {
                 aucun: "Нет наблюдаемого ущерба",
                 mineur: "Незначительный ущерб (быстро поправимые перебои)",
