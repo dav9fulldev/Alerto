@@ -37,6 +37,14 @@ function AppContent() {
     },
   });
 
+  // Periodic Update Check (Every 60 minutes)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateServiceWorker(true);
+    }, 60 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [updateServiceWorker]);
+
   // Initialize Local User ID
   useEffect(() => {
     if (!localStorage.getItem('alerto_user_id')) {
