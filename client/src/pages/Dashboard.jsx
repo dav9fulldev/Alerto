@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { BarChart3, AlertTriangle, CheckCircle2, Download, Table, Trash2, Shield, Eye, MapPin, Zap, HeartPulse, Trash } from 'lucide-react';
+import { BarChart3, AlertTriangle, CheckCircle2, Download, Table, Trash2, MapPin, Zap, HeartPulse, Trash, ExternalLink } from 'lucide-react';
 import './Dashboard.css';
 
 import { API_BASE } from '../services/api';
@@ -17,6 +17,19 @@ const Dashboard = ({ lang = 'fr' }) => {
     const [error, setError] = useState(null);
     const [selectedMedia, setSelectedMedia] = useState(null);
 
+    // Infrastructure Normalizer (to avoid language mix in chart)
+    const normalizeInfra = (type) => {
+        if (!type) return "Autre";
+        const t = type.toLowerCase();
+        if (t.includes('resid') || t.includes('住宅') || t.includes('residencial')) return "Résidentiel";
+        if (t.includes('comm') || t.includes('商业') || t.includes('comercial')) return "Commercial";
+        if (t.includes('gouv') || t.includes('政府') || t.includes('gubernamental')) return "Gouvernemental";
+        if (t.includes('public') || t.includes('公共') || t.includes('servicios p')) return "Services Publics";
+        if (t.includes('trans') || t.includes('交通') || t.includes('transporte')) return "Transport";
+        if (t.includes('commu') || t.includes('社区') || t.includes('comunitario')) return "Communautaire";
+        return "Autre";
+    };
+
     const getMediaUrl = (url) => {
         if (!url) return null;
         if (url.startsWith('http')) return url;
@@ -24,52 +37,31 @@ const Dashboard = ({ lang = 'fr' }) => {
         return `${API_BASE}/uploads/${url}`;
     };
 
-    const openMedia = (type, url) => setSelectedMedia({ type, url: getMediaUrl(url) });
+    const openMedia = (url) => setSelectedMedia(getMediaUrl(url));
     const closeMedia = () => setSelectedMedia(null);
 
     const exportToCSV = () => {
-        const headers = [
-            "ID", "Type de Crise", "Niveau Dégâts", "Infrastructure", "Nom Infra",
-            "Latitude", "Longitude", "Localisation", "Debris",
-            "Description", "Électricité (%)", "Santé (%)", "Contact", "Date"
-        ];
-        
+        const headers = ["ID", "Crise", "Dégâts", "Infra", "Lat", "Lon", "Date"];
         const rows = reports.map(r => [
-            r._id, 
-            r.crisis_type, 
-            r.damage_level, 
-            r.infrastructure_type, 
-            `"${r.infrastructure_name || ''}"`,
-            r.location.coordinates[1], 
-            r.location.coordinates[0], 
-            `"${r.text_location || ''}"`, 
-            r.debris_present || 'no',
-            `"${(r.description || '').replace(/"/g, '""')}"`, 
-            r.electricity_status || 0,
-            r.health_services_status || 0,
-            `"${r.contact_phone || ''}"`,
-            new Date(r.created_at).toISOString()
+            r._id, r.crisis_type, r.damage_level, normalizeInfra(r.infrastructure_type),
+            r.location.coordinates[1], r.location.coordinates[0], new Date(r.created_at).toISOString()
         ]);
-        
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
-            + headers.join(",") + "\n"
-            + rows.map(e => e.join(",")).join("\n");
-            
-        const encodedUri = encodeURI(csvContent);
+        let csv = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `ALERTO_PNUD_EXPORT_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute("href", encodeURI(csv));
+        link.setAttribute("download", "ALERTO_EXPORT.csv");
         document.body.appendChild(link);
         link.click();
     };
 
     const handleDeleteReport = async (id) => {
-        if (!window.confirm(lang === 'fr' ? 'Supprimer ce rapport ?' : 'Delete report?')) return;
-        const token = localStorage.getItem('alerto_token');
+        if (!window.confirm("Supprimer ?")) return;
         try {
-            await axios.delete(`${API_BASE}/reports/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            await axios.delete(`${API_BASE}/reports/${id}`, { 
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('alerto_token')}` } 
+            });
             setReports(reports.filter(r => r._id !== id));
-        } catch (err) { alert("Erreur: " + err.message); }
+        } catch (err) { alert(err.message); }
     };
 
     useEffect(() => {
@@ -81,7 +73,15 @@ const Dashboard = ({ lang = 'fr' }) => {
                     axios.get(`${API_BASE}/analytics/stats`, { headers: { 'Authorization': `Bearer ${token}` } }),
                     axios.get(`${API_BASE}/reports/`, { headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
-                setStats(statsRes.data);
+                
+                // Aggregate normalized infra stats
+                const normalizedStats = {};
+                Object.entries(statsRes.data.infrastructure_distribution).forEach(([key, val]) => {
+                    const norm = normalizeInfra(key);
+                    normalizedStats[norm] = (normalizedStats[norm] || 0) + val;
+                });
+                
+                setStats({...statsRes.data, infrastructure_distribution: normalizedStats});
                 setReports(reportsRes.data);
             } catch (err) { setError(err.message); }
             finally { setLoading(false); }
@@ -89,110 +89,109 @@ const Dashboard = ({ lang = 'fr' }) => {
         fetchData();
     }, []);
 
-    if (loading) return <div className="dashboard-container">Chargement...</div>;
+    if (loading) return <div className="dashboard-container">Analyse en cours...</div>;
 
     return (
         <div className="dashboard-container">
             <header className="dash-header">
                 <div>
-                    <h1>Tableau de Bord PNUD</h1>
-                    <div className="export-actions">
-                        <button onClick={exportToCSV} className="export-btn csv"><Table size={14} /> CSV</button>
-                        <button className="export-btn geojson"><Download size={14} /> SIG</button>
-                    </div>
+                    <h1>Plateforme ALERTO PNUD</h1>
+                    <p style={{fontSize: '0.8rem', color: 'var(--text-dim)'}}>Surveillance tactique et évaluation des dommages</p>
                 </div>
-                <div className="status-badge">SYSTÈME OPÉRATIONNEL</div>
+                <div className="export-actions">
+                    <button onClick={exportToCSV} className="export-btn csv"><Table size={14} /> CSV</button>
+                    <button className="export-btn geojson"><Download size={14} /> GeoJSON</button>
+                </div>
             </header>
 
             <div className="stats-grid">
                 <div className="stat-card">
-                    <div className="stat-icon total"><Shield /></div>
+                    <div className="stat-icon total"><AlertTriangle size={20} /></div>
                     <div className="stat-info">
-                        <h3>Total Signalements</h3>
-                        <p className="stat-value">{stats.total_reports}</p>
+                        <span className="stat-value">{stats.total_reports}</span>
+                        <p style={{fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700}}>RAPPORTS TOTAUX</p>
                     </div>
                 </div>
                 <div className="stat-card">
-                    <div className="stat-icon critical"><AlertTriangle /></div>
+                    <div className="stat-icon critical"><Trash2 size={20} /></div>
                     <div className="stat-info">
-                        <h3>Zones Critiques</h3>
-                        <p className="stat-value">{stats.critical_zones}</p>
+                        <span className="stat-value">{stats.critical_zones}</span>
+                        <p style={{fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700}}>DÉGÂTS COMPLETS</p>
                     </div>
                 </div>
                 <div className="stat-card">
-                    <div className="stat-icon duplicates"><CheckCircle2 /></div>
+                    <div className="stat-icon duplicates"><CheckCircle2 size={20} /></div>
                     <div className="stat-info">
-                        <h3>Fiabilité Données</h3>
-                        <p className="stat-value">98%</p>
+                        <span className="stat-value">98.4%</span>
+                        <p style={{fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700}}>FIABILITÉ IA</p>
                     </div>
                 </div>
             </div>
 
             <div className="charts-grid-layout">
-                <div className="chart-card">
-                    <h2>Répartition par Infrastructure</h2>
+                <aside className="chart-card">
+                    <h2>Répartition par Secteur</h2>
                     <div className="type-list">
-                        {Object.entries(stats.infrastructure_distribution || {}).map(([type, count]) => (
+                        {Object.entries(stats.infrastructure_distribution).map(([type, count]) => (
                             <div key={type} className="type-item">
                                 <span className="type-name">{type}</span>
                                 <div className="type-bar-bg">
                                     <div className="type-bar-fill" style={{ width: `${(count / stats.total_reports) * 100}%` }}></div>
                                 </div>
-                                <span className="type-count">{count} rapports</span>
+                                <span className="type-count">{count} reports</span>
                             </div>
                         ))}
                     </div>
-                </div>
+                </aside>
 
-                <div className="feed-card">
-                    <h2>Flux de Crise en Temps Réel</h2>
+                <section className="feed-card">
+                    <h2>Flux de Crise Tactique</h2>
                     <div className="feed-list">
-                        {reports.slice(0, 10).map((r) => (
+                        {reports.slice(0, 15).map((r) => (
                             <div key={r._id} className="feed-item">
-                                <div className="feed-img" onClick={() => openMedia('image', r.image_url)}>
-                                    {r.image_url ? (
-                                        <img src={getMediaUrl(r.image_url)} alt="Evidence" />
-                                    ) : (
-                                        <div className="img-placeholder">📸</div>
-                                    )}
+                                <div className="feed-img-box" onClick={() => openMedia(r.image_url)}>
+                                    <img src={getMediaUrl(r.image_url)} alt="Media" />
                                 </div>
+                                
                                 <div className="feed-info">
-                                    <div className="feed-meta">
-                                        <span className="feed-type">{r.crisis_type}</span>
-                                        <span className="feed-time">{new Date(r.created_at).toLocaleTimeString()}</span>
-                                        <button className="delete-report-btn" onClick={() => handleDeleteReport(r._id)} style={{marginLeft: 'auto'}}><Trash2 size={14}/></button>
-                                    </div>
-                                    
-                                    <h4 style={{fontSize: '0.9rem', marginBottom: '5px'}}>{r.infrastructure_name || r.infrastructure_type}</h4>
-                                    <p className="feed-desc">{r.description}</p>
-                                    
-                                    <div className="tactical-details" style={{display: 'flex', gap: '15px', marginTop: '10px'}}>
-                                        <div style={{display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', color: '#64748b'}}>
-                                            <Zap size={12} color="#f59e0b" /> {r.electricity_status}%
+                                    <div className="feed-top">
+                                        <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                                            <span className="feed-type-tag">{r.crisis_type}</span>
+                                            <span className="feed-time-tag">{new Date(r.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                                         </div>
-                                        <div style={{display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', color: '#64748b'}}>
-                                            <HeartPulse size={12} color="#ef4444" /> {r.health_services_status}%
+                                        <button className="delete-btn" onClick={() => handleDeleteReport(r._id)}><Trash2 size={14}/></button>
+                                    </div>
+
+                                    <h4 className="infra-title">{r.infrastructure_name || normalizeInfra(r.infrastructure_type)}</h4>
+                                    <p className="feed-description">{r.description}</p>
+                                    
+                                    <div className="tactical-badges">
+                                        <div className="t-badge elec">
+                                            <Zap size={12} /> {r.electricity_status > 50 ? 'Stable' : 'Coupé'} ({r.electricity_status}%)
+                                        </div>
+                                        <div className="t-badge health">
+                                            <HeartPulse size={12} /> {r.health_services_status > 50 ? 'Opérationnel' : 'HS'} ({r.health_services_status}%)
                                         </div>
                                         {r.debris_present === 'yes' && (
-                                            <div style={{display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', color: '#ef4444', fontWeight: 700}}>
-                                                <Trash size={12} /> DEBRIS
+                                            <div className="t-badge debris">
+                                                <Trash size={12} /> DÉBRIS PRÉSENTS
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="feed-location" style={{marginTop: '8px'}}><MapPin size={10} /> {r.text_location}</div>
+                                    <div className="feed-location-bar">
+                                        <MapPin size={10} /> {r.text_location || 'Lieu inconnu'}
+                                    </div>
                                 </div>
                             </div>
                         ))}
                     </div>
-                </div>
+                </section>
             </div>
 
             {selectedMedia && (
-                <div className="media-modal-overlay" onClick={closeMedia}>
-                    <div className="media-modal-box">
-                        <img src={selectedMedia.url} alt="Large" style={{maxWidth: '100%', maxHeight: '80vh', borderRadius: '15px'}} />
-                    </div>
+                <div className="modal-overlay-dash" onClick={closeMedia}>
+                    <img src={selectedMedia} alt="Evidence" style={{maxWidth: '90%', maxHeight: '90%', borderRadius: '20px'}} />
                 </div>
             )}
         </div>
