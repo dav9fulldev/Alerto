@@ -363,7 +363,8 @@ export const LanguageProvider = ({ children }) => {
 
     const t = translations[lang] || translations['fr'];
 
-    return React.createElement(LanguageContext.Provider, { value: { t, lang, setLang } }, children);
+    // On utilise React.createElement pour eviter le JSX dans un fichier .js
+    return React.createElement(LanguageContext.Provider, { value: { t, lang, setLang, translations } }, children);
 };
 
 export const useTranslation = () => {

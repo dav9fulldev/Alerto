@@ -11,7 +11,11 @@ import { API_BASE } from '../services/api';
 import { useTranslation } from '../services/i18n';
 
 const Dashboard = ({ onLogout }) => {
-    const { t, lang } = useTranslation();
+    const { translations, lang } = useTranslation();
+    
+    // Force Dashboard to FR or EN only
+    const dashLang = (lang === 'fr') ? 'fr' : 'en';
+    const t = translations[dashLang];
     const dashT = t.dashboard;
 
     const [reports, setReports] = useState([]);
