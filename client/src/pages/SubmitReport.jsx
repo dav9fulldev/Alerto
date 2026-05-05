@@ -5,7 +5,7 @@ import {
   ChevronRight, AlertTriangle, Zap, HeartPulse, Trash,
   Droplets, Flame, Car, Home, ShieldAlert, Bomb, PlusCircle,
   Construction, Building2, Store, Landmark, Factory, Bus, Users, Palmtree,
-  Crosshair, Navigation, Edit3
+  Crosshair, Navigation, Edit3, Mountain, Waves, Wind, Trees, CloudLightning
 } from 'lucide-react';
 import axios from 'axios';
 import { saveReportOffline } from '../services/storage';
@@ -45,18 +45,71 @@ const SubmitReport = ({ lang = 'fr' }) => {
     });
 
     const icons = {
-        'Séisme': <Home size={22} />, 'Inondation': <Droplets size={22} />, 'Cyclone': <Users size={22} />, 'Tsunami': <Droplets size={22} />,
-        'Incendie de forêt': <Flame size={22} />, 'Explosion': <Bomb size={22} />, 'Incident chimique': <ShieldAlert size={22} />,
-        'Conflit': <ShieldAlert size={22} />, 'Troubles civils': <Users size={22} />, 'Autre': <PlusCircle size={22} />,
-        'Earthquake': <Home size={22} />, 'Flood': <Droplets size={22} />, 'Hurricane / Cyclone': <Users size={22} />,
-        'Wildfire': <Flame size={22} />, 'Chemical Incident': <ShieldAlert size={22} />, 'Conflict': <ShieldAlert size={22} />,
-        'Civil Unrest': <Users size={22} />, 'Other': <PlusCircle size={22} />,
-        'Terremoto': <Home size={22} />, 'Inundación': <Droplets size={22} />, 'Huracán / Ciclón': <Users size={22} />,
-        'Incendio forestal': <Flame size={22} />, 'Explosión': <Bomb size={22} />, 'Incidente químico': <ShieldAlert size={22} />,
-        'Conflicto': <ShieldAlert size={22} />, 'Disturbios civiles': <Users size={22} />, 'Otro': <PlusCircle size={22} />,
-        'زلزال': <Home size={22} />, 'فيضان': <Droplets size={22} />, 'إعصار': <Users size={22} />, 'حريق غابات': <Flame size={22} />, 'انفجار': <Bomb size={22} />, 'حادث كيميائي': <ShieldAlert size={22} />, 'صراع': <ShieldAlert size={22} />, 'اضطرابات مدنية': <Users size={22} />,
-        '地震': <Home size={22} />, '洪水': <Droplets size={22} />, '飓风 / 台风': <Users size={22} />, '海啸': <Droplets size={22} />, '森林火灾': <Flame size={22} />, '爆炸': <Bomb size={22} />, '化学事故': <ShieldAlert size={22} />, '冲突': <ShieldAlert size={22} />, '内乱': <Users size={22} />,
-        'Землетрясение': <Home size={22} />, 'Наводнение': <Droplets size={22} />, 'Ураган / Циклон': <Users size={22} />, 'Цунами': <Droplets size={22} />, 'Лесной пожар': <Flame size={22} />, 'Взрыв': <Bomb size={22} />, 'Химический инцидент': <ShieldAlert size={22} />, 'Конфликт': <ShieldAlert size={22} />, 'Гражданские беспорядки': <Users size={22} />
+        // FR
+        'Tremblement de terre': <Mountain size={24} />,
+        'Inondation': <Droplets size={24} />,
+        'Tsunami': <Waves size={24} />,
+        'Ouragan / Cyclone': <Wind size={24} />,
+        'Feu de forêt': <Trees size={24} />,
+        'Explosion': <Bomb size={24} />,
+        'Incident chimique': <Factory size={24} />,
+        'Conflit': <ShieldAlert size={24} />,
+        'Troubles civils': <Users size={24} />,
+        
+        // EN
+        'Earthquake': <Mountain size={24} />,
+        'Flood': <Droplets size={24} />,
+        'Hurricane / Cyclone': <Wind size={24} />,
+        'Wildfire': <Flame size={24} />,
+        'Chemical Incident': <Factory size={24} />,
+        'Conflict': <ShieldAlert size={24} />,
+        'Civil Unrest': <Users size={24} />,
+        
+        // ES
+        'Terremoto': <Mountain size={24} />,
+        'Inundación': <Droplets size={24} />,
+        'Huracán / Ciclón': <Wind size={24} />,
+        'Incendio forestal': <Trees size={24} />,
+        'Explosión': <Bomb size={24} />,
+        'Incidente químico': <Factory size={24} />,
+        'Conflicto': <ShieldAlert size={24} />,
+        'Disturbios civiles': <Users size={24} />,
+        
+        // AR
+        'زلزال': <Mountain size={24} />,
+        'فيضان': <Droplets size={24} />,
+        'إعصار': <Wind size={24} />,
+        'حريق غابات': <Trees size={24} />,
+        'انفجار': <Bomb size={24} />,
+        'حادث كيميائي': <Factory size={24} />,
+        'صراع': <ShieldAlert size={24} />,
+        'اضطرابات مدنية': <Users size={24} />,
+        
+        // ZH
+        '地震': <Mountain size={24} />,
+        '洪水': <Droplets size={24} />,
+        '飓风 / 台风': <Wind size={24} />,
+        '海啸': <Waves size={24} />,
+        '森林火灾': <Trees size={24} />,
+        '爆炸': <Bomb size={24} />,
+        '化学事故': <Factory size={24} />,
+        '冲突': <ShieldAlert size={24} />,
+        '内乱': <Users size={24} />,
+        
+        // RU
+        'Землетрясение': <Mountain size={24} />,
+        'Наводнение': <Droplets size={24} />,
+        'Ураган / Циклон': <Wind size={24} />,
+        'Цунами': <Waves size={24} />,
+        'Лесной пожар': <Trees size={24} />,
+        'Взрыв': <Bomb size={24} />,
+        'Химический инцидент': <Factory size={24} />,
+        'Конфликт': <ShieldAlert size={24} />,
+        'Гражданские беспорядки': <Users size={24} />,
+        
+        'Autre': <PlusCircle size={24} />,
+        'Other': <PlusCircle size={24} />,
+        'Otro': <PlusCircle size={24} />
     };
 
     useEffect(() => {
@@ -82,7 +135,6 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     updateLocation(latitude, longitude);
                 },
                 () => {
-                    // Fail silently, retry low accuracy
                     navigator.geolocation.getCurrentPosition(
                         (pos) => updateLocation(pos.coords.latitude, pos.coords.longitude),
                         () => {
@@ -136,7 +188,6 @@ const SubmitReport = ({ lang = 'fr' }) => {
                 mediaUrl = res.data.url;
             }
 
-            // Fallback coordinates if GPS failed (Abidjan center)
             const coords = location ? [location.lng, location.lat] : [-4.0305, 5.3484];
 
             const payload = {
