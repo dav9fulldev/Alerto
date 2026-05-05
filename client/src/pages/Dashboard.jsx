@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { BarChart3, AlertTriangle, CheckCircle2, Download, Table, Trash2, MapPin, Zap, HeartPulse, Trash, ExternalLink, ShieldAlert } from 'lucide-react';
+import { 
+    BarChart3, AlertTriangle, CheckCircle2, Download, Table, Trash2, 
+    MapPin, Zap, HeartPulse, Trash, ExternalLink, ShieldAlert, 
+    LogOut, ShieldCheck 
+} from 'lucide-react';
 import './Dashboard.css';
 
 import { API_BASE } from '../services/api';
 
-const Dashboard = ({ lang = 'fr' }) => {
+const Dashboard = ({ lang = 'fr', onLogout }) => {
     const [reports, setReports] = useState([]);
     const [stats, setStats] = useState({
         total_reports: 0,
@@ -20,24 +24,22 @@ const Dashboard = ({ lang = 'fr' }) => {
     const [error, setError] = useState(null);
     const [selectedMedia, setSelectedMedia] = useState(null);
 
-    // Infrastructure Normalizer (to avoid language mix in chart)
+    // Infrastructure Normalizer
     const normalizeInfra = (type) => {
         if (!type) return "Autre";
         const t = type.toLowerCase();
-        if (t.includes('resid') || t.includes('住宅') || t.includes('residencial')) return "Résidentiel";
-        if (t.includes('comm') || t.includes('商业') || t.includes('comercial')) return "Commercial";
-        if (t.includes('gouv') || t.includes('政府') || t.includes('gubernamental')) return "Gouvernemental";
-        if (t.includes('public') || t.includes('公共') || t.includes('servicios p')) return "Services Publics";
-        if (t.includes('trans') || t.includes('交通') || t.includes('transporte')) return "Transport";
-        if (t.includes('commu') || t.includes('社区') || t.includes('comunitario')) return "Communautaire";
+        if (t.includes('resid')) return "Résidentiel";
+        if (t.includes('comm')) return "Commercial";
+        if (t.includes('gouv')) return "Gouvernemental";
+        if (t.includes('public')) return "Services Publics";
+        if (t.includes('trans')) return "Transport";
         return "Autre";
     };
 
     const getMediaUrl = (url) => {
         if (!url) return null;
         if (url.startsWith('http')) return url;
-        if (url.startsWith('/')) return `${API_BASE}${url}`;
-        return `${API_BASE}/uploads/${url}`;
+        return `${API_BASE}${url}`;
     };
 
     const openMedia = (url) => setSelectedMedia(getMediaUrl(url));
@@ -58,7 +60,7 @@ const Dashboard = ({ lang = 'fr' }) => {
     };
 
     const handleDeleteReport = async (id) => {
-        if (!window.confirm("Supprimer ?")) return;
+        if (!window.confirm("Supprimer ce rapport ?")) return;
         try {
             await axios.delete(`${API_BASE}/reports/${id}`, { 
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('alerto_token')}` } 
@@ -75,7 +77,6 @@ const Dashboard = ({ lang = 'fr' }) => {
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
             setReports(reports.map(r => r._id === id ? { ...r, is_flagged: isFlagged } : r));
-            // Update stats too
             setStats(prev => ({
                 ...prev,
                 nsfw_flagged: isFlagged ? prev.nsfw_flagged + 1 : prev.nsfw_flagged - 1
@@ -93,7 +94,6 @@ const Dashboard = ({ lang = 'fr' }) => {
                     axios.get(`${API_BASE}/reports/admin/all`, { headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
                 
-                // Aggregate normalized infra stats
                 const normalizedStats = {};
                 Object.entries(statsRes.data.infrastructure_distribution).forEach(([key, val]) => {
                     const norm = normalizeInfra(key);
@@ -108,18 +108,21 @@ const Dashboard = ({ lang = 'fr' }) => {
         fetchData();
     }, []);
 
-    if (loading) return <div className="dashboard-container">Analyse en cours...</div>;
+    if (loading) return <div className="dashboard-loading">Analyse des flux tactiques...</div>;
 
     return (
         <div className="dashboard-container">
             <header className="dash-header">
-                <div>
-                    <h1>Plateforme ALERTO PNUD</h1>
-                    <p style={{fontSize: '0.8rem', color: 'var(--text-dim)'}}>Surveillance tactique et évaluation des dommages</p>
+                <div className="dash-brand">
+                    <ShieldCheck size={28} color="#0ea5e9" />
+                    <div>
+                        <h1>Plateforme ALERTO PNUD</h1>
+                        <p>Surveillance tactique et évaluation des dommages</p>
+                    </div>
                 </div>
-                <div className="export-actions">
-                    <button onClick={exportToCSV} className="export-btn csv"><Table size={14} /> CSV</button>
-                    <button className="export-btn geojson"><Download size={14} /> GeoJSON</button>
+                <div className="dash-actions">
+                    <button onClick={exportToCSV} className="dash-btn-outline"><Table size={16} /> CSV</button>
+                    <button onClick={onLogout} className="dash-btn-danger"><LogOut size={16} /> Déconnexion</button>
                 </div>
             </header>
 
@@ -128,35 +131,35 @@ const Dashboard = ({ lang = 'fr' }) => {
                     <div className="stat-icon total"><AlertTriangle size={20} /></div>
                     <div className="stat-info">
                         <span className="stat-value">{stats.total_reports}</span>
-                        <p style={{fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700}}>RAPPORTS TOTAUX</p>
+                        <p>RAPPORTS TOTAUX</p>
                     </div>
                 </div>
                 <div className="stat-card">
                     <div className="stat-icon critical"><Trash2 size={20} /></div>
                     <div className="stat-info">
                         <span className="stat-value">{stats.critical_zones}</span>
-                        <p style={{fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700}}>DÉGÂTS COMPLETS</p>
+                        <p>DÉGÂTS COMPLETS</p>
                     </div>
                 </div>
                 <div className="stat-card">
                     <div className="stat-icon duplicates"><CheckCircle2 size={20} /></div>
                     <div className="stat-info">
                         <span className="stat-value">98.4%</span>
-                        <p style={{fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700}}>FIABILITÉ IA</p>
+                        <p>FIABILITÉ IA</p>
                     </div>
                 </div>
-                <div className={`stat-card ${stats.nsfw_flagged > 0 ? 'pulse-alert' : ''}`} style={{cursor: 'pointer'}} onClick={() => setViewMode('flagged')}>
+                <div className={`stat-card ${stats.nsfw_flagged > 0 ? 'pulse-alert' : ''}`} onClick={() => setViewMode('flagged')}>
                     <div className="stat-icon nsfw"><ShieldAlert size={20} /></div>
                     <div className="stat-info">
-                        <span className="stat-value" style={{color: stats.nsfw_flagged > 0 ? '#ef4444' : 'inherit'}}>{stats.nsfw_flagged}</span>
-                        <p style={{fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700}}>CONTENUS SIGNALÉS</p>
+                        <span className="stat-value">{stats.nsfw_flagged}</span>
+                        <p>SIGNALÉS</p>
                     </div>
                 </div>
             </div>
 
             <div className="charts-grid-layout">
                 <aside className="chart-card">
-                    <h2>Répartition par Secteur</h2>
+                    <h2>Secteurs Impactés</h2>
                     <div className="type-list">
                         {Object.entries(stats.infrastructure_distribution).map(([type, count]) => (
                             <div key={type} className="type-item">
@@ -164,82 +167,46 @@ const Dashboard = ({ lang = 'fr' }) => {
                                 <div className="type-bar-bg">
                                     <div className="type-bar-fill" style={{ width: `${(count / stats.total_reports) * 100}%` }}></div>
                                 </div>
-                                <span className="type-count">{count} reports</span>
+                                <span className="type-count">{count}</span>
                             </div>
                         ))}
                     </div>
                 </aside>
 
                 <section className="feed-card">
-                    <div className="feed-header-row">
-                        <h2>{viewMode === 'all' ? 'Flux de Crise Tactique' : 'Revue de Sécurité (Signalés)'}</h2>
-                        <div className="feed-filter-btns">
-                            <button className={`filter-chip ${viewMode === 'all' ? 'active' : ''}`} onClick={() => setViewMode('all')}>Tous</button>
-                            <button className={`filter-chip ${viewMode === 'flagged' ? 'active danger' : ''}`} onClick={() => setViewMode('flagged')}>Signalés {stats.nsfw_flagged > 0 && `(${stats.nsfw_flagged})`}</button>
+                    <div className="feed-header">
+                        <h2>{viewMode === 'all' ? 'Flux Tactique' : 'Revue de Sécurité'}</h2>
+                        <div className="feed-tabs">
+                            <button className={viewMode === 'all' ? 'active' : ''} onClick={() => setViewMode('all')}>Tous</button>
+                            <button className={viewMode === 'flagged' ? 'active alert' : ''} onClick={() => setViewMode('flagged')}>Signalés</button>
                         </div>
                     </div>
                     <div className="feed-list">
                         {reports
                             .filter(r => viewMode === 'all' || r.is_flagged)
-                            .slice(0, 15).map((r) => (
+                            .map((r) => (
                             <div key={r._id} className="feed-item">
-                                <div className="feed-img-box" onClick={() => openMedia(r.image_url)}>
+                                <div className="feed-media" onClick={() => openMedia(r.image_url)}>
                                     <img src={getMediaUrl(r.image_url)} alt="Media" />
                                 </div>
-                                
-                                <div className="feed-info">
-                                    <div className="feed-top">
-                                        <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
-                                            <span className="feed-type-tag">{r.crisis_type}</span>
-                                            <span className="feed-time-tag">{new Date(r.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-                                        </div>
-                                        <div className="feed-actions">
+                                <div className="feed-body">
+                                    <div className="feed-meta">
+                                        <span className="badge-crisis">{r.crisis_type}</span>
+                                        <div className="feed-ctrl">
                                             {r.is_flagged && (
-                                                <button 
-                                                    className="mod-btn approve" 
-                                                    title="Marquer comme sûr"
-                                                    onClick={() => handleModerate(r._id, false)}
-                                                >
-                                                    <CheckCircle2 size={14} />
-                                                </button>
+                                                <button className="btn-approve" onClick={() => handleModerate(r._id, false)}><CheckCircle2 size={14} /></button>
                                             )}
-                                            <button className="delete-btn" onClick={() => handleDeleteReport(r._id)}><Trash2 size={14}/></button>
+                                            <button className="btn-delete" onClick={() => handleDeleteReport(r._id)}><Trash2 size={14} /></button>
                                         </div>
                                     </div>
-
-                                    <h4 className="infra-title">{r.infrastructure_name || normalizeInfra(r.infrastructure_type)}</h4>
-                                    <p className="feed-description">{r.description}</p>
-                                    
-                                    <div className="tactical-badges">
-                                        <div className="t-badge elec">
-                                            <Zap size={12} /> {r.electricity_status > 50 ? 'Stable' : 'Coupé'} ({r.electricity_status}%)
-                                        </div>
-                                        <div className="t-badge health">
-                                            <HeartPulse size={12} /> {r.health_services_status > 50 ? 'Opérationnel' : 'HS'} ({r.health_services_status}%)
-                                        </div>
-                                        
-                                        {/* AI & SAFETY INSIGHTS */}
-                                        {r.ai_suggested_level && (
-                                            <div className="t-badge ai-insight">
-                                                <BarChart3 size={12} /> IA: {r.ai_suggested_level.toUpperCase()}
-                                            </div>
-                                        )}
-                                        {r.is_flagged && (
-                                            <div className="t-badge safety-flag">
-                                                <ShieldAlert size={12} /> SÉCURITÉ / NSFW
-                                            </div>
-                                        )}
-
-                                        {r.debris_present === 'yes' && (
-                                            <div className="t-badge debris">
-                                                <Trash size={12} /> DÉBRIS PRÉSENTS
-                                            </div>
-                                        )}
+                                    <h3>{r.infrastructure_name || normalizeInfra(r.infrastructure_type)}</h3>
+                                    <p>{r.description}</p>
+                                    <div className="feed-indicators">
+                                        <div className="indicator"><Zap size={12} /> Elec: {r.electricity_status}%</div>
+                                        <div className="indicator"><HeartPulse size={12} /> Santé: {r.health_services_status}%</div>
+                                        {r.is_flagged && <div className="indicator safety"><ShieldAlert size={12} /> NSFW</div>}
                                     </div>
-
-                                    <div className="feed-location-bar">
-                                        <MapPin size={10} /> {r.text_location || 'Lieu inconnu'}
-                                    </div>
+                                    <div className="feed-loc"><MapPin size={12} /> {r.text_location}</div>
                                 </div>
                             </div>
                         ))}
@@ -248,8 +215,8 @@ const Dashboard = ({ lang = 'fr' }) => {
             </div>
 
             {selectedMedia && (
-                <div className="modal-overlay-dash" onClick={closeMedia}>
-                    <img src={selectedMedia} alt="Evidence" style={{maxWidth: '90%', maxHeight: '90%', borderRadius: '20px'}} />
+                <div className="media-modal" onClick={closeMedia}>
+                    <img src={selectedMedia} alt="Full view" />
                 </div>
             )}
         </div>
