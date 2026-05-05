@@ -67,8 +67,22 @@
 .stat-icon.total { background: #e0f2fe; color: #0ea5e9; }
 .stat-icon.critical { background: #fee2e2; color: #ef4444; }
 .stat-icon.duplicates { background: #fef3c7; color: #f59e0b; }
+.stat-icon.nsfw { background: #fef2f2; color: #b91c1c; }
 
-.stat-icon.t-badge.elec { background: #e0f2fe; color: #0369a1; }
+.pulse-alert { animation: pulse-shadow 2s infinite; border: 1px solid #fecaca; }
+@keyframes pulse-shadow {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.feed-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.feed-filter-btns { display: flex; gap: 8px; }
+.filter-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.filter-chip.active { background: #0f172a; color: white; border-color: #0f172a; }
+.filter-chip.active.danger { background: #b91c1c; border-color: #b91c1c; }
+
+.t-badge.elec { background: #e0f2fe; color: #0369a1; }
 .t-badge.health { background: #fce7f3; color: #be185d; }
 .t-badge.debris { background: #fef3c7; color: #92400e; }
 .t-badge.ai-insight { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }

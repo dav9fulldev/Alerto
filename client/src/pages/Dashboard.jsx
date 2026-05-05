@@ -11,9 +11,11 @@ const Dashboard = ({ lang = 'fr' }) => {
         total_reports: 0,
         critical_zones: 0,
         duplicates_detected: 0,
+        nsfw_flagged: 0,
+        nsfw_detected: 0,
         infrastructure_distribution: {}
     });
-    const [loading, setLoading] = useState(true);
+    const [viewMode, setViewMode] = useState('all'); // 'all' or 'flagged'
     const [error, setError] = useState(null);
     const [selectedMedia, setSelectedMedia] = useState(null);
 
@@ -126,6 +128,13 @@ const Dashboard = ({ lang = 'fr' }) => {
                         <p style={{fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700}}>FIABILITÉ IA</p>
                     </div>
                 </div>
+                <div className={`stat-card ${stats.nsfw_flagged > 0 ? 'pulse-alert' : ''}`} style={{cursor: 'pointer'}} onClick={() => setViewMode('flagged')}>
+                    <div className="stat-icon nsfw"><ShieldAlert size={20} /></div>
+                    <div className="stat-info">
+                        <span className="stat-value" style={{color: stats.nsfw_flagged > 0 ? '#ef4444' : 'inherit'}}>{stats.nsfw_flagged}</span>
+                        <p style={{fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700}}>CONTENUS SIGNALÉS</p>
+                    </div>
+                </div>
             </div>
 
             <div className="charts-grid-layout">
@@ -145,9 +154,17 @@ const Dashboard = ({ lang = 'fr' }) => {
                 </aside>
 
                 <section className="feed-card">
-                    <h2>Flux de Crise Tactique</h2>
+                    <div className="feed-header-row">
+                        <h2>{viewMode === 'all' ? 'Flux de Crise Tactique' : 'Revue de Sécurité (Signalés)'}</h2>
+                        <div className="feed-filter-btns">
+                            <button className={`filter-chip ${viewMode === 'all' ? 'active' : ''}`} onClick={() => setViewMode('all')}>Tous</button>
+                            <button className={`filter-chip ${viewMode === 'flagged' ? 'active danger' : ''}`} onClick={() => setViewMode('flagged')}>Signalés {stats.nsfw_flagged > 0 && `(${stats.nsfw_flagged})`}</button>
+                        </div>
+                    </div>
                     <div className="feed-list">
-                        {reports.slice(0, 15).map((r) => (
+                        {reports
+                            .filter(r => viewMode === 'all' || r.is_flagged)
+                            .slice(0, 15).map((r) => (
                             <div key={r._id} className="feed-item">
                                 <div className="feed-img-box" onClick={() => openMedia(r.image_url)}>
                                     <img src={getMediaUrl(r.image_url)} alt="Media" />
