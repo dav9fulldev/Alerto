@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './SubmitReport.css';
-import { MapPin, Camera, X, Check, Info, Phone, Mail, Loader2, ChevronRight, AlertTriangle, Zap, HeartPulse, Trash } from 'lucide-react';
+import { 
+  MapPin, Camera, X, Check, Info, Phone, Mail, Loader2, 
+  ChevronRight, AlertTriangle, Zap, HeartPulse, Trash,
+  Droplets, Flame, Car, Home, ShieldAlert, Bomb, PlusCircle,
+  Construction, Building2, Store, Landmark, Factory, Bus, Users, Palmtree
+} from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
@@ -36,16 +41,18 @@ const SubmitReport = ({ lang = 'fr' }) => {
     const [imagePreview, setImagePreview] = useState(null);
     const [selectedImageFile, setSelectedImageFile] = useState(null);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+    const deferredPrompt = useRef(null);
 
     const [formData, setFormData] = useState({
         description: '',
         damage_level: 'minime', 
-        infrastructure_type: t.options.infra[0],
+        infrastructure_type: (t.options && t.options.infra) ? t.options.infra[0] : '',
         infrastructure_name: '',
-        crisis_type: t.options.crisis[1], // Index 1 to skip category header if any
+        crisis_type: 'Inondation',
         crisis_type_other: '',
         debris_present: 'no',
-        text_location: t.gps_searching,
+        text_location: t.gps_searching || 'GPS...',
         contact_phone: '',
         contact_email: '',
         allow_contact: true,
@@ -54,36 +61,48 @@ const SubmitReport = ({ lang = 'fr' }) => {
         urgent_needs: []
     });
 
-    // Update infrastructure_type if lang changes
-    useEffect(() => {
-        setFormData(prev => ({
-            ...prev,
-            infrastructure_type: t.options.infra[0],
-            crisis_type: t.options.crisis[1]
-        }));
-    }, [lang]);
-
     const crisisOptions = [
-        { id: 'Inondation', icon: '💧', label: lang === 'fr' ? 'Inondation' : 'Flood' },
-        { id: 'Incendie', icon: '🔥', label: lang === 'fr' ? 'Incendie' : 'Fire' },
-        { id: 'Accident', icon: '🚗', label: lang === 'fr' ? 'Accident' : 'Accident' },
-        { id: 'Séisme', icon: '🏠', label: lang === 'fr' ? 'Séisme' : 'Earthquake' },
-        { id: 'Conflit', icon: '⚔️', label: lang === 'fr' ? 'Conflit' : 'Conflict' },
-        { id: 'Explosion', icon: '💥', label: lang === 'fr' ? 'Explosion' : 'Explosion' },
-        { id: 'Autre', icon: '➕', label: lang === 'fr' ? 'Autre' : 'Other' }
+        { id: 'Inondation', icon: <Droplets size={24} />, label: lang === 'fr' ? 'Inondation' : 'Flood' },
+        { id: 'Incendie', icon: <Flame size={24} />, label: lang === 'fr' ? 'Incendie' : 'Fire' },
+        { id: 'Accident', icon: <Car size={24} />, label: lang === 'fr' ? 'Accident' : 'Accident' },
+        { id: 'Séisme', icon: <Home size={24} />, label: lang === 'fr' ? 'Séisme' : 'Earthquake' },
+        { id: 'Conflit', icon: <ShieldAlert size={24} />, label: lang === 'fr' ? 'Conflit' : 'Conflict' },
+        { id: 'Explosion', icon: <Bomb size={24} />, label: lang === 'fr' ? 'Explosion' : 'Explosion' },
+        { id: 'Autre', icon: <PlusCircle size={24} />, label: lang === 'fr' ? 'Autre' : 'Other' }
     ];
 
     useEffect(() => {
         const handleStatus = () => setIsOnline(navigator.onLine);
+        const handleBeforeInstall = (e) => {
+            e.preventDefault();
+            deferredPrompt.current = e;
+            setShowInstallPrompt(true);
+        };
+
         window.addEventListener('online', handleStatus);
         window.addEventListener('offline', handleStatus);
+        window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+        
         getGPS();
         if (navigator.onLine) syncOfflineData();
+        
         return () => {
             window.removeEventListener('online', handleStatus);
             window.removeEventListener('offline', handleStatus);
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
         };
     }, []);
+
+    const handleInstallClick = async () => {
+        if (!deferredPrompt.current) return;
+        deferredPrompt.current.prompt();
+        const { outcome } = await deferredPrompt.current.userChoice;
+        if (outcome === 'accepted') {
+            console.log('User accepted install');
+            setShowInstallPrompt(false);
+        }
+        deferredPrompt.current = null;
+    };
 
     const getGPS = () => {
         if ("geolocation" in navigator) {
@@ -114,69 +133,57 @@ const SubmitReport = ({ lang = 'fr' }) => {
         }
     };
 
-    const saveToLocalHistory = (report) => {
-        const history = JSON.parse(localStorage.getItem('alerto_my_reports') || '[]');
-        const newEntry = {
-            ...report,
-            id: Date.now(),
-            date: new Date().toISOString(),
-            crisis: report.crisis_type,
-            status: navigator.onLine ? 'sent' : 'pending',
-            location: report.text_location
-        };
-        localStorage.setItem('alerto_my_reports', JSON.stringify([newEntry, ...history]));
-    };
-
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         setLoading(true);
 
-        let imageUrl = "";
-        if (selectedImageFile) {
-            const uploadData = new FormData();
-            uploadData.append('file', selectedImageFile);
-            try {
+        try {
+            let imageUrl = "";
+            if (selectedImageFile) {
+                const uploadData = new FormData();
+                uploadData.append('file', selectedImageFile);
                 const res = await axios.post(`${API_BASE}/reports/upload`, uploadData);
                 imageUrl = res.data.url;
-            } catch (err) { console.error("Upload failed", err); }
-        }
+            }
 
-        const payload = {
-            ...formData,
-            image_url: imageUrl,
-            damage_level: formData.damage_level === 1 ? 'minime' : formData.damage_level === 2 ? 'partiel' : 'complet',
-            location: {
-                type: "Point",
-                coordinates: location ? [location.lng, location.lat] : [0, 0]
-            },
-            user_id: localStorage.getItem('alerto_user_id')
-        };
+            const payload = {
+                ...formData,
+                image_url: imageUrl,
+                damage_level: formData.damage_level === 1 ? 'minime' : formData.damage_level === 2 ? 'partiel' : 'complet',
+                location: {
+                    type: "Point",
+                    coordinates: location ? [location.lng, location.lat] : [0, 0]
+                },
+                user_id: localStorage.getItem('alerto_user_id')
+            };
 
-        saveToLocalHistory(payload);
+            const history = JSON.parse(localStorage.getItem('alerto_my_reports') || '[]');
+            const newEntry = { ...payload, id: Date.now(), date: new Date().toISOString(), status: navigator.onLine ? 'sent' : 'pending' };
+            localStorage.setItem('alerto_my_reports', JSON.stringify([newEntry, ...history]));
 
-        if (navigator.onLine) {
-            try {
+            if (navigator.onLine) {
                 await axios.post(API_URL, payload);
                 alert(t.online_success);
-                resetForm();
-            } catch (error) {
+            } else {
                 await saveReportOffline(payload);
-                alert("📡 Erreur réseau. Sauvegardé localement.");
+                alert(t.offline_success);
             }
-        } else {
-            await saveReportOffline(payload);
-            alert(t.offline_success);
+            resetForm();
+        } catch (error) {
+            console.error("Submission error", error);
+            alert("Erreur lors de l'envoi.");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const resetForm = () => {
         setFormData({
             description: '',
-            damage_level: 1,
-            infrastructure_type: t.options.infra[0],
+            damage_level: 'minime',
+            infrastructure_type: (t.options && t.options.infra) ? t.options.infra[0] : '',
             infrastructure_name: '',
-            crisis_type: t.options.crisis[1],
+            crisis_type: 'Inondation',
             crisis_type_other: '',
             debris_present: 'no',
             text_location: '',
@@ -194,7 +201,13 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     return (
         <div className="report-container">
-            {!isOnline && <div className="offline-banner-top">📡 {t.offline_success}</div>}
+            {showInstallPrompt && (
+                <div className="install-banner">
+                    <span>Installer ALERTO pour un accès hors-ligne rapide</span>
+                    <button onClick={handleInstallClick}>Installer</button>
+                    <X size={16} onClick={() => setShowInstallPrompt(false)} />
+                </div>
+            )}
             
             <div className="report-card">
                 <div className="mini-map-container">
@@ -211,7 +224,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                         </div>
                     )}
                     <div className="address-overlay">
-                        <MapPin size={16} color="#0ea5e9" />
+                        <MapPin size={14} color="#0ea5e9" />
                         <span className="address-text">{formData.text_location}</span>
                     </div>
                 </div>
@@ -224,9 +237,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     }}>
                         {formStep === 1 ? (
                             <>
-                                <h2 className="form-section-title">{t.title}</h2>
-                                
-                                <label className="input-label">{t.crisis_label}</label>
+                                <h2 className="form-section-title">{t.crisis_label}</h2>
                                 <div className="crisis-grid">
                                     {crisisOptions.map(opt => (
                                         <div 
@@ -247,7 +258,9 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                         value={formData.infrastructure_type}
                                         onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}
                                     >
-                                        {t.options.infra.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                        {t.options && t.options.infra ? t.options.infra.map(opt => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        )) : <option>Chargement...</option>}
                                     </select>
                                 </div>
 
@@ -257,8 +270,8 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                         <img src={imagePreview} alt="Preview" />
                                     ) : (
                                         <>
-                                            <Camera size={32} />
-                                            <span style={{fontSize: '0.8rem'}}>{t.take_photo}</span>
+                                            <Camera size={32} color="#94a3b8" />
+                                            <span style={{fontSize: '0.8rem', color: '#94a3b8'}}>{t.take_photo}</span>
                                         </>
                                     )}
                                     <input id="photo-input" type="file" accept="image/*" capture="environment" hidden onChange={handleImageCapture} />
@@ -279,7 +292,6 @@ const SubmitReport = ({ lang = 'fr' }) => {
                         ) : (
                             <>
                                 <h2 className="form-section-title">{t.needs}</h2>
-                                
                                 <div className="slider-group">
                                     <label className="input-label"><Zap size={14}/> {t.electricity}</label>
                                     <input type="range" min="0" max="100" value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: parseInt(e.target.value)})} />
@@ -293,26 +305,25 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                 </div>
 
                                 <div className="input-group">
-                                    <label className="input-label"><Trash size={14}/> {t.debris_label}</label>
+                                    <label className="input-label"><Construction size={14}/> {t.debris_label}</label>
                                     <select 
                                         className="input-modern"
                                         value={formData.debris_present}
                                         onChange={(e) => setFormData({...formData, debris_present: e.target.value})}
                                     >
-                                        <option value="no">{t.options.debris.no}</option>
-                                        <option value="yes">{t.options.debris.yes}</option>
+                                        <option value="no">{t.options?.debris?.no || 'Non'}</option>
+                                        <option value="yes">{t.options?.debris?.yes || 'Oui'}</option>
                                     </select>
                                 </div>
 
                                 <div className="contact-card-modern">
-                                    <p className="card-subtitle">{t.authorities}</p>
                                     <div className="input-with-icon">
                                         <Phone size={14} className="input-icon" />
-                                        <input type="tel" className="input-modern-clean" placeholder="Numéro" value={formData.contact_phone} onChange={(e) => setFormData({...formData, contact_phone: e.target.value})} />
+                                        <input type="tel" className="input-modern-clean" placeholder="Contact Téléphone" value={formData.contact_phone} onChange={(e) => setFormData({...formData, contact_phone: e.target.value})} />
                                     </div>
                                     <label className="checkbox-label">
                                         <input type="checkbox" checked={formData.allow_contact} onChange={(e) => setFormData({...formData, allow_contact: e.target.checked})} />
-                                        {t.options.urgent_needs.authorities}
+                                        Autoriser le contact des secours
                                     </label>
                                 </div>
                             </>
@@ -321,7 +332,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                         <div className="btn-row">
                             {formStep === 2 && (
                                 <button type="button" className="btn-back" onClick={() => setFormStep(1)}>
-                                    {lang === 'fr' ? 'Retour' : 'Back'}
+                                    {lang === 'fr' ? 'Précédent' : 'Back'}
                                 </button>
                             )}
                             <button type="submit" className="btn-primary" disabled={loading}>
@@ -331,22 +342,6 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     </form>
                 </div>
             </div>
-
-            <style>{`
-                .offline-banner-top { background: #fffbeb; color: #f59e0b; text-align: center; padding: 10px; font-size: 0.75rem; font-weight: 800; border-radius: 12px; margin-bottom: 15px; border: 1px solid #fef3c7; }
-                .input-group { margin-bottom: 15px; }
-                .input-label { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 8px; }
-                .btn-row { display: flex; gap: 12px; margin-top: 25px; }
-                .btn-back { flex: 1; padding: 16px; border-radius: 16px; border: 1px solid #e2e8f0; background: white; font-weight: 700; color: #64748b; cursor: pointer; }
-                .contact-card-modern { background: #f8fafc; padding: 15px; border-radius: 20px; border: 1px solid #e2e8f0; margin-top: 20px; }
-                .card-subtitle { font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 12px; }
-                .input-with-icon { position: relative; margin-bottom: 12px; }
-                .input-icon { position: absolute; left: 12px; top: 12px; color: #94a3b8; }
-                .input-modern-clean { width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 0.9rem; }
-                .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; color: #64748b; font-weight: 600; cursor: pointer; }
-                .spinner { animation: spin 1s linear infinite; }
-                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-            `}</style>
         </div>
     );
 };

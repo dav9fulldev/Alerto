@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export const translations = {
     fr: {
-        title: "🚨 ALERTO",
+        title: "ALERTO",
         subtitle: "Système de réponse rapide",
         take_photo: "Prendre une photo",
         description_label: "Description du sinistre",
@@ -16,8 +16,8 @@ export const translations = {
         submit_btn: "ENVOYER LE RAPPORT",
         gps_active: "GPS Actif",
         gps_searching: "Recherche GPS...",
-        online_success: "✅ Rapport envoyé en ligne !",
-        offline_success: "📡 Hors-ligne : Rapport sauvegardé localement.",
+        online_success: "Rapport envoyé en ligne !",
+        offline_success: "Mode Hors-ligne : Rapport sauvegardé localement.",
         select_placeholder: "Sélectionner...",
         electricity: "État de l'électricité",
         health: "Services de Santé",
@@ -79,7 +79,7 @@ export const translations = {
         }
     },
     en: {
-        title: "🚨 ALERTO",
+        title: "ALERTO",
         subtitle: "Rapid Response System",
         take_photo: "Take a photo",
         description_label: "Damage Description",
@@ -93,8 +93,8 @@ export const translations = {
         submit_btn: "SUBMIT REPORT",
         gps_active: "GPS Active",
         gps_searching: "Searching GPS...",
-        online_success: "✅ Report sent online!",
-        offline_success: "📡 Offline: Report saved locally.",
+        online_success: "Report sent online!",
+        offline_success: "Offline: Report saved locally.",
         select_placeholder: "Select...",
         electricity: "Electricity Status",
         health: "Health Services",
@@ -156,7 +156,7 @@ export const translations = {
         }
     },
     es: {
-        title: "🚨 ALERTO",
+        title: "ALERTO",
         subtitle: "Sistema de respuesta rápida",
         take_photo: "Tomar una foto",
         description_label: "Descripción del daño",
@@ -208,7 +208,7 @@ export const translations = {
         }
     },
     ar: {
-        title: "🚨 ALERTO",
+        title: "ALERTO",
         subtitle: "نظام الاستجابة السريعة",
         take_photo: "التقط صورة",
         description_label: "وصف الضرر",
@@ -260,7 +260,7 @@ export const translations = {
         }
     },
     zh: {
-        title: "🚨 ALERTO",
+        title: "ALERTO",
         subtitle: "快速反应系统",
         take_photo: "拍照",
         description_label: "损害描述",
@@ -312,7 +312,7 @@ export const translations = {
         }
     },
     ru: {
-        title: "🚨 ALERTO",
+        title: "ALERTO",
         subtitle: "Система быстрого реагирования",
         take_photo: "Сделать фото",
         description_label: "Описание повреждений",

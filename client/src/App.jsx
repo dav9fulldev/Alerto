@@ -12,8 +12,10 @@ import {
   Map as MapIcon, 
   Clock, 
   HelpCircle, 
-  Globe
+  Globe,
+  RefreshCw
 } from 'lucide-react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 import { v4 as uuidv4 } from 'uuid';
 
 function AppContent() {
@@ -21,6 +23,19 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState('map'); // map, report, history, help
   const { lang, setLang } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('alerto_token'));
+
+  const {
+    offlineReady: [offlineReady, setOfflineReady],
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegistered(r) {
+      console.log('SW Registered: ' + r);
+    },
+    onRegisterError(error) {
+      console.log('SW registration error', error);
+    },
+  });
 
   // Initialize Local User ID
   useEffect(() => {
@@ -57,6 +72,16 @@ function AppContent() {
   // --- CITIZEN VIEW (MAIN) ---
   return (
     <div className="app-container">
+      {(offlineReady || needRefresh) && (
+        <div className="pwa-toast">
+          <div className="message">
+            {offlineReady ? <span>App prête pour l'usage hors-ligne</span> : <span>Nouvelle version disponible !</span>}
+          </div>
+          {needRefresh && <button onClick={() => updateServiceWorker(true)}>Mettre à jour</button>}
+          <button onClick={() => { setOfflineReady(false); setNeedRefresh(false); }}>Fermer</button>
+        </div>
+      )}
+      
       {/* Global Language Switcher (Floating) */}
       <div className="global-lang-overlay">
         <select value={lang} onChange={(e) => setLang(e.target.value)} className="minimal-select">
