@@ -39,13 +39,13 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     const [formData, setFormData] = useState({
         description: '',
-        damage_level: 1, 
-        infrastructure_type: 'Résidentiel',
+        damage_level: 'minime', 
+        infrastructure_type: t.options.infra[0],
         infrastructure_name: '',
-        crisis_type: 'Inondation',
+        crisis_type: t.options.crisis[1], // Index 1 to skip category header if any
         crisis_type_other: '',
         debris_present: 'no',
-        text_location: 'Recherche de votre position...',
+        text_location: t.gps_searching,
         contact_phone: '',
         contact_email: '',
         allow_contact: true,
@@ -53,6 +53,15 @@ const SubmitReport = ({ lang = 'fr' }) => {
         health_services_status: 50,
         urgent_needs: []
     });
+
+    // Update infrastructure_type if lang changes
+    useEffect(() => {
+        setFormData(prev => ({
+            ...prev,
+            infrastructure_type: t.options.infra[0],
+            crisis_type: t.options.crisis[1]
+        }));
+    }, [lang]);
 
     const crisisOptions = [
         { id: 'Inondation', icon: '💧', label: lang === 'fr' ? 'Inondation' : 'Flood' },
@@ -111,7 +120,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             ...report,
             id: Date.now(),
             date: new Date().toISOString(),
-            crisis: report.crisis_type === 'Autre' ? report.crisis_type_other : report.crisis_type,
+            crisis: report.crisis_type,
             status: navigator.onLine ? 'sent' : 'pending',
             location: report.text_location
         };
@@ -148,7 +157,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         if (navigator.onLine) {
             try {
                 await axios.post(API_URL, payload);
-                alert("✅ Signalement envoyé !");
+                alert(t.online_success);
                 resetForm();
             } catch (error) {
                 await saveReportOffline(payload);
@@ -156,7 +165,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             }
         } else {
             await saveReportOffline(payload);
-            alert("📡 Mode Hors-ligne : Sauvegardé localement.");
+            alert(t.offline_success);
         }
         setLoading(false);
     };
@@ -165,9 +174,9 @@ const SubmitReport = ({ lang = 'fr' }) => {
         setFormData({
             description: '',
             damage_level: 1,
-            infrastructure_type: 'Résidentiel',
+            infrastructure_type: t.options.infra[0],
             infrastructure_name: '',
-            crisis_type: 'Inondation',
+            crisis_type: t.options.crisis[1],
             crisis_type_other: '',
             debris_present: 'no',
             text_location: '',
@@ -185,7 +194,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     return (
         <div className="report-container">
-            {!isOnline && <div className="offline-banner-top">📡 Mode Hors-Ligne</div>}
+            {!isOnline && <div className="offline-banner-top">📡 {t.offline_success}</div>}
             
             <div className="report-card">
                 <div className="mini-map-container">
@@ -198,7 +207,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     ) : (
                         <div className="map-placeholder">
                            <Loader2 className="spinner" />
-                           <span>Localisation...</span>
+                           <span>{t.gps_searching}</span>
                         </div>
                     )}
                     <div className="address-overlay">
@@ -215,9 +224,9 @@ const SubmitReport = ({ lang = 'fr' }) => {
                     }}>
                         {formStep === 1 ? (
                             <>
-                                <h2 className="form-section-title">Nouvelle Alerte</h2>
+                                <h2 className="form-section-title">{t.title}</h2>
                                 
-                                <label className="input-label">Type de Crise</label>
+                                <label className="input-label">{t.crisis_label}</label>
                                 <div className="crisis-grid">
                                     {crisisOptions.map(opt => (
                                         <div 
@@ -231,52 +240,36 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                     ))}
                                 </div>
 
-                                {formData.crisis_type === 'Autre' && (
-                                    <input 
-                                        type="text" 
-                                        className="input-modern" 
-                                        placeholder="Quelle crise ?"
-                                        value={formData.crisis_type_other}
-                                        onChange={(e) => setFormData({...formData, crisis_type_other: e.target.value})}
-                                        required
-                                    />
-                                )}
-
                                 <div className="input-group">
-                                    <label className="input-label">Type d'Infrastructure</label>
+                                    <label className="input-label">{t.infrastructure_label}</label>
                                     <select 
                                         className="input-modern"
                                         value={formData.infrastructure_type}
                                         onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}
                                     >
-                                        <option>Résidentiel</option>
-                                        <option>Commercial</option>
-                                        <option>Gouvernemental</option>
-                                        <option>Services Publics</option>
-                                        <option>Transport</option>
-                                        <option>Communautaire</option>
+                                        {t.options.infra.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                                     </select>
                                 </div>
 
-                                <label className="input-label">Preuve Visuelle</label>
+                                <label className="input-label">{t.take_photo}</label>
                                 <div className="photo-box" onClick={() => document.getElementById('photo-input').click()}>
                                     {imagePreview ? (
                                         <img src={imagePreview} alt="Preview" />
                                     ) : (
                                         <>
                                             <Camera size={32} />
-                                            <span style={{fontSize: '0.8rem'}}>Capturer une photo</span>
+                                            <span style={{fontSize: '0.8rem'}}>{t.take_photo}</span>
                                         </>
                                     )}
                                     <input id="photo-input" type="file" accept="image/*" capture="environment" hidden onChange={handleImageCapture} />
                                 </div>
 
                                 <div style={{marginTop: '20px'}}>
-                                    <label className="input-label">Description</label>
+                                    <label className="input-label">{t.description_label}</label>
                                     <textarea 
                                         className="input-modern" 
                                         rows="3" 
-                                        placeholder="Décrivez les dégâts..."
+                                        placeholder={t.description_placeholder}
                                         value={formData.description}
                                         onChange={(e) => setFormData({...formData, description: e.target.value})}
                                         required
@@ -285,41 +278,41 @@ const SubmitReport = ({ lang = 'fr' }) => {
                             </>
                         ) : (
                             <>
-                                <h2 className="form-section-title">Analyse Tactique</h2>
+                                <h2 className="form-section-title">{t.needs}</h2>
                                 
                                 <div className="slider-group">
-                                    <label className="input-label"><Zap size={14}/> Électricité</label>
+                                    <label className="input-label"><Zap size={14}/> {t.electricity}</label>
                                     <input type="range" min="0" max="100" value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: parseInt(e.target.value)})} />
-                                    <div className="slider-labels"><span>Coupé</span><span>Stable</span></div>
+                                    <div className="slider-labels"><span>0%</span><span>100%</span></div>
                                 </div>
 
                                 <div className="slider-group">
-                                    <label className="input-label"><HeartPulse size={14}/> Santé</label>
+                                    <label className="input-label"><HeartPulse size={14}/> {t.health}</label>
                                     <input type="range" min="0" max="100" value={formData.health_services_status} onChange={(e) => setFormData({...formData, health_services_status: parseInt(e.target.value)})} />
-                                    <div className="slider-labels"><span>Indispo.</span><span>OK</span></div>
+                                    <div className="slider-labels"><span>0%</span><span>100%</span></div>
                                 </div>
 
                                 <div className="input-group">
-                                    <label className="input-label"><Trash size={14}/> Débris à déblayer ?</label>
+                                    <label className="input-label"><Trash size={14}/> {t.debris_label}</label>
                                     <select 
                                         className="input-modern"
                                         value={formData.debris_present}
                                         onChange={(e) => setFormData({...formData, debris_present: e.target.value})}
                                     >
-                                        <option value="no">Non, accès dégagé</option>
-                                        <option value="yes">Oui, accès bloqué</option>
+                                        <option value="no">{t.options.debris.no}</option>
+                                        <option value="yes">{t.options.debris.yes}</option>
                                     </select>
                                 </div>
 
                                 <div className="contact-card-modern">
-                                    <p className="card-subtitle">Contact pour les secours</p>
+                                    <p className="card-subtitle">{t.authorities}</p>
                                     <div className="input-with-icon">
                                         <Phone size={14} className="input-icon" />
-                                        <input type="tel" className="input-modern-clean" placeholder="Numéro de téléphone" value={formData.contact_phone} onChange={(e) => setFormData({...formData, contact_phone: e.target.value})} />
+                                        <input type="tel" className="input-modern-clean" placeholder="Numéro" value={formData.contact_phone} onChange={(e) => setFormData({...formData, contact_phone: e.target.value})} />
                                     </div>
                                     <label className="checkbox-label">
                                         <input type="checkbox" checked={formData.allow_contact} onChange={(e) => setFormData({...formData, allow_contact: e.target.checked})} />
-                                        J'accepte d'être contacté
+                                        {t.options.urgent_needs.authorities}
                                     </label>
                                 </div>
                             </>
@@ -328,11 +321,11 @@ const SubmitReport = ({ lang = 'fr' }) => {
                         <div className="btn-row">
                             {formStep === 2 && (
                                 <button type="button" className="btn-back" onClick={() => setFormStep(1)}>
-                                    Retour
+                                    {lang === 'fr' ? 'Retour' : 'Back'}
                                 </button>
                             )}
                             <button type="submit" className="btn-primary" disabled={loading}>
-                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? 'Suivant' : 'Envoyer')}
+                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? (lang === 'fr' ? 'Suivant' : 'Next') : t.submit_btn)}
                             </button>
                         </div>
                     </form>

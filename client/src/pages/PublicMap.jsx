@@ -4,6 +4,7 @@ import L from 'leaflet';
 import axios from 'axios';
 import { API_BASE } from '../services/api';
 import { AlertTriangle, MapPin, Navigation } from 'lucide-react';
+import { translations } from '../services/i18n';
 import './PublicMap.css';
 
 // Custom icons based on crisis type
@@ -27,12 +28,12 @@ const createIcon = (type) => {
 };
 
 const PublicMap = ({ lang = 'fr' }) => {
+    const t = translations[lang] || translations.fr;
     const [reports, setReports] = useState([]);
     const [center, setCenter] = useState([5.3484, -4.0305]); // Abidjan default
 
     useEffect(() => {
         fetchReports();
-        // Get user position to center map
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => setCenter([pos.coords.latitude, pos.coords.longitude]),
@@ -61,7 +62,7 @@ const PublicMap = ({ lang = 'fr' }) => {
             <header className="map-header-overlay">
                 <div className="map-search-mock">
                     <Navigation size={18} color="#0ea5e9" />
-                    <span>Explorer les alertes à proximité...</span>
+                    <span>{lang === 'fr' ? 'Explorer les alertes...' : 'Explore alerts...'}</span>
                 </div>
             </header>
 
@@ -79,7 +80,7 @@ const PublicMap = ({ lang = 'fr' }) => {
                                 {report.image_url && <img src={report.image_url.startsWith('http') ? report.image_url : `${API_BASE}${report.image_url}`} alt="Evidence" />}
                                 <div className="popup-info">
                                     <div className="popup-badge" style={{ background: getDamageColor(report.damage_level) }}>
-                                        {report.damage_level.toUpperCase()}
+                                        {t.options.damage[report.damage_level] || report.damage_level.toUpperCase()}
                                     </div>
                                     <h3>{report.crisis_type}</h3>
                                     <p className="popup-loc"><MapPin size={12} /> {report.text_location}</p>
@@ -92,9 +93,9 @@ const PublicMap = ({ lang = 'fr' }) => {
             </MapContainer>
 
             <div className="map-legend-fab">
-                <div className="legend-item"><span className="dot red"></span> Complet</div>
-                <div className="legend-item"><span className="dot orange"></span> Partiel</div>
-                <div className="legend-item"><span className="dot green"></span> Minime</div>
+                <div className="legend-item"><span className="dot red"></span> {t.options.damage.complet}</div>
+                <div className="legend-item"><span className="dot orange"></span> {t.options.damage.partiel}</div>
+                <div className="legend-item"><span className="dot green"></span> {t.options.damage.minime}</div>
             </div>
         </div>
     );
