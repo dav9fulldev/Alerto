@@ -196,20 +196,41 @@ async def get_report(report_id: str, current_user: User = Depends(get_current_us
         raise HTTPException(status_code=400, detail="Invalid report ID format")
 
 @router.get("/")
-async def get_reports(current_user: User = Depends(get_current_user)):
-    """Récupère tous les rapports (Sécurisé)"""
+async def get_reports():
+    """Récupère tous les rapports (Public par défaut, admin si token présent)"""
     try:
         if reports_collection is None:
             raise HTTPException(status_code=500, detail="Database connection failed")
         
-        print(f"User {current_user.username} récupère tous les rapports...")
+        # On ne force pas Depends(get_current_user) ici pour que la route reste publique
+        # Mais on peut essayer d'extraire le token manuellement si besoin (simplifié ici pour le moment)
+        
+        reports = []
+        for report in reports_collection.find().sort("created_at", -1):
+            report["_id"] = str(report["_id"])
+            
+            # NOTE: Pour le Dashboard, on utilisera une route specifique /admin/reports plus tard 
+            # ou on filtrera ici si on ajoute la logique de token optionnel.
+            # Pour l'instant, on cache tout en public pour securiser.
+            report.pop("contact_phone", None)
+            report.pop("contact_email", None)
+            
+            reports.append(report)
+        return reports
+    except Exception as e:
+        print(f"ERREUR GET_REPORTS: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/admin/all")
+async def get_admin_reports(current_user: User = Depends(get_current_user)):
+    """Route SECURISEE pour le Dashboard - Accès complet aux données"""
+    try:
         reports = []
         for report in reports_collection.find().sort("created_at", -1):
             report["_id"] = str(report["_id"])
             reports.append(report)
         return reports
     except Exception as e:
-        print(f"ERREUR GET_REPORTS: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{report_id}")

@@ -3,34 +3,61 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
 import { API_BASE } from '../services/api';
-import { AlertTriangle, MapPin, Navigation } from 'lucide-react';
+import { AlertTriangle, MapPin, Navigation, Droplets, Flame, Car, Home, ShieldAlert, Bomb, PlusCircle } from 'lucide-react';
 import { translations } from '../services/i18n';
 import './PublicMap.css';
-
-// Custom icons based on crisis type
-const createIcon = (type) => {
-    const emojis = {
-        'Inondation': '💧',
-        'Incendie': '🔥',
-        'Accident': '🚗',
-        'Séisme': '🏠',
-        'Conflit': '⚔️',
-        'Explosion': '💥',
-        'Autre': '⚠️'
-    };
-    
-    return L.divIcon({
-        className: 'custom-div-icon',
-        html: `<div class="marker-pin">${emojis[type] || '📍'}</div>`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 30]
-    });
-};
+import { renderToStaticMarkup } from 'react-dom/server';
 
 const PublicMap = ({ lang = 'fr' }) => {
     const t = translations[lang] || translations.fr;
     const [reports, setReports] = useState([]);
     const [center, setCenter] = useState([5.3484, -4.0305]); // Abidjan default
+
+    const icons = {
+        'Inondation': <Droplets size={20} color="white" />,
+        'Incendie': <Flame size={20} color="white" />,
+        'Accident': <Car size={20} color="white" />,
+        'Séisme': <Home size={20} color="white" />,
+        'Conflit': <ShieldAlert size={20} color="white" />,
+        'Explosion': <Bomb size={20} color="white" />,
+        'Autre': <PlusCircle size={20} color="white" />,
+        'Flood': <Droplets size={20} color="white" />,
+        'Fire': <Flame size={20} color="white" />,
+        'Earthquake': <Home size={20} color="white" />,
+        'Conflict': <ShieldAlert size={20} color="white" />
+    };
+
+    const getDamageColor = (level) => {
+        if (level === 'complet') return '#ef4444';
+        if (level === 'partiel') return '#f59e0b';
+        return '#10b981';
+    };
+
+    const createIcon = (type, level) => {
+        const color = getDamageColor(level);
+        const iconMarkup = renderToStaticMarkup(
+            <div style={{ 
+                backgroundColor: color, 
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '50%', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                border: '2px solid white'
+            }}>
+                {icons[type] || <AlertTriangle size={16} color="white" />}
+            </div>
+        );
+        
+        return L.divIcon({
+            className: 'custom-leaflet-icon',
+            html: iconMarkup,
+            iconSize: [32, 32],
+            iconAnchor: [16, 32]
+        });
+    };
 
     useEffect(() => {
         fetchReports();
@@ -51,12 +78,6 @@ const PublicMap = ({ lang = 'fr' }) => {
         }
     };
 
-    const getDamageColor = (level) => {
-        if (level === 'complet') return '#ef4444';
-        if (level === 'partiel') return '#f59e0b';
-        return '#10b981';
-    };
-
     return (
         <div className="public-map-container">
             <header className="map-header-overlay">
@@ -73,14 +94,14 @@ const PublicMap = ({ lang = 'fr' }) => {
                     <Marker 
                         key={report._id} 
                         position={[report.location.coordinates[1], report.location.coordinates[0]]}
-                        icon={createIcon(report.crisis_type)}
+                        icon={createIcon(report.crisis_type, report.damage_level)}
                     >
                         <Popup className="modern-popup">
                             <div className="popup-card">
                                 {report.image_url && <img src={report.image_url.startsWith('http') ? report.image_url : `${API_BASE}${report.image_url}`} alt="Evidence" />}
                                 <div className="popup-info">
                                     <div className="popup-badge" style={{ background: getDamageColor(report.damage_level) }}>
-                                        {t.options.damage[report.damage_level] || report.damage_level.toUpperCase()}
+                                        {t.options?.damage?.[report.damage_level] || report.damage_level?.toUpperCase()}
                                     </div>
                                     <h3>{report.crisis_type}</h3>
                                     <p className="popup-loc"><MapPin size={12} /> {report.text_location}</p>
@@ -93,9 +114,9 @@ const PublicMap = ({ lang = 'fr' }) => {
             </MapContainer>
 
             <div className="map-legend-fab">
-                <div className="legend-item"><span className="dot red"></span> {t.options.damage.complet}</div>
-                <div className="legend-item"><span className="dot orange"></span> {t.options.damage.partiel}</div>
-                <div className="legend-item"><span className="dot green"></span> {t.options.damage.minime}</div>
+                <div className="legend-item"><span className="dot red"></span> {t.options?.damage?.complet || 'COMPLET'}</div>
+                <div className="legend-item"><span className="dot orange"></span> {t.options?.damage?.partiel || 'PARTIEL'}</div>
+                <div className="legend-item"><span className="dot green"></span> {t.options?.damage?.minime || 'MINIME'}</div>
             </div>
         </div>
     );

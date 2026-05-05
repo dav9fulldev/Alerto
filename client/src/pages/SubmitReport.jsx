@@ -4,9 +4,10 @@ import {
   MapPin, Camera, Video, X, Check, Info, Phone, Mail, Loader2, 
   ChevronRight, AlertTriangle, Zap, HeartPulse, Trash,
   Droplets, Flame, Car, Home, ShieldAlert, Bomb, PlusCircle,
-  Construction, Building2, Store, Landmark, Factory, Bus, Users, Palmtree
+  Construction, Building2, Store, Landmark, Factory, Bus, Users, Palmtree,
+  Crosshair
 } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
 import { saveReportOffline } from '../services/storage';
@@ -27,9 +28,30 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 const API_URL = `${API_BASE}/reports/`;
 
-const ChangeView = ({ center }) => {
+// Component to handle map clicks and centering
+const MapController = ({ location, setLocation, setAddress }) => {
   const map = useMap();
-  map.setView(center, 15);
+  
+  // Update view when location changes (auto GPS)
+  useEffect(() => {
+    if (location) map.setView([location.lat, location.lng], 15);
+  }, [location, map]);
+
+  // Handle map clicks for manual selection
+  useMapEvents({
+    click: async (e) => {
+      const { lat, lng } = e.latlng;
+      setLocation({ lat, lng });
+      try {
+        setAddress("Localisation manuelle...");
+        const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        if (res.data && res.data.display_name) {
+          setAddress(res.data.display_name);
+        }
+      } catch (err) { console.error(err); }
+    },
+  });
+
   return null;
 };
 
@@ -44,6 +66,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [showInstallPrompt, setShowInstallPrompt] = useState(false);
     const deferredPrompt = useRef(null);
+    const [gpsError, setGpsError] = useState(null);
 
     const [formData, setFormData] = useState({
         description: '',
@@ -62,7 +85,6 @@ const SubmitReport = ({ lang = 'fr' }) => {
         urgent_needs: []
     });
 
-    // Icons map for crisis
     const icons = {
         'Séisme': <Home size={22} />,
         'Inondation': <Droplets size={22} />,
@@ -73,13 +95,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
         'Incident chimique': <ShieldAlert size={22} />,
         'Conflit': <ShieldAlert size={22} />,
         'Troubles civils': <Users size={22} />,
-        'Autre': <PlusCircle size={22} />,
-        'Earthquake': <Home size={22} />,
-        'Flood': <Droplets size={22} />,
-        'Wildfire': <Flame size={22} />,
-        'Conflict': <ShieldAlert size={22} />,
-        'Civil Unrest': <Users size={22} />,
-        'Hurricane': <Users size={22} />
+        'Autre': <PlusCircle size={22} />
     };
 
     useEffect(() => {
@@ -104,31 +120,42 @@ const SubmitReport = ({ lang = 'fr' }) => {
         };
     }, []);
 
-    const handleInstallClick = async () => {
-        if (!deferredPrompt.current) return;
-        deferredPrompt.current.prompt();
-        const { outcome } = await deferredPrompt.current.userChoice;
-        if (outcome === 'accepted') setShowInstallPrompt(false);
-        deferredPrompt.current = null;
-    };
-
     const getGPS = () => {
+        setGpsError(null);
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
                     const { latitude, longitude } = position.coords;
-                    setLocation({ lat: latitude, lng: longitude });
-                    try {
-                        const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-                        if (res.data && res.data.display_name) {
-                            setFormData(prev => ({ ...prev, text_location: res.data.display_name }));
-                        }
-                    } catch (e) { console.error(e); }
+                    updateLocation(latitude, longitude);
                 },
-                (err) => console.error(err),
+                (err) => {
+                    console.warn("High accuracy GPS failed, retrying with low accuracy...", err);
+                    // Retry with low accuracy
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            const { latitude, longitude } = position.coords;
+                            updateLocation(latitude, longitude);
+                        },
+                        (err2) => {
+                            setGpsError(true);
+                            setFormData(prev => ({ ...prev, text_location: "GPS indisponible. Cliquez sur la carte." }));
+                        },
+                        { enableHighAccuracy: false, timeout: 10000 }
+                    );
+                },
                 { enableHighAccuracy: true, timeout: 5000 }
             );
         }
+    };
+
+    const updateLocation = async (lat, lng) => {
+        setLocation({ lat, lng });
+        try {
+            const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            if (res.data && res.data.display_name) {
+                setFormData(prev => ({ ...prev, text_location: res.data.display_name }));
+            }
+        } catch (e) { console.error(e); }
     };
 
     const handleMediaCapture = (e) => {
@@ -145,7 +172,8 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
-        if (!formData.crisis_type) { alert("Veuillez sélectionner le type de crise."); return; }
+        if (!formData.crisis_type) { alert("Type de crise requis"); return; }
+        if (!location) { alert("Position requise (cliquez sur la carte si le GPS échoue)"); return; }
         setLoading(true);
 
         try {
@@ -163,14 +191,10 @@ const SubmitReport = ({ lang = 'fr' }) => {
                 media_type: mediaType,
                 location: {
                     type: "Point",
-                    coordinates: location ? [location.lng, location.lat] : [0, 0]
+                    coordinates: [location.lng, location.lat]
                 },
                 user_id: localStorage.getItem('alerto_user_id')
             };
-
-            const history = JSON.parse(localStorage.getItem('alerto_my_reports') || '[]');
-            const newEntry = { ...payload, id: Date.now(), date: new Date().toISOString(), status: navigator.onLine ? 'sent' : 'pending' };
-            localStorage.setItem('alerto_my_reports', JSON.stringify([newEntry, ...history]));
 
             if (navigator.onLine) {
                 await axios.post(API_URL, payload);
@@ -181,7 +205,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
             }
             resetForm();
         } catch (error) {
-            alert("Erreur lors de l'envoi.");
+            alert("Erreur. Rapport mis en attente.");
         } finally {
             setLoading(false);
         }
@@ -212,29 +236,29 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
     return (
         <div className="report-container">
-            {showInstallPrompt && (
-                <div className="install-banner">
-                    <span>Installer ALERTO (Accès Direct)</span>
-                    <button onClick={handleInstallClick}>Installer</button>
-                    <X size={16} onClick={() => setShowInstallPrompt(false)} />
-                </div>
-            )}
-            
             <div className="report-card">
                 <div className="mini-map-container">
-                    {location ? (
-                        <MapContainer center={[location.lat, location.lng]} zoom={15} zoomControl={false} style={{ height: '100%', width: '100%' }}>
-                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                            <Marker position={[location.lat, location.lng]} />
-                            <ChangeView center={[location.lat, location.lng]} />
-                        </MapContainer>
-                    ) : (
-                        <div className="map-placeholder">
-                           <Loader2 className="spinner" />
-                           <span className="gps-status-text">{t.gps_searching}</span>
+                    <MapContainer center={location ? [location.lat, location.lng] : [5.3484, -4.0305]} zoom={13} zoomControl={false} style={{ height: '100%', width: '100%' }}>
+                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        {location && <Marker position={[location.lat, location.lng]} />}
+                        <MapController location={location} setLocation={setLocation} setAddress={(addr) => setFormData(p => ({...p, text_location: addr}))} />
+                    </MapContainer>
+                    
+                    {!location && (
+                        <div className="map-overlay-searching">
+                            <Loader2 className="spinner" />
+                            <span>{t.gps_searching}</span>
+                            <p style={{fontSize: '0.6rem', marginTop: '5px'}}>Ou cliquez sur la carte</p>
                         </div>
                     )}
-                    <div className="address-overlay-v2">
+
+                    <div className="map-actions-btns">
+                        <button type="button" className="recenter-btn" onClick={getGPS} title="Recalibrer GPS">
+                            <Crosshair size={18} />
+                        </button>
+                    </div>
+
+                    <div className="address-overlay-v3">
                         <MapPin size={14} color="#0ea5e9" />
                         <span className="address-text">{formData.text_location}</span>
                     </div>
@@ -251,10 +275,7 @@ const SubmitReport = ({ lang = 'fr' }) => {
                                 <h2 className="form-section-title">{t.crisis_label}</h2>
                                 <div className="crisis-grid">
                                     {t.options?.crisis?.map((label, idx) => {
-                                        const isCategory = label.startsWith('---');
-                                        if (isCategory) {
-                                            return <div key={idx} className="grid-category-header">{label.replace(/---/g, '')}</div>;
-                                        }
+                                        if (label.startsWith('---')) return <div key={idx} className="grid-category-header">{label.replace(/---/g, '')}</div>;
                                         return (
                                             <div 
                                                 key={idx} 
@@ -270,32 +291,18 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
                                 <div className="input-group">
                                     <label className="input-label">{t.infrastructure_label}</label>
-                                    <select 
-                                        className="input-modern"
-                                        value={formData.infrastructure_type}
-                                        onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}
-                                    >
-                                        {t.options?.infra?.map(opt => (
-                                            <option key={opt} value={opt}>{opt}</option>
-                                        ))}
+                                    <select className="input-modern" value={formData.infrastructure_type} onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}>
+                                        {t.options?.infra?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                                     </select>
                                 </div>
 
-                                <label className="input-label">Capturer Photo ou Vidéo</label>
                                 <div className="photo-box" onClick={() => document.getElementById('media-input').click()}>
                                     {mediaPreview ? (
-                                        mediaType === 'video' ? (
-                                            <video src={mediaPreview} className="preview-media" controls />
-                                        ) : (
-                                            <img src={mediaPreview} alt="Preview" className="preview-media" />
-                                        )
+                                        mediaType === 'video' ? <video src={mediaPreview} className="preview-media" controls /> : <img src={mediaPreview} alt="Preview" className="preview-media" />
                                     ) : (
                                         <div className="capture-placeholder">
-                                            <div className="icon-row">
-                                                <Camera size={28} />
-                                                <Video size={28} />
-                                            </div>
-                                            <span>Capturer en direct</span>
+                                            <Camera size={28} />
+                                            <span>Capture Directe (Photo/Vidéo)</span>
                                         </div>
                                     )}
                                     <input id="media-input" type="file" accept="image/*,video/*" capture="environment" hidden onChange={handleMediaCapture} />
@@ -303,64 +310,27 @@ const SubmitReport = ({ lang = 'fr' }) => {
 
                                 <div style={{marginTop: '20px'}}>
                                     <label className="input-label">{t.description_label}</label>
-                                    <textarea 
-                                        className="input-modern" 
-                                        rows="3" 
-                                        placeholder={t.description_placeholder}
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                        required
-                                    />
+                                    <textarea className="input-modern" rows="3" placeholder={t.description_placeholder} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required />
                                 </div>
                             </>
                         ) : (
                             <>
-                                <h2 className="form-section-title">Analyse Tactique</h2>
+                                <h2 className="form-section-title">Détails Terrain</h2>
                                 <div className="slider-group">
-                                    <label className="input-label"><Zap size={14}/> {t.electricity}</label>
+                                    <label className="input-label"><Zap size={14}/> Électricité</label>
                                     <input type="range" min="0" max="100" value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: parseInt(e.target.value)})} />
-                                    <div className="slider-labels"><span>0%</span><span>100%</span></div>
                                 </div>
-
                                 <div className="slider-group">
-                                    <label className="input-label"><HeartPulse size={14}/> {t.health}</label>
+                                    <label className="input-label"><HeartPulse size={14}/> Santé</label>
                                     <input type="range" min="0" max="100" value={formData.health_services_status} onChange={(e) => setFormData({...formData, health_services_status: parseInt(e.target.value)})} />
-                                    <div className="slider-labels"><span>Indisponible</span><span>OK</span></div>
-                                </div>
-
-                                <div className="input-group">
-                                    <label className="input-label"><Construction size={14}/> {t.debris_label}</label>
-                                    <select 
-                                        className="input-modern"
-                                        value={formData.debris_present}
-                                        onChange={(e) => setFormData({...formData, debris_present: e.target.value})}
-                                    >
-                                        <option value="no">{t.options?.debris?.no}</option>
-                                        <option value="yes">{t.options?.debris?.yes}</option>
-                                    </select>
-                                </div>
-
-                                <div className="contact-card-modern">
-                                    <div className="input-with-icon">
-                                        <Phone size={14} className="input-icon" />
-                                        <input type="tel" className="input-modern-clean" placeholder="Contact" value={formData.contact_phone} onChange={(e) => setFormData({...formData, contact_phone: e.target.value})} />
-                                    </div>
-                                    <label className="checkbox-label">
-                                        <input type="checkbox" checked={formData.allow_contact} onChange={(e) => setFormData({...formData, allow_contact: e.target.checked})} />
-                                        Autoriser le contact des secours
-                                    </label>
                                 </div>
                             </>
                         )}
 
                         <div className="btn-row">
-                            {formStep === 2 && (
-                                <button type="button" className="btn-back" onClick={() => setFormStep(1)}>
-                                    Retour
-                                </button>
-                            )}
+                            {formStep === 2 && <button type="button" className="btn-back" onClick={() => setFormStep(1)}>Retour</button>}
                             <button type="submit" className="btn-primary" disabled={loading}>
-                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? 'Suivant' : t.submit_btn)}
+                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? 'Suivant' : 'Envoyer')}
                             </button>
                         </div>
                     </form>

@@ -71,7 +71,7 @@ const Dashboard = ({ lang = 'fr' }) => {
             try {
                 const [statsRes, reportsRes] = await Promise.all([
                     axios.get(`${API_BASE}/analytics/stats`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                    axios.get(`${API_BASE}/reports/`, { headers: { 'Authorization': `Bearer ${token}` } })
+                    axios.get(`${API_BASE}/reports/admin/all`, { headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
                 
                 // Aggregate normalized infra stats
