@@ -111,6 +111,9 @@ function AppContent() {
           <button className={`side-item ${activeTab === 'help' ? 'active' : ''}`} onClick={() => setActiveTab('help')}>
             <HelpCircle size={20} /> <span>{t.nav.help}</span>
           </button>
+          <button className={`side-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
+            <User size={20} /> <span>{t.nav.profile}</span>
+          </button>
         </nav>
         
         <div className="sidebar-footer">
@@ -142,6 +145,14 @@ function AppContent() {
           {activeTab === 'map' && <PublicMap lang={lang} />}
           {activeTab === 'report' && <SubmitReport lang={lang} />}
           {activeTab === 'history' && <MyReports lang={lang} />}
+          {activeTab === 'profile' && (
+            <div className="profile-placeholder modern-card" style={{margin: '40px', padding: '60px', textAlign: 'center'}}>
+               <User size={80} color="#2dd4bf" style={{marginBottom: '20px'}} />
+               <h2 style={{fontWeight: 900}}>{t.nav.profile}</h2>
+               <p style={{color: '#64748b', marginTop: '10px'}}>Gestion du compte citoyen ALERTO</p>
+               <button className="btn-primary" style={{marginTop: '30px', width: 'auto'}} onClick={() => alert('Bientôt disponible')}>Modifier mes infos</button>
+            </div>
+          )}
           {activeTab === 'help' && (
             <div className="help-page-wrapper">
                <HelpCenter lang={lang} />
