@@ -52,6 +52,11 @@ const PublicMap = () => {
     const [activeFilter, setActiveFilter] = useState('Tous');
     const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
+    // Detailed filter states
+    const [filterPeriod, setFilterPeriod] = useState('7_days');
+    const [filterDamage, setFilterDamage] = useState({ minime: true, partiel: true, complet: true });
+    const [filterTypes, setFilterTypes] = useState({ Inondation: true, Incendie: true, Effondrement: true, Conflit: true, Autre: true });
+
     const icons = {
         'Inondation': <Droplets size={16} color="white" />,
         'Incendie': <Flame size={16} color="white" />,
@@ -108,12 +113,86 @@ const PublicMap = () => {
                 </button>
             </div>
 
+            {isFiltersOpen && (
+                <div className="filters-overlay-premium" onClick={() => setIsFiltersOpen(false)}>
+                    <div className="filters-panel-premium" onClick={e => e.stopPropagation()}>
+                        <header className="filters-header-premium">
+                            <h2>Filtres</h2>
+                            <button className="close-btn-premium" onClick={() => setIsFiltersOpen(false)}><X size={24} /></button>
+                        </header>
+                        
+                        <div className="filters-scroll-content">
+                            <div className="filter-section">
+                                <label className="section-label">Période</label>
+                                <div className="select-wrapper-premium">
+                                    <select value={filterPeriod} onChange={(e) => setFilterPeriod(e.target.value)}>
+                                        <option value="24h">Dernières 24 heures</option>
+                                        <option value="7_days">7 derniers jours</option>
+                                        <option value="30_days">30 derniers jours</option>
+                                    </select>
+                                    <ChevronRight size={18} className="select-arrow" />
+                                </div>
+                            </div>
+
+                            <div className="filter-section">
+                                <label className="section-label">Niveau de dégâts</label>
+                                <div className="checkbox-list-premium">
+                                    <label className="checkbox-item-premium">
+                                        <input type="checkbox" checked={filterDamage.minime} onChange={() => setFilterDamage({...filterDamage, minime: !filterDamage.minime})} />
+                                        <div className="custom-check minime"></div>
+                                        <span>Minime</span>
+                                    </label>
+                                    <label className="checkbox-item-premium">
+                                        <input type="checkbox" checked={filterDamage.partiel} onChange={() => setFilterDamage({...filterDamage, partiel: !filterDamage.partiel})} />
+                                        <div className="custom-check partiel"></div>
+                                        <span>Partiel</span>
+                                    </label>
+                                    <label className="checkbox-item-premium">
+                                        <input type="checkbox" checked={filterDamage.complet} onChange={() => setFilterDamage({...filterDamage, complet: !filterDamage.complet})} />
+                                        <div className="custom-check complet"></div>
+                                        <span>Complet</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div className="filter-section">
+                                <label className="section-label">Types d'incidents</label>
+                                <div className="incident-grid-premium">
+                                    {Object.keys(filterTypes).map(type => (
+                                        <label key={type} className={`incident-item-premium ${filterTypes[type] ? 'active' : ''}`}>
+                                            <input type="checkbox" checked={filterTypes[type]} onChange={() => setFilterTypes({...filterTypes, [type]: !filterTypes[type]})} />
+                                            <div className={`icon-box ${type.toLowerCase()}`}>
+                                                {icons[type]}
+                                            </div>
+                                            <span>{type}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <footer className="filters-footer-premium">
+                            <button className="btn-reset-premium" onClick={() => {
+                                setFilterDamage({ minime: true, partiel: true, complet: true });
+                                setFilterTypes({ Inondation: true, Incendie: true, Effondrement: true, Conflit: true, Autre: true });
+                            }}>Réinitialiser</button>
+                            <button className="btn-apply-premium" onClick={() => setIsFiltersOpen(false)}>Appliquer</button>
+                        </footer>
+                    </div>
+                </div>
+            )}
+
             <MapContainer center={center} zoom={zoomLevel} zoomControl={false} style={{ flex: 1, width: '100%', position: 'relative' }}>
                 <MapController center={center} zoom={zoomLevel} />
                 <MapAutoFixer trigger={activeFilter} />
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; CARTO' />
                 
-                {reports.filter(r => activeFilter === 'Tous' || r.crisis_type === activeFilter).map((report) => (
+                {reports.filter(r => {
+                    const matchCategory = activeFilter === 'Tous' || r.crisis_type === activeFilter;
+                    const matchType = filterTypes[r.crisis_type] || false;
+                    const matchDamage = filterDamage[r.damage_level] || false;
+                    return matchCategory && matchType && matchDamage;
+                }).map((report) => (
                     <Marker key={report._id} position={[report.location.coordinates[1], report.location.coordinates[0]]} icon={createCustomMarker(report.crisis_type, 1)}>
                         <Popup className="premium-popup">
                             <div className="popup-card-premium">
