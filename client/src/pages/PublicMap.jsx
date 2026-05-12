@@ -8,6 +8,7 @@ import {
   ShieldAlert, Bomb, PlusCircle, Layers, RefreshCw, X, Filter,
   Plus, Minus, Users
 } from 'lucide-react';
+import 'leaflet/dist/leaflet.css';
 import { useTranslation } from '../services/i18n';
 import './PublicMap.css';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -29,9 +30,15 @@ const MapAutoFixer = ({ trigger }) => {
     const map = useMap();
     useEffect(() => {
         if (map) {
-            map.invalidateSize();
-            const timer = setTimeout(() => map.invalidateSize(), 500);
-            return () => clearTimeout(timer);
+            const fix = () => map.invalidateSize();
+            fix();
+            const timers = [
+                setTimeout(fix, 100),
+                setTimeout(fix, 500),
+                setTimeout(fix, 1000),
+                setTimeout(fix, 2000)
+            ];
+            return () => timers.forEach(t => clearTimeout(t));
         }
     }, [map, trigger]);
     return null;
@@ -101,7 +108,7 @@ const PublicMap = () => {
                 </button>
             </div>
 
-            <MapContainer center={center} zoom={zoomLevel} zoomControl={false} style={{ height: '100%', width: '100%' }}>
+            <MapContainer center={center} zoom={zoomLevel} zoomControl={false} style={{ flex: 1, width: '100%', position: 'relative' }}>
                 <MapController center={center} zoom={zoomLevel} />
                 <MapAutoFixer trigger={activeFilter} />
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; CARTO' />
