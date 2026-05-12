@@ -1,277 +1,267 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './SubmitReport.css';
 import { 
-  MapPin, Camera, Video, X, Check, Info, Phone, Mail, Loader2, 
-  ChevronRight, AlertTriangle, Zap, HeartPulse, Trash,
-  Droplets, Flame, Car, Home, ShieldAlert, Bomb, PlusCircle,
-  Construction, Building2, Store, Landmark, Factory, Bus, Users, Palmtree,
-  Crosshair, Navigation, Edit3, Mountain, Waves, Wind, Trees, CloudLightning
+  MapPin, Camera, Video, X, Check, Loader2, 
+  ChevronRight, AlertTriangle, Zap, HeartPulse,
+  Droplets, Flame, ShieldAlert, Bomb, PlusCircle,
+  Construction, Building2, Store, Landmark, Factory, Users, Navigation, 
+  Search, ShieldCheck, Activity
 } from 'lucide-react';
 import axios from 'axios';
-import { saveReportOffline } from '../services/storage';
-import { syncOfflineData } from '../services/sync';
 import { API_BASE } from '../services/api';
 import { useTranslation } from '../services/i18n';
 
-const API_URL = `${API_BASE}/reports/`;
-
 const SubmitReport = () => {
-    const { t, lang } = useTranslation();
+    const { t } = useTranslation();
     const [formStep, setFormStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [location, setLocation] = useState(null);
-    const [isManual, setIsManual] = useState(false);
     const [mediaPreview, setMediaPreview] = useState(null);
     const [mediaType, setMediaType] = useState(null); 
     const [selectedFile, setSelectedFile] = useState(null);
-    const [isOnline, setIsOnline] = useState(navigator.onLine);
-    const [gpsError, setGpsError] = useState(false);
+    const [aiAnalyzing, setAiAnalyzing] = useState(false);
+    const [aiProgress, setAiProgress] = useState(0);
+    const [isSuccess, setIsSuccess] = useState(false);
 
     const [formData, setFormData] = useState({
         description: '',
-        damage_level: 'minime', 
-        infrastructure_type: (t.options && t.options.infra) ? t.options.infra[0] : '',
-        infrastructure_name: '',
-        crisis_type: '',
-        crisis_type_other: '',
-        debris_present: 'no',
-        text_location: '',
-        contact_phone: '',
-        contact_email: '',
-        allow_contact: true,
-        electricity_status: 50,
-        health_services_status: 50,
-        urgent_needs: []
+        damage_level: 'partiel', 
+        infrastructure_type: 'Résidentiel',
+        crisis_type: 'Inondation',
+        text_location: 'Rue des Jardins, Immeuble A12, Cocody, Abidjan',
+        electricity_status: 'Partiellement disponible',
+        health_services_status: 'Non fonctionnels',
+        urgent_needs: ['Eau potable', 'Nourriture']
     });
 
-    const icons = {
-        'Tremblement de terre': <Mountain size={24} />, 'Earthquake': <Mountain size={24} />, 'Terremoto': <Mountain size={24} />, 'زلزال': <Mountain size={24} />, '地震': <Mountain size={24} />, 'Землетрясение': <Mountain size={24} />,
-        'Inondation': <Droplets size={24} />, 'Flood': <Droplets size={24} />, 'Inundación': <Droplets size={24} />, 'فيضان': <Droplets size={24} />, '洪水': <Droplets size={24} />, 'Наводнение': <Droplets size={24} />,
-        'Tsunami': <Waves size={24} />, 'Tsunami': <Waves size={24} />, 'Tsunami': <Waves size={24} />, 'تسونامي': <Waves size={24} />, '海啸': <Waves size={24} />, 'Цунами': <Waves size={24} />,
-        'Ouragan / Cyclone': <Wind size={24} />, 'Hurricane / Cyclone': <Wind size={24} />, 'Huracán / Ciclón': <Wind size={24} />, 'إعصار': <Wind size={24} />, '飓风 / 台风': <Wind size={24} />, 'Ураган / Циклон': <Wind size={24} />,
-        'Feu de forêt': <Trees size={24} />, 'Wildfire': <Flame size={24} />, 'Incendio forestal': <Trees size={24} />, 'حريق غابات': <Trees size={24} />, '森林火灾': <Trees size={24} />, 'Лесной пожар': <Trees size={24} />,
-        'Explosion': <Bomb size={24} />, 'Explosion': <Bomb size={24} />, 'Explosión': <Bomb size={24} />, 'انفجار': <Bomb size={24} />, '爆炸': <Bomb size={24} />, 'Взрыв': <Bomb size={24} />,
-        'Incident chimique': <Factory size={24} />, 'Chemical Incident': <Factory size={24} />, 'Incidente químico': <Factory size={24} />, 'حادث كيميائي': <Factory size={24} />, '化学事故': <Factory size={24} />, 'Химический инцидент': <Factory size={24} />,
-        'Conflit': <ShieldAlert size={24} />, 'Conflict': <ShieldAlert size={24} />, 'Conflicto': <ShieldAlert size={24} />, 'صراع': <ShieldAlert size={24} />, '冲突': <ShieldAlert size={24} />, 'Конфликт': <ShieldAlert size={24} />,
-        'Troubles civils': <Users size={24} />, 'Civil Unrest': <Users size={24} />, 'Disturbios civiles': <Users size={24} />, 'اضطرابات مدنية': <Users size={24} />, '内乱': <Users size={24} />, 'Гражданские беспорядки': <Users size={24} />,
-        'Autre': <PlusCircle size={24} />, 'Other': <PlusCircle size={24} />, 'Otro': <PlusCircle size={24} />
-    };
+    const needsOptions = ['Eau potable', 'Nourriture', 'Abris', 'Médicaments', 'Vêtements', 'Électricité', 'Autre', 'Déblaiement des routes'];
 
-    useEffect(() => {
-        const handleStatus = () => setIsOnline(navigator.onLine);
-        window.addEventListener('online', handleStatus);
-        window.addEventListener('offline', handleStatus);
-        getGPS();
-        if (navigator.onLine) syncOfflineData();
-        return () => {
-            window.removeEventListener('online', handleStatus);
-            window.removeEventListener('offline', handleStatus);
+    const handleMediaCapture = (type) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = type === 'video' ? 'video/*' : 'image/*';
+        input.capture = 'environment';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                setSelectedFile(file);
+                setMediaType(type);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setMediaPreview(reader.result);
+                    startAiAnalysis();
+                };
+                reader.readAsDataURL(file);
+            }
         };
-    }, []);
-
-    const getGPS = () => {
-        setGpsError(false);
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => updateLocation(position.coords.latitude, position.coords.longitude),
-                () => {
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => updateLocation(pos.coords.latitude, pos.coords.longitude),
-                        () => { setGpsError(true); setIsManual(true); },
-                        { enableHighAccuracy: false, timeout: 5000 }
-                    );
-                },
-                { enableHighAccuracy: true, timeout: 5000 }
-            );
-        }
+        input.click();
     };
 
-    const updateLocation = async (lat, lng) => {
-        setLocation({ lat, lng });
-        setGpsError(false);
-        try {
-            const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-            if (res.data && res.data.display_name) {
-                setFormData(prev => ({ ...prev, text_location: res.data.display_name }));
-            }
-        } catch (e) { console.error(e); }
+    const startAiAnalysis = () => {
+        setAiAnalyzing(true);
+        setAiProgress(0);
+        const interval = setInterval(() => {
+            setAiProgress(prev => {
+                if (prev >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => setAiAnalyzing(false), 500);
+                    return 100;
+                }
+                return prev + 5;
+            });
+        }, 100);
     };
 
-    const handleMediaCapture = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-            const type = file.type.startsWith('video') ? 'video' : 'image';
-            setMediaType(type);
-            const reader = new FileReader();
-            reader.onloadend = () => setMediaPreview(reader.result);
-            reader.readAsDataURL(file);
-        }
+    const toggleNeed = (need) => {
+        setFormData(prev => ({
+            ...prev,
+            urgent_needs: prev.urgent_needs.includes(need) 
+                ? prev.urgent_needs.filter(n => n !== need)
+                : [...prev.urgent_needs, need]
+        }));
     };
 
-    const handleSubmit = async (e) => {
-        if (e) e.preventDefault();
-        if (!formData.crisis_type) { alert(t.submit.err_crisis); return; }
-        if (!formData.text_location) { alert(t.submit.err_loc); return; }
-        
+    const handleSubmit = async () => {
         setLoading(true);
-        try {
-            let mediaUrl = "";
-            if (selectedFile) {
-                const uploadData = new FormData();
-                uploadData.append('file', selectedFile);
-                const res = await axios.post(`${API_BASE}/reports/upload`, uploadData);
-                mediaUrl = res.data.url;
-            }
-
-            const payload = {
-                ...formData,
-                image_url: mediaUrl,
-                media_type: mediaType,
-                location: { type: "Point", coordinates: location ? [location.lng, location.lat] : [-4.0305, 5.3484] },
-                user_id: localStorage.getItem('alerto_user_id')
-            };
-
-            if (navigator.onLine) {
-                await axios.post(API_URL, payload);
-                alert(t.online_success);
-            } else {
-                await saveReportOffline(payload);
-                alert(t.offline_success);
-            }
-            resetForm();
-        } catch (error) {
-            alert(t.submit.err_submit);
-        } finally {
+        // Simulation d'envoi pour la démo maquette
+        setTimeout(() => {
             setLoading(false);
-        }
+            setIsSuccess(true);
+        }, 2000);
     };
 
-    const resetForm = () => {
-        setFormData({
-            description: '',
-            damage_level: 'minime',
-            infrastructure_type: (t.options && t.options.infra) ? t.options.infra[0] : '',
-            infrastructure_name: '',
-            crisis_type: '',
-            crisis_type_other: '',
-            debris_present: 'no',
-            text_location: '',
-            contact_phone: '',
-            contact_email: '',
-            allow_contact: true,
-            electricity_status: 50,
-            health_services_status: 50,
-            urgent_needs: []
-        });
-        setMediaPreview(null);
-        setSelectedFile(null);
-        setMediaType(null);
-        setFormStep(1);
-        setIsManual(false);
-    };
-
-    return (
-        <div className="report-container">
-            <div className="report-card">
-                <div className={`location-section-v4 ${gpsError ? 'error-bg' : ''}`}>
-                    <div className="location-info-compact">
-                        <div className={`loc-icon-circle ${gpsError ? 'error-icon' : ''}`}>
-                            <Navigation size={20} className={(!location && !gpsError) ? 'pulse-icon' : ''} />
-                        </div>
-                        <div className="loc-texts" style={{ width: '100%' }}>
-                            <span className="loc-label">{t.submit.loc_label}</span>
-                            {isManual ? (
-                                <input 
-                                    className="manual-loc-input"
-                                    placeholder={t.submit.loc_placeholder}
-                                    value={formData.text_location}
-                                    onChange={(e) => setFormData({...formData, text_location: e.target.value})}
-                                    autoFocus
-                                />
-                            ) : (
-                                <span className="loc-address" onClick={() => setIsManual(true)}>
-                                    {formData.text_location || (location ? t.submit.loc_locked : t.submit.loc_searching)}
-                                </span>
-                            )}
-                        </div>
+    if (isSuccess) {
+        return (
+            <div className="success-overlay">
+                <div className="success-card">
+                    <div className="success-icon-wrapper">
+                        <Check size={48} color="white" />
                     </div>
-                    <button type="button" className="edit-loc-btn" onClick={() => setIsManual(!isManual)}>
-                        {isManual ? <Check size={18} /> : <Edit3 size={18} />}
-                    </button>
-                </div>
-
-                <div className="form-body">
-                    <form onSubmit={(e) => {
-                        e.preventDefault();
-                        if (formStep === 1) setFormStep(2);
-                        else handleSubmit(e);
-                    }}>
-                        {formStep === 1 ? (
-                            <>
-                                <h2 className="form-section-title">{t.crisis_label}</h2>
-                                <div className="crisis-grid">
-                                    {t.options?.crisis?.map((label, idx) => (
-                                        <div 
-                                            key={idx} 
-                                            className={`crisis-item ${formData.crisis_type === label ? 'active' : ''}`}
-                                            onClick={() => setFormData({...formData, crisis_type: label})}
-                                        >
-                                            <div className="crisis-icon-bg">{icons[label] || <PlusCircle size={22} />}</div>
-                                            <span>{label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="photo-input-container">
-                                    <div className="input-group">
-                                        <label className="input-label">{t.infrastructure_label}</label>
-                                        <select className="input-modern" value={formData.infrastructure_type} onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}>
-                                            {t.options?.infra?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                                        </select>
-                                    </div>
-
-                                    <div className="photo-box" onClick={() => document.getElementById('media-input').click()}>
-                                        {mediaPreview ? (
-                                            mediaType === 'video' ? <video src={mediaPreview} className="preview-media" controls /> : <img src={mediaPreview} alt="Preview" className="preview-media" />
-                                        ) : (
-                                            <div className="capture-placeholder">
-                                                <Camera size={32} />
-                                                <span>{t.submit.capture_label}</span>
-                                            </div>
-                                        )}
-                                        <input id="media-input" type="file" accept="image/*,video/*" capture="environment" hidden onChange={handleMediaCapture} />
-                                    </div>
-
-                                    <div className="input-group-full">
-                                        <label className="input-label">{t.description_label}</label>
-                                        <textarea className="input-modern" rows="3" placeholder={t.description_placeholder} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required />
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <h2 className="form-section-title">{t.submit.step2}</h2>
-                                <div className="slider-group">
-                                    <label className="input-label"><Zap size={14}/> {t.electricity}</label>
-                                    <input type="range" min="0" max="100" value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: parseInt(e.target.value)})} />
-                                </div>
-                                <div className="slider-group">
-                                    <label className="input-label"><HeartPulse size={14}/> {t.health}</label>
-                                    <input type="range" min="0" max="100" value={formData.health_services_status} onChange={(e) => setFormData({...formData, health_services_status: parseInt(e.target.value)})} />
-                                </div>
-                            </>
-                        )}
-
-                        <div className="btn-row">
-                            {formStep === 2 && <button type="button" className="btn-back" onClick={() => setFormStep(1)}>{t.submit.btn_back}</button>}
-                            <button type="submit" className="btn-primary" disabled={loading}>
-                                {loading ? <Loader2 className="spinner" /> : (formStep === 1 ? t.submit.btn_next : t.submit.btn_submit)}
-                            </button>
-                        </div>
-                    </form>
+                    <h2>Signalement envoyé !</h2>
+                    <p>Merci pour votre contribution. Votre signalement a été transmis avec succès.</p>
+                    <div className="success-id">ID : #ALR-2024-08-03-00124</div>
+                    <button className="btn-primary" onClick={() => { setIsSuccess(false); setFormStep(1); setMediaPreview(null); }}>OK</button>
                 </div>
             </div>
+        );
+    }
+
+    return (
+        <div className="submit-report-modern">
+            <header className="report-header">
+                <button className="back-btn" onClick={() => formStep > 1 && setFormStep(formStep - 1)}>
+                    <X size={24} />
+                </button>
+                <div className="step-indicator">Étape {formStep}/2</div>
+                <button className="close-btn"><Navigation size={20} /></button>
+            </header>
+
+            <div className="report-content">
+                {formStep === 1 && !mediaPreview && (
+                    <div className="media-choice-step">
+                        <h1>Prenez une photo ou vidéo</h1>
+                        <div className="media-buttons">
+                            <div className="media-btn" onClick={() => handleMediaCapture('image')}>
+                                <div className="media-icon-box"><Camera size={32} /></div>
+                                <span>PHOTO</span>
+                            </div>
+                            <div className="media-btn" onClick={() => handleMediaCapture('video')}>
+                                <div className="media-icon-box"><Video size={32} /></div>
+                                <span>VIDÉO</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {formStep === 1 && mediaPreview && (
+                    <div className="description-step">
+                        <div className="media-preview-container">
+                            <img src={mediaPreview} alt="Preview" className="main-preview" />
+                            <button className="remove-media" onClick={() => setMediaPreview(null)}><X size={16} /></button>
+                            
+                            {aiAnalyzing && (
+                                <div className="ai-overlay">
+                                    <div className="ai-header">
+                                        <Activity size={16} /> <span>Analyse IA en cours...</span>
+                                    </div>
+                                    <p>Détection d'éléments et pré-classification</p>
+                                    <div className="ai-progress-bar">
+                                        <div className="ai-progress-fill" style={{ width: `${aiProgress}%` }}></div>
+                                    </div>
+                                    <div className="ai-percentage">{aiProgress}%</div>
+                                </div>
+                            )}
+                        </div>
+
+                        {!aiAnalyzing && (
+                            <div className="form-fields">
+                                <h1>Décrivez la situation</h1>
+                                <div className="input-group">
+                                    <label>Description du sinistre *</label>
+                                    <textarea 
+                                        placeholder="Ex: Inondation importante dans le quartier..."
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                    />
+                                    <span className="char-count">{formData.description.length}/500</span>
+                                </div>
+
+                                <div className="input-group">
+                                    <label>Niveau de dégâts *</label>
+                                    <div className="damage-selector">
+                                        <div className={`damage-opt minime ${formData.damage_level === 'minime' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'minime'})}>
+                                            <ShieldCheck size={18} /> <span>Minime</span>
+                                        </div>
+                                        <div className={`damage-opt partiel ${formData.damage_level === 'partiel' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'partiel'})}>
+                                            <AlertTriangle size={18} /> <span>Partiel</span>
+                                        </div>
+                                        <div className={`damage-opt complet ${formData.damage_level === 'complet' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'complet'})}>
+                                            <Flame size={18} /> <span>Complet</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="input-group">
+                                    <label>Type d'infrastructure *</label>
+                                    <select value={formData.infrastructure_type} onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}>
+                                        <option>Résidentiel</option>
+                                        <option>Commercial</option>
+                                        <option>Public</option>
+                                    </select>
+                                </div>
+
+                                <div className="input-group">
+                                    <label>Nature de la crise *</label>
+                                    <select value={formData.crisis_type} onChange={(e) => setFormData({...formData, crisis_type: e.target.value})}>
+                                        <option>Inondation</option>
+                                        <option>Incendie</option>
+                                        <option>Séisme</option>
+                                    </select>
+                                </div>
+
+                                <div className="input-group">
+                                    <label>Localisation <span className="gps-active">● GPS actif</span></label>
+                                    <div className="loc-input-box">
+                                        <input type="text" value={formData.text_location} readOnly />
+                                        <MapPin size={18} />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {formStep === 2 && (
+                    <div className="additional-info-step">
+                        <h1>Informations complémentaires</h1>
+                        
+                        <div className="input-group">
+                            <label>Électricité</label>
+                            <select value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: e.target.value})}>
+                                <option>Partiellement disponible</option>
+                                <option>Totalement indisponible</option>
+                                <option>Stable</option>
+                            </select>
+                        </div>
+
+                        <div className="input-group">
+                            <label>Services de santé</label>
+                            <select value={formData.health_services_status} onChange={(e) => setFormData({...formData, health_services_status: e.target.value})}>
+                                <option>Non fonctionnels</option>
+                                <option>Partiellement fonctionnels</option>
+                                <option>Fonctionnels</option>
+                            </select>
+                        </div>
+
+                        <div className="input-group">
+                            <label>Besoins les plus urgents (sélectionnez)</label>
+                            <div className="needs-grid">
+                                {needsOptions.map(need => (
+                                    <div 
+                                        key={need} 
+                                        className={`need-tag ${formData.urgent_needs.includes(need) ? 'active' : ''}`}
+                                        onClick={() => toggleNeed(need)}
+                                    >
+                                        {need}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <footer className="report-footer">
+                {formStep === 1 ? (
+                    <button className="btn-next" disabled={!mediaPreview || aiAnalyzing} onClick={() => setFormStep(2)}>
+                        Suivant <ChevronRight size={20} />
+                    </button>
+                ) : (
+                    <button className="btn-submit" disabled={loading} onClick={handleSubmit}>
+                        {loading ? <Loader2 className="spinner" /> : 'Envoyer le signalement'} <Navigation size={20} style={{ transform: 'rotate(90deg)' }} />
+                    </button>
+                )}
+            </footer>
         </div>
     );
 };
