@@ -1,149 +1,147 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, CheckCircle2, CloudOff, AlertCircle, ChevronRight, MapPin, X, Phone, Mail } from 'lucide-react';
+import { 
+  Clock, CheckCircle2, AlertCircle, ChevronLeft, MapPin, X, 
+  MoreVertical, Navigation, Share2, HelpCircle, Hourglass, XCircle
+} from 'lucide-react';
 import './MyReports.css';
 import { API_BASE } from '../services/api';
 import { useTranslation } from '../services/i18n';
 
-const MyReports = () => {
+const MyReports = ({ onBack }) => {
     const { t, lang } = useTranslation();
     const [reports, setReports] = useState([]);
     const [selectedReport, setSelectedReport] = useState(null);
+    const [filter, setFilter] = useState('all');
 
     useEffect(() => {
         const history = JSON.parse(localStorage.getItem('alerto_my_reports') || '[]');
         setReports(history);
     }, []);
 
+    const filteredReports = reports.filter(r => {
+        if (filter === 'all') return true;
+        return r.status === filter;
+    });
+
     const getStatusIcon = (status) => {
         switch (status) {
-            case 'sent': return <CheckCircle2 size={16} color="#10b981" />;
-            case 'pending': return <CloudOff size={16} color="#f59e0b" />;
-            case 'failed': return <AlertCircle size={16} color="#ef4444" />;
+            case 'sent': return <CheckCircle2 size={14} />;
+            case 'pending': return <Hourglass size={14} />;
+            case 'failed': return <XCircle size={14} />;
             default: return null;
         }
     };
 
     const getStatusText = (status) => {
-        if (lang === 'fr') {
-            switch (status) {
-                case 'sent': return 'Envoyé';
-                case 'pending': return 'En attente';
-                case 'failed': return 'Échec';
-                default: return 'Inconnu';
-            }
-        }
         switch (status) {
-            case 'sent': return 'Sent';
-            case 'pending': return 'Pending';
-            case 'failed': return 'Failed';
-            default: return 'Unknown';
+            case 'sent': return 'Envoyé';
+            case 'pending': return 'En attente';
+            case 'failed': return 'Échec';
+            default: return 'Inconnu';
         }
     };
 
-    return (
-        <div className="history-container">
-            <header className="page-header">
-                <h1>{t.nav.history}</h1>
-                <p>{lang === 'fr' ? 'Consultez et suivez vos signalements.' : 'View and track your reports.'}</p>
-            </header>
-
-            <div className="history-list">
-                {reports.length > 0 ? (
-                    reports.map(report => (
-                        <div key={report.id} className="history-card" onClick={() => setSelectedReport(report)}>
-                            <div className="card-status">
-                                {getStatusIcon(report.status)}
-                                <span className={`status-badge ${report.status}`}>{getStatusText(report.status)}</span>
-                            </div>
-                            
-                            <div className="card-main">
-                                <div className="crisis-type-badge">{report.crisis}</div>
-                                <h3 className="location-summary">{report.location}</h3>
-                                <div className="date-row">
-                                    <Clock size={12} />
-                                    <span>{new Date(report.date).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                                </div>
-                            </div>
-                            
-                            <div className="card-action">
-                                <ChevronRight size={20} color="#94a3b8" />
-                            </div>
+    if (selectedReport) {
+        return (
+            <div className="report-detail-premium">
+                <header className="detail-header-premium">
+                    <button className="back-btn-premium" onClick={() => setSelectedReport(null)}><ChevronLeft size={24} /></button>
+                    <h2>Détail du signalement</h2>
+                    <button className="more-btn-premium"><MoreVertical size={20} /></button>
+                </header>
+                
+                <div className="detail-scroll-premium">
+                    <div className="detail-hero-media">
+                        <img 
+                            src={selectedReport.image_url?.startsWith('http') ? selectedReport.image_url : `${API_BASE}${selectedReport.image_url}`} 
+                            alt="Incident" 
+                        />
+                        <div className="hero-status-pill sent">
+                            <CheckCircle2 size={16} /> <span>Envoyé</span>
                         </div>
-                    ))
-                ) : (
-                    <div className="empty-history">
-                        <div className="empty-icon-bg">
-                            <AlertCircle size={40} color="#cbd5e1" />
-                        </div>
-                        <h3>{lang === 'fr' ? 'Aucun signalement' : 'No reports'}</h3>
-                        <p>{lang === 'fr' ? 'Vos alertes apparaîtront ici.' : 'Your alerts will appear here.'}</p>
                     </div>
-                )}
-            </div>
 
-            {selectedReport && (
-                <div className="modal-overlay" onClick={() => setSelectedReport(null)}>
-                    <div className="detail-modal" onClick={e => e.stopPropagation()}>
-                        <header className="modal-header-tactical">
-                            <button className="back-btn" onClick={() => setSelectedReport(null)}><X size={24} /></button>
-                            <h3>Détail du signalement</h3>
-                            <button className="more-btn"><PlusCircle size={24} style={{ transform: 'rotate(45deg)' }} /></button>
-                        </header>
+                    <div className="detail-info-grid">
+                        <div className="info-row">
+                            <span className="info-label">Type</span>
+                            <span className="info-value">{selectedReport.crisis}</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="info-label">Niveau de dégâts</span>
+                            <span className="info-value">{selectedReport.damage_level?.charAt(0).toUpperCase() + selectedReport.damage_level?.slice(1)}</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="info-label">Infrastructure</span>
+                            <span className="info-value">{selectedReport.infrastructure_type || 'Résidentiel'}</span>
+                        </div>
                         
-                        <div className="modal-scroll-content">
-                            {selectedReport.image_url && (
-                                <div className="detail-media-container">
-                                    <img 
-                                        src={selectedReport.image_url.startsWith('http') ? selectedReport.image_url : `${API_BASE}${selectedReport.image_url}`} 
-                                        alt="Sinistre" 
-                                        className="detail-img-full"
-                                    />
-                                    <div className="media-status-badge">
-                                        <div className="dot-green"></div> <span>Envoyé</span>
-                                    </div>
-                                </div>
-                            )}
-                            
-                            <div className="detail-fields">
-                                <div className="detail-field">
-                                    <label>Type</label>
-                                    <p>{selectedReport.crisis}</p>
-                                </div>
-                                <div className="detail-field">
-                                    <label>Niveau de dégâts</label>
-                                    <p style={{ color: selectedReport.damage_level === 'complet' ? '#ef4444' : selectedReport.damage_level === 'partiel' ? '#f59e0b' : '#10b981' }}>
-                                        {selectedReport.damage_level?.toUpperCase() || 'PARTIEL'}
-                                    </p>
-                                </div>
-                                <div className="detail-field">
-                                    <label>Infrastructure</label>
-                                    <p>{selectedReport.infrastructure_type || 'Résidentiel'}</p>
-                                </div>
-                                <div className="detail-field">
-                                    <label>Localisation</label>
-                                    <div className="detail-loc-box">
-                                        <MapPin size={16} color="#ef4444" />
-                                        <span>{selectedReport.location}</span>
-                                    </div>
-                                </div>
-                                <div className="detail-field">
-                                    <label>Date</label>
-                                    <p>{new Date(selectedReport.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} - {new Date(selectedReport.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
-                                </div>
-                                <div className="detail-field">
-                                    <label>Description</label>
-                                    <p className="detail-desc-text">{selectedReport.description || "..."}</p>
-                                </div>
+                        <div className="info-section">
+                            <label>Localisation</label>
+                            <div className="loc-display-box">
+                                <MapPin size={18} color="#94a3b8" />
+                                <span>{selectedReport.location}</span>
                             </div>
                         </div>
 
-                        <footer className="modal-footer-tactical">
-                            <button className="btn-share"><Navigation size={20} style={{ transform: 'rotate(90deg)' }} /> <span>Partager</span></button>
-                            <button className="btn-report-problem"><AlertCircle size={20} /> <span>Signaler un problème</span></button>
-                        </footer>
+                        <div className="info-row">
+                            <span className="info-label">Date</span>
+                            <span className="info-value">03 Août 2024 - 10:24</span>
+                        </div>
+
+                        <div className="info-section">
+                            <label>Description</label>
+                            <p className="description-text-premium">
+                                {selectedReport.description || "Inondation importante dans le quartier..."}
+                            </p>
+                        </div>
                     </div>
                 </div>
-            )}
+
+                <footer className="detail-footer-premium">
+                    <button className="btn-share-premium"><Share2 size={20} /> <span>Partager</span></button>
+                    <button className="btn-problem-premium"><AlertCircle size={20} /> <span>Signaler un problème</span></button>
+                </footer>
+            </div>
+        );
+    }
+
+    return (
+        <div className="my-reports-premium">
+            <header className="reports-header-premium">
+                <button className="back-btn-premium" onClick={onBack}><ChevronLeft size={24} /></button>
+                <h1>Mes signalements</h1>
+            </header>
+
+            <div className="reports-filters-premium">
+                <button className={`filter-pill ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>Tous</button>
+                <button className={`filter-pill ${filter === 'sent' ? 'active' : ''}`} onClick={() => setFilter('sent')}>Envoyés</button>
+                <button className={`filter-pill ${filter === 'pending' ? 'active' : ''}`} onClick={() => setFilter('pending')}>En attente</button>
+                <button className={`filter-pill ${filter === 'failed' ? 'active' : ''}`} onClick={() => setFilter('failed')}>Échec</button>
+            </div>
+
+            <div className="reports-list-premium">
+                {filteredReports.map(report => (
+                    <div key={report.id} className="report-card-premium" onClick={() => setSelectedReport(report)}>
+                        <div className="card-thumb-premium">
+                            <img src={report.image_url?.startsWith('http') ? report.image_url : `${API_BASE}${report.image_url}`} alt="Thumb" />
+                        </div>
+                        <div className="card-info-premium">
+                            <div className="card-header-row">
+                                <h3>{report.crisis} - {report.location.split(',')[0]}</h3>
+                                <MoreVertical size={16} color="#475569" />
+                            </div>
+                            <p className="card-loc-text">{report.location}</p>
+                            <div className="card-footer-row">
+                                <span className="card-time-text">03 Août 2024 - 10:24</span>
+                                <div className={`card-status-badge ${report.status}`}>
+                                    {getStatusIcon(report.status)}
+                                    <span>{getStatusText(report.status)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };

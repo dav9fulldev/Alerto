@@ -137,7 +137,7 @@ function AppContent() {
           {activeTab === 'home' && <Home onNavigate={setActiveTab} onMenuClick={() => setIsMenuOpen(true)} />}
           {activeTab === 'map' && <PublicMap lang={lang} />}
           {activeTab === 'report' && <SubmitReport lang={lang} onClose={() => setActiveTab('home')} />}
-          {activeTab === 'history' && <MyReports lang={lang} />}
+          {activeTab === 'history' && <MyReports lang={lang} onBack={() => setActiveTab('home')} />}
           {activeTab === 'profile' && (
             <div className="profile-placeholder modern-card" style={{margin: '40px', padding: '60px', textAlign: 'center'}}>
                <UserIcon size={80} color="#2dd4bf" style={{marginBottom: '20px'}} />
