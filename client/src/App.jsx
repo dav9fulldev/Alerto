@@ -15,7 +15,7 @@ import {
   Globe,
   RefreshCw,
   ShieldCheck,
-  User
+  User as UserIcon
 } from 'lucide-react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { v4 as uuidv4 } from 'uuid';
@@ -112,7 +112,7 @@ function AppContent() {
             <HelpCircle size={20} /> <span>{t.nav.help}</span>
           </button>
           <button className={`side-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
-            <User size={20} /> <span>{t.nav.profile}</span>
+            <UserIcon size={20} /> <span>{t.nav.profile}</span>
           </button>
         </nav>
         
@@ -147,7 +147,7 @@ function AppContent() {
           {activeTab === 'history' && <MyReports lang={lang} />}
           {activeTab === 'profile' && (
             <div className="profile-placeholder modern-card" style={{margin: '40px', padding: '60px', textAlign: 'center'}}>
-               <User size={80} color="#2dd4bf" style={{marginBottom: '20px'}} />
+               <UserIcon size={80} color="#2dd4bf" style={{marginBottom: '20px'}} />
                <h2 style={{fontWeight: 900}}>{t.nav.profile}</h2>
                <p style={{color: '#64748b', marginTop: '10px'}}>Gestion du compte citoyen ALERTO</p>
                <button className="btn-primary" style={{marginTop: '30px', width: 'auto'}} onClick={() => alert('Bientôt disponible')}>Modifier mes infos</button>
@@ -204,7 +204,7 @@ function AppContent() {
             <span>{t.nav.help}</span>
           </button>
           <button className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
-            <User className="nav-icon" />
+            <UserIcon className="nav-icon" />
             <span>{t.nav.profile}</span>
           </button>
         </nav>
