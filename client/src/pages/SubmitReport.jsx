@@ -28,11 +28,41 @@ const SubmitReport = () => {
         damage_level: 'partiel', 
         infrastructure_type: 'Résidentiel',
         crisis_type: 'Inondation',
-        text_location: 'Rue des Jardins, Immeuble A12, Cocody, Abidjan',
+        text_location: 'Recherche de localisation...',
         electricity_status: 'Partiellement disponible',
         health_services_status: 'Non fonctionnels',
         urgent_needs: ['Eau potable', 'Nourriture']
     });
+
+    useEffect(() => {
+        getGPS();
+    }, []);
+
+    const getGPS = () => {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => updateLocation(position.coords.latitude, position.coords.longitude),
+                (error) => {
+                    console.error("GPS Error", error);
+                    setFormData(prev => ({ ...prev, text_location: 'Localisation manuelle requise' }));
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+    };
+
+    const updateLocation = async (lat, lng) => {
+        setLocation({ lat, lng });
+        try {
+            const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            if (res.data && res.data.display_name) {
+                setFormData(prev => ({ ...prev, text_location: res.data.display_name }));
+            }
+        } catch (e) { 
+            console.error(e);
+            setFormData(prev => ({ ...prev, text_location: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
+        }
+    };
 
     const needsOptions = ['Eau potable', 'Nourriture', 'Abris', 'Médicaments', 'Vêtements', 'Électricité', 'Autre', 'Déblaiement des routes'];
 
@@ -202,7 +232,11 @@ const SubmitReport = () => {
                                 <div className="input-group">
                                     <label>Localisation <span className="gps-active">● GPS actif</span></label>
                                     <div className="loc-input-box">
-                                        <input type="text" value={formData.text_location} readOnly />
+                                        <input 
+                                            type="text" 
+                                            value={formData.text_location} 
+                                            onChange={(e) => setFormData({...formData, text_location: e.target.value})} 
+                                        />
                                         <MapPin size={18} />
                                     </div>
                                 </div>
