@@ -12,6 +12,19 @@ import { useTranslation } from '../services/i18n';
 import './PublicMap.css';
 import { renderToStaticMarkup } from 'react-dom/server';
 
+const MapController = ({ center, zoom }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (center) map.setView(center, map.getZoom(), { animate: true });
+    }, [center, map]);
+    
+    useEffect(() => {
+        if (zoom !== undefined) map.setZoom(zoom, { animate: true });
+    }, [zoom, map]);
+
+    return null;
+};
+
 const MapAutoFixer = ({ trigger }) => {
     const map = useMap();
     useEffect(() => {
@@ -28,6 +41,7 @@ const PublicMap = () => {
     const { t, lang } = useTranslation();
     const [reports, setReports] = useState([]);
     const [center, setCenter] = useState([5.3484, -4.0305]); 
+    const [zoomLevel, setZoomLevel] = useState(13);
     const [activeFilter, setActiveFilter] = useState('Tous');
     const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
@@ -87,7 +101,8 @@ const PublicMap = () => {
                 </button>
             </div>
 
-            <MapContainer center={center} zoom={13} zoomControl={false} style={{ height: '100%', width: '100%' }}>
+            <MapContainer center={center} zoom={zoomLevel} zoomControl={false} style={{ height: '100%', width: '100%' }}>
+                <MapController center={center} zoom={zoomLevel} />
                 <MapAutoFixer trigger={activeFilter} />
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; CARTO' />
                 
@@ -109,16 +124,19 @@ const PublicMap = () => {
             {/* Floating Controls */}
             <button className="my-pos-btn-floating" onClick={() => {
                 if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((pos) => setCenter([pos.coords.latitude, pos.coords.longitude]));
+                    navigator.geolocation.getCurrentPosition((pos) => {
+                        setCenter([pos.coords.latitude, pos.coords.longitude]);
+                        setZoomLevel(15);
+                    });
                 }
             }}>
                 <Navigation size={18} /> <span>Ma position</span>
             </button>
 
             <div className="zoom-ctrl-pill">
-                <button className="zoom-btn"><Plus size={20} /></button>
+                <button className="zoom-btn" onClick={() => setZoomLevel(prev => Math.min(prev + 1, 19))}><Plus size={20} /></button>
                 <div className="zoom-divider"></div>
-                <button className="zoom-btn"><Minus size={20} /></button>
+                <button className="zoom-btn" onClick={() => setZoomLevel(prev => Math.max(prev - 1, 3))}><Minus size={20} /></button>
             </div>
 
             {/* Bottom Legend Bar */}
