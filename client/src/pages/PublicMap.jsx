@@ -45,6 +45,12 @@ const PublicMap = () => {
     const [reports, setReports] = useState([]);
     const [center, setCenter] = useState([5.3484, -4.0305]); // Abidjan default
     const [isSatellite, setIsSatellite] = useState(false);
+    const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+    // Filter states
+    const [filterPeriod, setFilterPeriod] = useState('7_days');
+    const [filterDamage, setFilterDamage] = useState({ minime: true, partiel: true, complet: true });
+    const [filterTypes, setFilterTypes] = useState({ inondation: true, incendie: true, effondrement: true, conflit: true, autre: true });
 
     const icons = {
         'Tremblement de terre': <Mountain size={20} color="white" />, 'Earthquake': <Mountain size={20} color="white" />, 'Землетрясение': <Mountain size={20} color="white" />,
@@ -97,15 +103,100 @@ const PublicMap = () => {
             <header className="map-header-overlay">
                 <div className="map-search-mock">
                     <Navigation size={18} color="#0ea5e9" />
-                    <span className="search-text">{t.title} - {t.nav.map}</span>
+                    <span className="search-text">ALERTO — Carte des alertes</span>
                 </div>
-                <div className="map-lang-badge">{lang.toUpperCase()}</div>
+                <button className="map-filter-trigger" onClick={() => setIsFiltersOpen(true)}>
+                    <div className="filter-dot-active"></div>
+                    <PlusCircle size={20} style={{ transform: 'rotate(45deg)' }} />
+                </button>
             </header>
 
             <button className={`sat-toggle-btn ${isSatellite ? 'active' : ''}`} onClick={() => setIsSatellite(!isSatellite)}>
                 <Layers size={20} />
                 <span>{isSatellite ? 'Standard' : 'Satellite'}</span>
             </button>
+
+            {isFiltersOpen && (
+                <div className="filters-overlay">
+                    <div className="filters-panel">
+                        <header className="filters-header">
+                            <h3>Filtres</h3>
+                            <button className="close-filters" onClick={() => setIsFiltersOpen(false)}><X size={24} /></button>
+                        </header>
+                        
+                        <div className="filters-body">
+                            <div className="filter-group">
+                                <label>Période</label>
+                                <select value={filterPeriod} onChange={(e) => setFilterPeriod(e.target.value)}>
+                                    <option value="24h">Dernières 24 heures</option>
+                                    <option value="7_days">7 derniers jours</option>
+                                    <option value="30_days">30 derniers jours</option>
+                                </select>
+                            </div>
+
+                            <div className="filter-group">
+                                <label>Niveau de dégâts</label>
+                                <div className="check-list">
+                                    <label className="check-item">
+                                        <input type="checkbox" checked={filterDamage.minime} onChange={() => setFilterDamage({...filterDamage, minime: !filterDamage.minime})} />
+                                        <div className="custom-check green"></div>
+                                        <span>Minime</span>
+                                    </label>
+                                    <label className="check-item">
+                                        <input type="checkbox" checked={filterDamage.partiel} onChange={() => setFilterDamage({...filterDamage, partiel: !filterDamage.partiel})} />
+                                        <div className="custom-check orange"></div>
+                                        <span>Partiel</span>
+                                    </label>
+                                    <label className="check-item">
+                                        <input type="checkbox" checked={filterDamage.complet} onChange={() => setFilterDamage({...filterDamage, complet: !filterDamage.complet})} />
+                                        <div className="custom-check red"></div>
+                                        <span>Complet</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div className="filter-group">
+                                <label>Types d'incidents</label>
+                                <div className="check-list-icons">
+                                    <label className="check-item-icon">
+                                        <input type="checkbox" checked={filterTypes.inondation} onChange={() => setFilterTypes({...filterTypes, inondation: !filterTypes.inondation})} />
+                                        <div className="icon-check-box blue"><Droplets size={16} /></div>
+                                        <span>Inondation</span>
+                                    </label>
+                                    <label className="check-item-icon">
+                                        <input type="checkbox" checked={filterTypes.incendie} onChange={() => setFilterTypes({...filterTypes, incendie: !filterTypes.incendie})} />
+                                        <div className="icon-check-box red"><Flame size={16} /></div>
+                                        <span>Incendie</span>
+                                    </label>
+                                    <label className="check-item-icon">
+                                        <input type="checkbox" checked={filterTypes.effondrement} onChange={() => setFilterTypes({...filterTypes, effondrement: !filterTypes.effondrement})} />
+                                        <div className="icon-check-box orange"><Building2 size={16} /></div>
+                                        <span>Effondrement</span>
+                                    </label>
+                                    <label className="check-item-icon">
+                                        <input type="checkbox" checked={filterTypes.conflit} onChange={() => setFilterTypes({...filterTypes, conflit: !filterTypes.conflit})} />
+                                        <div className="icon-check-box purple"><ShieldAlert size={16} /></div>
+                                        <span>Conflit</span>
+                                    </label>
+                                    <label className="check-item-icon">
+                                        <input type="checkbox" checked={filterTypes.autre} onChange={() => setFilterTypes({...filterTypes, autre: !filterTypes.autre})} />
+                                        <div className="icon-check-box green"><PlusCircle size={16} /></div>
+                                        <span>Autre</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <footer className="filters-footer">
+                            <button className="btn-reset" onClick={() => {
+                                setFilterDamage({ minime: true, partiel: true, complet: true });
+                                setFilterTypes({ inondation: true, incendie: true, effondrement: true, conflit: true, autre: true });
+                            }}>Réinitialiser</button>
+                            <button className="btn-apply" onClick={() => setIsFiltersOpen(false)}>Appliquer</button>
+                        </footer>
+                    </div>
+                </div>
+            )}
 
             <MapContainer key={`${isSatellite ? 'sat' : 'std'}`} center={center} zoom={13} zoomControl={false} style={{ height: '100%', width: '100%' }} preferCanvas={false}>
                 <MapAutoFixer trigger={isSatellite} />

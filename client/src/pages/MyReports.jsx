@@ -84,55 +84,63 @@ const MyReports = () => {
             {selectedReport && (
                 <div className="modal-overlay" onClick={() => setSelectedReport(null)}>
                     <div className="detail-modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>{lang === 'fr' ? 'Détails du Signalement' : 'Report Details'}</h2>
-                            <button className="close-modal" onClick={() => setSelectedReport(null)}><X /></button>
-                        </div>
+                        <header className="modal-header-tactical">
+                            <button className="back-btn" onClick={() => setSelectedReport(null)}><X size={24} /></button>
+                            <h3>Détail du signalement</h3>
+                            <button className="more-btn"><PlusCircle size={24} style={{ transform: 'rotate(45deg)' }} /></button>
+                        </header>
                         
                         <div className="modal-scroll-content">
                             {selectedReport.image_url && (
-                                <img 
-                                    src={selectedReport.image_url.startsWith('http') ? selectedReport.image_url : `${API_BASE}${selectedReport.image_url}`} 
-                                    alt="Evidence" 
-                                    className="detail-img"
-                                />
+                                <div className="detail-media-container">
+                                    <img 
+                                        src={selectedReport.image_url.startsWith('http') ? selectedReport.image_url : `${API_BASE}${selectedReport.image_url}`} 
+                                        alt="Sinistre" 
+                                        className="detail-img-full"
+                                    />
+                                    <div className="media-status-badge">
+                                        <div className="dot-green"></div> <span>Envoyé</span>
+                                    </div>
+                                </div>
                             )}
                             
-                            <div className="detail-section">
-                                <div className="detail-row">
-                                    <AlertCircle size={18} color="#0ea5e9" />
-                                    <div>
-                                        <label>{t.crisis_label}</label>
-                                        <p>{selectedReport.crisis}</p>
+                            <div className="detail-fields">
+                                <div className="detail-field">
+                                    <label>Type</label>
+                                    <p>{selectedReport.crisis}</p>
+                                </div>
+                                <div className="detail-field">
+                                    <label>Niveau de dégâts</label>
+                                    <p style={{ color: selectedReport.damage_level === 'complet' ? '#ef4444' : selectedReport.damage_level === 'partiel' ? '#f59e0b' : '#10b981' }}>
+                                        {selectedReport.damage_level?.toUpperCase() || 'PARTIEL'}
+                                    </p>
+                                </div>
+                                <div className="detail-field">
+                                    <label>Infrastructure</label>
+                                    <p>{selectedReport.infrastructure_type || 'Résidentiel'}</p>
+                                </div>
+                                <div className="detail-field">
+                                    <label>Localisation</label>
+                                    <div className="detail-loc-box">
+                                        <MapPin size={16} color="#ef4444" />
+                                        <span>{selectedReport.location}</span>
                                     </div>
                                 </div>
-                                <div className="detail-row">
-                                    <MapPin size={18} color="#0ea5e9" />
-                                    <div>
-                                        <label>{t.location_label}</label>
-                                        <p>{selectedReport.location}</p>
-                                    </div>
+                                <div className="detail-field">
+                                    <label>Date</label>
+                                    <p>{new Date(selectedReport.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} - {new Date(selectedReport.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
                                 </div>
-                            </div>
-
-                            <div className="detail-section">
-                                <label>{t.description_label}</label>
-                                <p className="detail-description">{selectedReport.description || "..."}</p>
-                            </div>
-
-                            <div className="detail-grid">
-                                <div className="grid-item">
-                                    <label>{t.damage_label}</label>
-                                    <div className="status-indicator">{t.options?.damage?.[selectedReport.damage_level] || selectedReport.damage_level}</div>
-                                </div>
-                                <div className="grid-item">
-                                    <label>{t.electricity}</label>
-                                    <div className="status-progress">
-                                        <div className="progress-fill" style={{width: `${selectedReport.electricity_status}%`}}></div>
-                                    </div>
+                                <div className="detail-field">
+                                    <label>Description</label>
+                                    <p className="detail-desc-text">{selectedReport.description || "..."}</p>
                                 </div>
                             </div>
                         </div>
+
+                        <footer className="modal-footer-tactical">
+                            <button className="btn-share"><Navigation size={20} style={{ transform: 'rotate(90deg)' }} /> <span>Partager</span></button>
+                            <button className="btn-report-problem"><AlertCircle size={20} /> <span>Signaler un problème</span></button>
+                        </footer>
                     </div>
                 </div>
             )}

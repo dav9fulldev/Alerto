@@ -112,12 +112,6 @@ function AppContent() {
           <button className={`side-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
             <Clock size={20} /> <span>{t.nav.history}</span>
           </button>
-          <button className={`side-item ${activeTab === 'help' ? 'active' : ''}`} onClick={() => setActiveTab('help')}>
-            <HelpCircle size={20} /> <span>{t.nav.help}</span>
-          </button>
-          <button className={`side-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
-            <UserIcon size={20} /> <span>{t.nav.profile}</span>
-          </button>
         </nav>
         
         <div className="sidebar-footer">
@@ -207,14 +201,6 @@ function AppContent() {
           <button className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
             <Clock className="nav-icon" />
             <span>{t.nav.history}</span>
-          </button>
-          <button className={`nav-item ${activeTab === 'help' ? 'active' : ''}`} onClick={() => setActiveTab('help')}>
-            <HelpCircle className="nav-icon" />
-            <span>{t.nav.help}</span>
-          </button>
-          <button className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
-            <UserIcon className="nav-icon" />
-            <span>{t.nav.profile}</span>
           </button>
         </nav>
       </div>

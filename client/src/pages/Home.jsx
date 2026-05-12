@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, Map as MapIcon, Clock, ShieldCheck, Navigation } from 'lucide-react';
+import { AlertCircle, Map as MapIcon, Clock, ShieldCheck, Navigation, Camera, FileText } from 'lucide-react';
 import { useTranslation } from '../services/i18n';
 import './Home.css';
 
@@ -8,45 +8,42 @@ const Home = ({ onNavigate }) => {
 
     return (
         <div className="home-container">
-            <div className="home-hero">
-                <div className="hero-badge">
-                    <ShieldCheck size={16} /> <span>Application Officielle</span>
+            <header className="home-tactical-header">
+                <div className="logo-section">
+                    <div className="logo-box"><ShieldCheck size={28} /></div>
+                    <h1>ALERTO</h1>
                 </div>
-                <h1>{t.title || 'ALERTO'}</h1>
-                <p>Plateforme communautaire de réponse rapide aux crises</p>
+                <p className="home-subtitle">Que souhaitez-vous faire ?</p>
+            </header>
                 
-                <div className="home-grid">
-                    <div className="home-card primary" onClick={() => onNavigate('report')}>
-                        <div className="card-icon">
-                            <AlertCircle size={32} />
-                        </div>
-                        <div className="card-content">
-                            <h3>Nouveau signalement</h3>
-                            <p>Signaler un incident ou des dégâts en temps réel</p>
-                        </div>
-                        <div className="card-action">
-                             <Navigation size={20} />
-                        </div>
+            <div className="home-grid">
+                <div className="home-card primary-red" onClick={() => onNavigate('report')}>
+                    <div className="card-icon-box">
+                        <Camera size={28} />
                     </div>
-
-                    <div className="home-card secondary" onClick={() => onNavigate('map')}>
-                        <div className="card-icon">
-                            <MapIcon size={32} />
-                        </div>
-                        <div className="card-content">
-                            <h3>Carte des alertes</h3>
-                            <p>Voir les incidents signalés sur la carte interactive</p>
-                        </div>
+                    <div className="card-content">
+                        <h3>Nouveau signalement</h3>
+                        <p>Signaler un incident ou des dégâts</p>
                     </div>
+                </div>
 
-                    <div className="home-card tertiary" onClick={() => onNavigate('history')}>
-                        <div className="card-icon">
-                            <Clock size={32} />
-                        </div>
-                        <div className="card-content">
-                            <h3>Mes signalements</h3>
-                            <p>Voir l'historique de vos signalements envoyés</p>
-                        </div>
+                <div className="home-card tactical-dark" onClick={() => onNavigate('map')}>
+                    <div className="card-icon-box">
+                        <MapIcon size={28} />
+                    </div>
+                    <div className="card-content">
+                        <h3>Carte des alertes</h3>
+                        <p>Voir les incidents signalés sur la carte</p>
+                    </div>
+                </div>
+
+                <div className="home-card tactical-dark" onClick={() => onNavigate('history')}>
+                    <div className="card-icon-box">
+                        <FileText size={28} />
+                    </div>
+                    <div className="card-content">
+                        <h3>Mes signalements</h3>
+                        <p>Voir l'historique de vos signalements</p>
                     </div>
                 </div>
             </div>

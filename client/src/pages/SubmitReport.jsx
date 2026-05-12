@@ -5,7 +5,7 @@ import {
   ChevronRight, AlertTriangle, Zap, HeartPulse,
   Droplets, Flame, ShieldAlert, Bomb, PlusCircle,
   Construction, Building2, Store, Landmark, Factory, Users, Navigation, 
-  Search, ShieldCheck, Activity
+  Search, ShieldCheck, Activity, ChevronLeft, Clock
 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE } from '../services/api';
@@ -123,14 +123,14 @@ const SubmitReport = () => {
     if (isSuccess) {
         return (
             <div className="success-overlay">
-                <div className="success-card">
-                    <div className="success-icon-wrapper">
-                        <Check size={48} color="white" />
+                <div className="success-card-tactical">
+                    <div className="success-icon-bg">
+                        <Check size={48} strokeWidth={3} />
                     </div>
                     <h2>Signalement envoyé !</h2>
-                    <p>Merci pour votre contribution. Votre signalement a été transmis avec succès.</p>
-                    <div className="success-id">ID : #ALR-2024-08-03-00124</div>
-                    <button className="btn-primary" onClick={() => { setIsSuccess(false); setFormStep(1); setMediaPreview(null); }}>OK</button>
+                    <p className="success-sub">Merci pour votre contribution.<br/>Votre signalement a été transmis avec succès.</p>
+                    <div className="success-id-badge">ID : #ALR-2024-08-03-00124</div>
+                    <button className="btn-success-ok" onClick={() => { setIsSuccess(false); setFormStep(1); setMediaPreview(null); }}>OK</button>
                 </div>
             </div>
         );
@@ -138,12 +138,17 @@ const SubmitReport = () => {
 
     return (
         <div className="submit-report-modern">
-            <header className="report-header">
-                <button className="back-btn" onClick={() => formStep > 1 && setFormStep(formStep - 1)}>
-                    <X size={24} />
+            <header className="report-tactical-header">
+                <button className="back-btn" onClick={() => formStep > 1 ? setFormStep(formStep - 1) : null}>
+                    <ChevronLeft size={24} />
                 </button>
-                <div className="step-indicator">Étape {formStep}/2</div>
-                <button className="close-btn"><Navigation size={20} /></button>
+                <div className="header-center">
+                    <div className="step-label">Étape {formStep}/2</div>
+                    <div className="step-progress-bar">
+                        <div className="progress-fill" style={{ width: `${formStep === 1 ? '50%' : '100%'}` }}></div>
+                    </div>
+                </div>
+                <button className="timer-btn"><Clock size={20} /></button>
             </header>
 
             <div className="report-content">
@@ -189,7 +194,7 @@ const SubmitReport = () => {
                                 <div className="input-group">
                                     <label>Description du sinistre *</label>
                                     <textarea 
-                                        placeholder="Ex: Inondation importante dans le quartier..."
+                                        placeholder="Inondation importante dans le quartier, plusieurs maisons sont touchées et les routes sont impraticables."
                                         value={formData.description}
                                         onChange={(e) => setFormData({...formData, description: e.target.value})}
                                     />
@@ -200,13 +205,13 @@ const SubmitReport = () => {
                                     <label>Niveau de dégâts *</label>
                                     <div className="damage-selector">
                                         <div className={`damage-opt minime ${formData.damage_level === 'minime' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'minime'})}>
-                                            <ShieldCheck size={18} /> <span>Minime</span>
+                                            <div className="opt-icon green"><ShieldCheck size={18} /></div> <span>Minime</span>
                                         </div>
                                         <div className={`damage-opt partiel ${formData.damage_level === 'partiel' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'partiel'})}>
-                                            <AlertTriangle size={18} /> <span>Partiel</span>
+                                            <div className="opt-icon orange"><AlertTriangle size={18} /></div> <span>Partiel</span>
                                         </div>
                                         <div className={`damage-opt complet ${formData.damage_level === 'complet' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'complet'})}>
-                                            <Flame size={18} /> <span>Complet</span>
+                                            <div className="opt-icon red"><X size={18} /></div> <span>Complet</span>
                                         </div>
                                     </div>
                                 </div>
@@ -216,7 +221,8 @@ const SubmitReport = () => {
                                     <select value={formData.infrastructure_type} onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}>
                                         <option>Résidentiel</option>
                                         <option>Commercial</option>
-                                        <option>Public</option>
+                                        <option>Public / Gouvernemental</option>
+                                        <option>Industriel</option>
                                     </select>
                                 </div>
 
@@ -225,19 +231,21 @@ const SubmitReport = () => {
                                     <select value={formData.crisis_type} onChange={(e) => setFormData({...formData, crisis_type: e.target.value})}>
                                         <option>Inondation</option>
                                         <option>Incendie</option>
-                                        <option>Séisme</option>
+                                        <option>Effondrement</option>
+                                        <option>Conflit</option>
+                                        <option>Autre</option>
                                     </select>
                                 </div>
 
                                 <div className="input-group">
-                                    <label>Localisation <span className="gps-active">● GPS actif</span></label>
+                                    <label>Localisation <span className="gps-active-badge">● GPS actif</span></label>
                                     <div className="loc-input-box">
                                         <input 
                                             type="text" 
                                             value={formData.text_location} 
                                             onChange={(e) => setFormData({...formData, text_location: e.target.value})} 
                                         />
-                                        <MapPin size={18} />
+                                        <Navigation size={18} style={{ transform: 'rotate(45deg)' }} />
                                     </div>
                                 </div>
                             </div>

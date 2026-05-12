@@ -102,10 +102,11 @@
     padding: 20px;
 }
 
+/* Tactical Modal */
 .detail-modal {
     background: #0f172a;
     width: 100%;
-    max-width: 750px;
+    max-width: 500px;
     max-height: 90vh;
     border-radius: 40px;
     overflow: hidden;
@@ -115,80 +116,117 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.modal-header {
-    padding: 24px 35px;
+/* Tactical Modal Header */
+.modal-header-tactical {
+    padding: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.02);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    color: white;
 }
 
-.detail-img {
+.modal-header-tactical h3 { font-size: 1.1rem; font-weight: 800; color: white; margin: 0; }
+.back-btn, .more-btn { background: none; border: none; color: white; cursor: pointer; display: flex; align-items: center; }
+
+.detail-media-container {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.detail-img-full {
     width: 100%;
-    height: 320px;
+    height: 240px;
     object-fit: cover;
-    border-radius: 32px;
-    margin-bottom: 35px;
+    border-radius: 24px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-.detail-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 25px;
-    background: rgba(255, 255, 255, 0.02);
-    padding: 30px;
-    border-radius: 32px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+.media-status-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(8px);
+    padding: 6px 14px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: white;
 }
 
-.status-indicator {
-    background: #1e293b;
-    padding: 12px 20px;
-    border-radius: 16px;
-    font-weight: 900;
-    font-size: 0.9rem;
-    color: #10b981;
-    text-align: center;
-}
+.dot-green { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; }
 
-.status-progress {
-    height: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    margin-top: 12px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #ef4444, #f97316);
-    border-radius: 6px;
-}
-
-.modal-scroll-content { padding: 30px; overflow-y: auto; }
-.detail-section { margin-bottom: 30px; }
-.detail-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 20px; }
-.detail-row label { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-.detail-row p { font-size: 1.1rem; font-weight: 700; color: white; }
-
-.empty-history {
+.detail-fields {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 120px 40px;
-    text-align: center;
-    color: #94a3b8;
+    gap: 20px;
 }
 
-.empty-icon-bg {
-    width: 100px; height: 100px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 35px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 25px;
-    color: #4f46e5;
+.detail-field {
+    text-align: left;
 }
+
+.detail-field label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+
+.detail-field p { font-size: 1rem; font-weight: 700; color: white; margin: 0; }
+
+.detail-loc-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+}
+
+.detail-desc-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #cbd5e1;
+}
+
+.modal-footer-tactical {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn-share, .btn-report-problem {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-share {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn-report-problem {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.btn-report-problem:hover { background: rgba(239, 68, 68, 0.25); }
