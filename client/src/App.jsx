@@ -24,6 +24,7 @@ import { v4 as uuidv4 } from 'uuid';
 function AppContent() {
   const [path, setPath] = useState(window.location.pathname);
   const [activeTab, setActiveTab] = useState('home'); 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { t, lang, setLang } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('alerto_token'));
 
@@ -127,6 +128,32 @@ function AppContent() {
       </aside>
 
       <div className="layout-main">
+        {/* Mobile Sidebar / Drawer */}
+        {isMenuOpen && (
+          <div className="mobile-sidebar-overlay" onClick={() => setIsMenuOpen(false)}>
+            <div className="mobile-drawer" onClick={e => e.stopPropagation()}>
+              <div className="drawer-header">
+                <ShieldCheck size={32} color="#ef4444" />
+                <span>ALERTO</span>
+              </div>
+              <nav className="drawer-nav">
+                <button className={`drawer-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => { setActiveTab('home'); setIsMenuOpen(false); }}>
+                  <ShieldCheck size={20} /> <span>ACCUEIL</span>
+                </button>
+                <button className={`drawer-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => { setActiveTab('map'); setIsMenuOpen(false); }}>
+                  <MapIcon size={20} /> <span>EXPLORER</span>
+                </button>
+                <button className={`drawer-item ${activeTab === 'report' ? 'active' : ''}`} onClick={() => { setActiveTab('report'); setIsMenuOpen(false); }}>
+                  <AlertCircle size={20} /> <span>SIGNALER</span>
+                </button>
+                <button className={`drawer-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => { setActiveTab('history'); setIsMenuOpen(false); }}>
+                  <Clock size={20} /> <span>MES ALERTES</span>
+                </button>
+              </nav>
+            </div>
+          </div>
+        )}
+
         {/* Global Language Switcher (Mobile Only) */}
         <div className="mobile-lang-overlay">
           <select value={lang} onChange={(e) => setLang(e.target.value)} className="minimal-select">
@@ -140,7 +167,7 @@ function AppContent() {
         </div>
         
         <main className="main-content">
-          {activeTab === 'home' && <Home onNavigate={setActiveTab} />}
+          {activeTab === 'home' && <Home onNavigate={setActiveTab} onMenuClick={() => setIsMenuOpen(true)} />}
           {activeTab === 'map' && <PublicMap lang={lang} />}
           {activeTab === 'report' && <SubmitReport lang={lang} onClose={() => setActiveTab('home')} />}
           {activeTab === 'history' && <MyReports lang={lang} />}
@@ -184,58 +211,78 @@ function AppContent() {
           </div>
         </footer>
 
-        {/* Bottom Nav (Mobile Only) */}
-        <nav className="bottom-nav">
-          <button className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
-            <ShieldCheck className="nav-icon" />
-            <span>ACCUEIL</span>
-          </button>
-          <button className={`nav-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => setActiveTab('map')}>
-            <MapIcon className="nav-icon" />
-            <span>EXPLORER</span>
-          </button>
-          <button className={`nav-item ${activeTab === 'report' ? 'active' : ''}`} onClick={() => setActiveTab('report')}>
-            <AlertCircle className="nav-icon" />
-            <span>SIGNALER</span>
-          </button>
-          <button className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
-            <Clock className="nav-icon" />
-            <span>MES ALERTES</span>
-          </button>
-        </nav>
+        {/* Bottom Nav removed for premium brand parity */}
       </div>
 
       <style>{`
-        .global-lang-overlay {
-          position: fixed;
-          top: 15px;
-          right: 15px;
-          z-index: 2000;
-        }
-        .minimal-select {
-          background: white;
-          border: 1px solid #e2e8f0;
-          padding: 8px 12px;
-          border-radius: 12px;
-          font-weight: 700;
-          font-size: 0.75rem;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-          outline: none;
-        }
-        .admin-access-btn {
-          width: 100%;
-          padding: 15px;
-          background: #f1f5f9;
-          border: 1px solid #e2e8f0;
-          border-radius: 16px;
-          color: #64748b;
-          font-weight: 700;
-          font-size: 0.9rem;
-          cursor: pointer;
-        }
-        .main-content {
-          min-height: 100vh;
-        }
+.mobile-sidebar-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(2, 6, 23, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 5000;
+    display: flex;
+}
+
+.mobile-drawer {
+    width: 280px;
+    height: 100%;
+    background: #0f172a;
+    box-shadow: 15px 0 50px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+.drawer-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 50px;
+}
+
+.drawer-header span {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: white;
+}
+
+.drawer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.drawer-item {
+    background: none;
+    border: none;
+    padding: 18px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #94a3b8;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.drawer-item.active {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.drawer-item:active {
+    background: rgba(255, 255, 255, 0.05);
+}
       `}</style>
     </div>
   );

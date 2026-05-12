@@ -3,13 +3,13 @@ import { AlertCircle, Map as MapIcon, Clock, ShieldCheck, Navigation, Camera, Fi
 import { useTranslation } from '../services/i18n';
 import './Home.css';
 
-const Home = ({ onNavigate }) => {
+const Home = ({ onNavigate, onMenuClick }) => {
     const { t } = useTranslation();
 
     return (
         <div className="home-container-premium">
             <header className="home-header-maquette">
-                <button className="menu-btn-maquette"><Menu size={24} /></button>
+                <button className="menu-btn-maquette" onClick={onMenuClick}><Menu size={24} /></button>
                 <h1 className="brand-alerto-maquette">ALERTO</h1>
                 <div className="notif-wrapper-maquette">
                     <Bell size={24} />
