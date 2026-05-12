@@ -6,6 +6,7 @@ import PublicMap from './pages/PublicMap';
 import HelpCenter from './pages/HelpCenter';
 import PnudLogin from './pages/PnudLogin';
 import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 import { LanguageProvider, useTranslation } from './services/i18n';
 import { 
   AlertCircle, 
@@ -22,7 +23,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 function AppContent() {
   const [path, setPath] = useState(window.location.pathname);
-  const [activeTab, setActiveTab] = useState('map'); // map, report, history, help
+  const [activeTab, setActiveTab] = useState('home'); 
   const { t, lang, setLang } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('alerto_token'));
 
@@ -99,6 +100,9 @@ function AppContent() {
           <span>ALERTO</span>
         </div>
         <nav className="sidebar-nav">
+          <button className={`side-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
+            <ShieldCheck size={20} /> <span>Accueil</span>
+          </button>
           <button className={`side-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => setActiveTab('map')}>
             <MapIcon size={20} /> <span>{t.nav.map}</span>
           </button>
@@ -142,6 +146,7 @@ function AppContent() {
         </div>
         
         <main className="main-content">
+          {activeTab === 'home' && <Home onNavigate={setActiveTab} />}
           {activeTab === 'map' && <PublicMap lang={lang} />}
           {activeTab === 'report' && <SubmitReport lang={lang} />}
           {activeTab === 'history' && <MyReports lang={lang} />}
@@ -187,6 +192,10 @@ function AppContent() {
 
         {/* Bottom Nav (Mobile Only) */}
         <nav className="bottom-nav">
+          <button className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
+            <ShieldCheck className="nav-icon" />
+            <span>Accueil</span>
+          </button>
           <button className={`nav-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => setActiveTab('map')}>
             <MapIcon className="nav-icon" />
             <span>{t.nav.map}</span>

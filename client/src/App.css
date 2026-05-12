@@ -1,19 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --primary: #5eead4; /* Mint green from design */
-  --primary-dark: #2dd4bf;
-  --secondary: #fb923c; /* Orange accent */
-  --bg-app: #f0fdfa; /* Light mint background */
-  --card-bg: #ffffff;
-  --text-main: #0f172a;
-  --text-dim: #64748b;
-  --border: #e2e8f0;
-  --success: #4ade80;
-  --warning: #facc15;
-  --danger: #f87171;
-  --glass: rgba(255, 255, 255, 0.9);
+  --primary: #ef4444; /* Coral Red for primary actions */
+  --primary-dark: #b91c1c;
+  --secondary: #4f46e5; /* Indigo for secondary */
+  --bg-app: #0f172a; /* Deep Navy background */
+  --card-bg: #1e293b;
+  --text-main: #f8fafc;
+  --text-dim: #94a3b8;
+  --border: rgba(255, 255, 255, 0.08);
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --glass: rgba(15, 23, 42, 0.8);
   --sidebar-width: 280px;
+  --radius-lg: 32px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -51,7 +52,7 @@ body {
 /* Sidebar (Desktop) */
 .desktop-sidebar {
   width: var(--sidebar-width);
-  background: white;
+  background: #0f172a;
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -99,16 +100,14 @@ body {
 }
 
 .side-item:hover {
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.03);
   color: var(--text-main);
-  border-bottom-color: #e2e8f0;
 }
 
 .side-item.active {
-  background: #f0fdfa;
-  color: #2dd4bf;
-  border-bottom: 4px solid #ccfbf1;
-  transform: translateY(-2px);
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  transform: translateX(5px);
 }
 
 .side-item:active {
@@ -184,9 +183,9 @@ body {
   width: 25%;
 }
 
-.nav-item.active { color: #2dd4bf; }
-.nav-item span { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-.nav-icon { width: 24px; height: 24px; }
+.nav-item.active { color: #ef4444; }
+.nav-item span { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.nav-icon { width: 22px; height: 22px; }
 
 /* PWA Toast */
 .pwa-toast {
