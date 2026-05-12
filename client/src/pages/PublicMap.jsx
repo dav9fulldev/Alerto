@@ -113,7 +113,7 @@ const PublicMap = () => {
                 {isSatellite ? (
                     <TileLayer url="https://mt1.google.com/vt/lyrs=y,h&x={x}&y={y}&z={z}" attribution='&copy; Google' maxZoom={20} />
                 ) : (
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' maxZoom={19} />
+                    <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; OpenStreetMap &copy; CARTO' maxZoom={19} />
                 )}
                 
                 {reports.map((report) => (
@@ -149,9 +149,11 @@ const PublicMap = () => {
             </div>
 
             <div className="map-legend-fab">
-                <div className="legend-item"><span className="dot red"></span> {t.options?.damage?.complet || 'COMPLET'}</div>
-                <div className="legend-item"><span className="dot orange"></span> {t.options?.damage?.partiel || 'PARTIEL'}</div>
-                <div className="legend-item"><span className="dot green"></span> {t.options?.damage?.minime || 'MINIME'}</div>
+                <div className="legend-item"><div className="dot" style={{background: '#3b82f6'}}></div> <span>Inondation</span></div>
+                <div className="legend-item"><div className="dot" style={{background: '#ef4444'}}></div> <span>Incendie</span></div>
+                <div className="legend-item"><div className="dot" style={{background: '#f59e0b'}}></div> <span>Effondrement</span></div>
+                <div className="legend-item"><div className="dot" style={{background: '#8b5cf6'}}></div> <span>Conflit</span></div>
+                <div className="legend-item"><div className="dot" style={{background: '#10b981'}}></div> <span>Autre</span></div>
             </div>
         </div>
     );
