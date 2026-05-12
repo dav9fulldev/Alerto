@@ -134,6 +134,14 @@
 .icon-box-green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
 
 /* Custom Markers with Glow */
+.leaflet-tile {
+    filter: brightness(0.8) saturate(1.5) hue-rotate(15deg) contrast(1.1);
+}
+
+.leaflet-container {
+    background: #020617 !important;
+}
+
 .custom-glow-icon {
     background: none !important;
     border: none !important;

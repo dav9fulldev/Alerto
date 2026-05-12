@@ -6,7 +6,7 @@ import { API_BASE } from '../services/api';
 import { 
   AlertTriangle, MapPin, Navigation, Droplets, Flame, Building2, 
   ShieldAlert, Bomb, PlusCircle, Layers, RefreshCw, X, Filter,
-  Plus, Minus, Users
+  Plus, Minus, Users, ChevronRight
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import { useTranslation } from '../services/i18n';
@@ -44,11 +44,25 @@ const MapAutoFixer = ({ trigger }) => {
     return null;
 };
 
+const MapBoundsSetter = ({ reports }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (reports && reports.length > 0 && map) {
+            const validReports = reports.filter(r => r.location?.coordinates);
+            if (validReports.length > 0) {
+                const bounds = L.latLngBounds(validReports.map(r => [r.location.coordinates[1], r.location.coordinates[0]]));
+                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+            }
+        }
+    }, [reports, map]);
+    return null;
+};
+
 const PublicMap = () => {
     const { t, lang } = useTranslation();
     const [reports, setReports] = useState([]);
     const [center, setCenter] = useState([5.3484, -4.0305]); 
-    const [zoomLevel, setZoomLevel] = useState(13);
+    const [zoomLevel, setZoomLevel] = useState(12);
     const [activeFilter, setActiveFilter] = useState('Tous');
     const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
@@ -182,10 +196,15 @@ const PublicMap = () => {
                 </div>
             )}
 
-            <MapContainer center={center} zoom={zoomLevel} zoomControl={false} style={{ flex: 1, width: '100%', position: 'relative' }}>
+            <MapContainer center={center} zoom={zoomLevel} zoomControl={false} style={{ flex: 1, width: '100%', position: 'relative' }} minZoom={4} worldCopyJump={true}>
                 <MapController center={center} zoom={zoomLevel} />
+                <MapBoundsSetter reports={reports} />
                 <MapAutoFixer trigger={activeFilter} />
-                <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; CARTO' />
+                <TileLayer 
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" 
+                    attribution='&copy; CARTO' 
+                    noWrap={true}
+                />
                 
                 {reports.filter(r => {
                     const matchCategory = activeFilter === 'Tous' || r.crisis_type === activeFilter;
