@@ -142,7 +142,7 @@ function AppContent() {
         <main className="main-content">
           {activeTab === 'home' && <Home onNavigate={setActiveTab} />}
           {activeTab === 'map' && <PublicMap lang={lang} />}
-          {activeTab === 'report' && <SubmitReport lang={lang} />}
+          {activeTab === 'report' && <SubmitReport lang={lang} onClose={() => setActiveTab('home')} />}
           {activeTab === 'history' && <MyReports lang={lang} />}
           {activeTab === 'profile' && (
             <div className="profile-placeholder modern-card" style={{margin: '40px', padding: '60px', textAlign: 'center'}}>

@@ -11,7 +11,7 @@ import axios from 'axios';
 import { API_BASE } from '../services/api';
 import { useTranslation } from '../services/i18n';
 
-const SubmitReport = () => {
+const SubmitReport = ({ lang, onClose }) => {
     const { t } = useTranslation();
     const [formStep, setFormStep] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -31,8 +31,16 @@ const SubmitReport = () => {
         text_location: 'Recherche de localisation...',
         electricity_status: 'Partiellement disponible',
         health_services_status: 'Non fonctionnels',
-        urgent_needs: ['Eau potable', 'Nourriture']
+        urgent_needs: []
     });
+
+    const handleBack = () => {
+        if (formStep > 1) {
+            setFormStep(formStep - 1);
+        } else {
+            onClose();
+        }
+    };
 
     useEffect(() => {
         getGPS();
@@ -139,7 +147,7 @@ const SubmitReport = () => {
     return (
         <div className="submit-report-premium">
             <header className="report-header-premium">
-                <button className="header-back-btn" onClick={() => formStep > 1 ? setFormStep(formStep - 1) : null}>
+                <button className="header-back-btn" onClick={handleBack}>
                     <ChevronLeft size={24} />
                 </button>
                 <div className="header-center-info">
@@ -283,7 +291,7 @@ const SubmitReport = () => {
 
             <footer className="report-footer-premium">
                 <div className="footer-actions-row">
-                    <button className="btn-cancel-premium" onClick={() => setFormStep(1)}>Annuler</button>
+                    <button className="btn-cancel-premium" onClick={handleBack}>Annuler</button>
                     {formStep === 1 ? (
                         <button className="btn-next-premium" disabled={!mediaPreview || aiAnalyzing} onClick={() => setFormStep(2)}>
                             Suivant <ChevronRight size={20} />
