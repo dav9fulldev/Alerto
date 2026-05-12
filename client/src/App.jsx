@@ -94,40 +94,7 @@ function AppContent() {
         </div>
       )}
       
-      {/* Sidebar for Desktop (>= 768px) */}
-      <aside className="desktop-sidebar">
-        <div className="sidebar-logo">
-          <ShieldCheck size={32} color="#0ea5e9" />
-          <span>ALERTO</span>
-        </div>
-        <nav className="sidebar-nav">
-          <button className={`side-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
-            <ShieldCheck size={20} /> <span>Accueil</span>
-          </button>
-          <button className={`side-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => setActiveTab('map')}>
-            <MapIcon size={20} /> <span>{t.nav.map}</span>
-          </button>
-          <button className={`side-item ${activeTab === 'report' ? 'active' : ''}`} onClick={() => setActiveTab('report')}>
-            <AlertCircle size={20} /> <span>{t.nav.report}</span>
-          </button>
-          <button className={`side-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
-            <Clock size={20} /> <span>{t.nav.history}</span>
-          </button>
-        </nav>
-        
-        <div className="sidebar-footer">
-          <select value={lang} onChange={(e) => setLang(e.target.value)} className="side-select">
-            <option value="fr">Français (FR)</option>
-            <option value="en">English (EN)</option>
-            <option value="es">Español (ES)</option>
-            <option value="ar">العربية (AR)</option>
-            <option value="zh">中文 (ZH)</option>
-            <option value="ru">Русский (RU)</option>
-          </select>
-        </div>
-      </aside>
-
-      <div className="layout-main">
+      <div className="layout-main full-width-premium">
         {/* Mobile Sidebar / Drawer */}
         {isMenuOpen && (
           <div className="mobile-sidebar-overlay" onClick={() => setIsMenuOpen(false)}>
@@ -191,25 +158,6 @@ function AppContent() {
             </div>
           )}
         </main>
-
-        <footer className="app-footer">
-          <div className="footer-content">
-            <div className="footer-brand">
-              <ShieldCheck size={24} color="#0ea5e9" />
-              <span>{t.footer.brand}</span>
-            </div>
-            <p className="footer-mission">{t.footer.mission}</p>
-            <div className="footer-links">
-              <a href="#">{t.footer.legal}</a>
-              <a href="#">{t.footer.privacy}</a>
-              <a href="#">{t.footer.api}</a>
-            </div>
-            <div className="footer-bottom">
-              <p>{t.footer.copyright}</p>
-              <p className="made-with">{t.footer.made_with}</p>
-            </div>
-          </div>
-        </footer>
 
         {/* Bottom Nav removed for premium brand parity */}
       </div>
