@@ -138,17 +138,21 @@ const SubmitReport = () => {
 
     return (
         <div className="submit-report-modern">
-            <header className="report-tactical-header">
-                <button className="back-btn" onClick={() => formStep > 1 ? setFormStep(formStep - 1) : null}>
-                    <ChevronLeft size={24} />
-                </button>
-                <div className="header-center">
-                    <div className="step-label">Étape {formStep}/2</div>
-                    <div className="step-progress-bar">
-                        <div className="progress-fill" style={{ width: `${formStep === 1 ? '50%' : '100%'}` }}></div>
-                    </div>
+    return (
+        <div className="submit-report-modern">
+            <header className="report-tactical-header-v2">
+                <div className="header-top-row">
+                    <div className="step-label-v2">ÉTAPE {formStep}/2</div>
+                    <button className="timer-btn-v2"><Clock size={20} /></button>
                 </div>
-                <button className="timer-btn"><Clock size={20} /></button>
+                <div className="step-progress-line-orange">
+                    <div className="progress-fill-orange" style={{ width: `${formStep === 1 ? '50%' : '100%'}` }}></div>
+                </div>
+                <div className="header-bottom-row">
+                    <button className="back-btn-v2" onClick={() => formStep > 1 ? setFormStep(formStep - 1) : null}>
+                        <ChevronLeft size={24} />
+                    </button>
+                </div>
             </header>
 
             <div className="report-content">
@@ -238,14 +242,14 @@ const SubmitReport = () => {
                                 </div>
 
                                 <div className="input-group">
-                                    <label>Localisation <span className="gps-active-badge">● GPS actif</span></label>
-                                    <div className="loc-input-box">
+                                    <label>Localisation <div className="gps-pill-badge">● GPS ACTIF</div></label>
+                                    <div className="loc-input-box-v2">
                                         <input 
                                             type="text" 
                                             value={formData.text_location} 
                                             onChange={(e) => setFormData({...formData, text_location: e.target.value})} 
                                         />
-                                        <Navigation size={18} style={{ transform: 'rotate(45deg)' }} />
+                                        <button className="loc-refresh-btn"><Navigation size={18} style={{ transform: 'rotate(45deg)' }} /></button>
                                     </div>
                                 </div>
                             </div>
@@ -293,14 +297,14 @@ const SubmitReport = () => {
                 )}
             </div>
 
-            <footer className="report-footer">
+            <footer className="report-footer-v2">
                 {formStep === 1 ? (
-                    <button className="btn-next" disabled={!mediaPreview || aiAnalyzing} onClick={() => setFormStep(2)}>
-                        Suivant <ChevronRight size={20} />
+                    <button className="btn-next-v2" disabled={!mediaPreview || aiAnalyzing} onClick={() => setFormStep(2)}>
+                        SUIVANT <ChevronRight size={20} />
                     </button>
                 ) : (
-                    <button className="btn-submit" disabled={loading} onClick={handleSubmit}>
-                        {loading ? <Loader2 className="spinner" /> : 'Envoyer le signalement'} <Navigation size={20} style={{ transform: 'rotate(90deg)' }} />
+                    <button className="btn-submit-v2" disabled={loading} onClick={handleSubmit}>
+                        {loading ? <Loader2 className="spinner" /> : 'ENVOYER LE SIGNALEMENT'} <Navigation size={20} style={{ transform: 'rotate(90deg)' }} />
                     </button>
                 )}
             </footer>
