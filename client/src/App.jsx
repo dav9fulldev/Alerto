@@ -188,19 +188,19 @@ function AppContent() {
         <nav className="bottom-nav">
           <button className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
             <ShieldCheck className="nav-icon" />
-            <span>Accueil</span>
+            <span>ACCUEIL</span>
           </button>
           <button className={`nav-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => setActiveTab('map')}>
             <MapIcon className="nav-icon" />
-            <span>{t.nav.map}</span>
+            <span>EXPLORER</span>
           </button>
           <button className={`nav-item ${activeTab === 'report' ? 'active' : ''}`} onClick={() => setActiveTab('report')}>
             <AlertCircle className="nav-icon" />
-            <span>{t.nav.report}</span>
+            <span>SIGNALER</span>
           </button>
           <button className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
             <Clock className="nav-icon" />
-            <span>{t.nav.history}</span>
+            <span>MES ALERTES</span>
           </button>
         </nav>
       </div>

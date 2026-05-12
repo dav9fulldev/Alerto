@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, Map as MapIcon, Clock, ShieldCheck, Navigation, Camera, FileText } from 'lucide-react';
+import { AlertCircle, Map as MapIcon, Clock, ShieldCheck, Navigation, Camera, FileText, ChevronDown } from 'lucide-react';
 import { useTranslation } from '../services/i18n';
 import './Home.css';
 
@@ -8,13 +8,18 @@ const Home = ({ onNavigate }) => {
 
     return (
         <div className="home-container">
-            <header className="home-tactical-header">
-                <div className="logo-section">
-                    <div className="logo-box"><ShieldCheck size={28} /></div>
-                    <h1>ALERTO</h1>
+            <header className="home-header-top">
+                <div className="logo-group">
+                    <div className="logo-box-mini"><ShieldCheck size={22} fill="white" /></div>
+                    <span className="brand-name">ALERTO</span>
                 </div>
-                <p className="home-subtitle">Que souhaitez-vous faire ?</p>
+                <div className="lang-selector-white">
+                    <span>FR</span>
+                    <ChevronDown size={14} />
+                </div>
             </header>
+            
+            <h2 className="home-main-title">Que souhaitez-vous faire ?</h2>
                 
             <div className="home-grid">
                 <div className="home-card primary-red" onClick={() => onNavigate('report')}>

@@ -1,64 +1,80 @@
 .home-container {
-    padding: 20px;
+    padding: 15px;
     max-width: 600px;
     margin: 0 auto;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 30px;
     background: #0f172a;
+    color: white;
 }
 
-.home-tactical-header {
-    margin-bottom: 10px;
-    text-align: left;
+.home-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 5px;
+    margin-bottom: 25px;
 }
 
-.logo-section {
+.logo-group {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 15px;
 }
 
-.logo-box {
-    width: 44px;
-    height: 44px;
+.logo-box-mini {
+    width: 42px;
+    height: 42px;
     background: #ef4444;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
 }
 
-.logo-section h1 {
-    font-size: 1.5rem;
+.brand-name {
+    font-size: 1.6rem;
     font-weight: 900;
-    color: white;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
 }
 
-.home-subtitle {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: white;
+.lang-selector-white {
+    background: white;
+    color: #0f172a;
+    padding: 6px 14px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.home-main-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 30px;
+    text-align: left;
+    padding-left: 5px;
 }
 
 .home-grid {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
 }
 
 .home-card {
-    border-radius: 24px;
-    padding: 20px;
+    border-radius: 28px;
+    padding: 24px;
     display: flex;
     align-items: center;
     gap: 20px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.1s;
     text-align: left;
 }
 
@@ -66,73 +82,61 @@
 
 .home-card.primary-red {
     background: #ef4444;
-    color: white;
-    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.25);
 }
 
 .home-card.tactical-dark {
     background: #1e293b;
-    color: white;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .card-icon-box {
-    width: 56px;
-    height: 56px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 18px;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.home-card.primary-red .card-icon-box {
-    background: rgba(255, 255, 255, 0.2);
-}
-
 .card-content h3 {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 800;
     margin-bottom: 4px;
+    color: white;
 }
 
 .card-content p {
-    font-size: 0.8rem;
-    opacity: 0.7;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.7);
     font-weight: 600;
 }
 
 .home-status-bar {
-    margin-top: auto;
-    padding-bottom: 100px; /* Space for mobile nav */
+    margin-top: 50px;
+    padding: 20px 5px 120px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
+    gap: 12px;
+    font-size: 0.9rem;
     font-weight: 700;
     color: #94a3b8;
 }
 
 .status-indicator {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
 }
 
 .status-indicator.online {
     background: #10b981;
-    box-shadow: 0 0 10px #10b981;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
 }
 
 @media (min-width: 768px) {
-    .home-container {
-        padding: 40px;
-        max-width: 800px;
-    }
-    .home-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    .home-card { padding: 30px; }
+    .home-container { padding: 40px; max-width: 800px; }
+    .home-grid { gap: 24px; }
+    .home-card { padding: 32px; }
 }
