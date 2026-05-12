@@ -5,7 +5,7 @@ import axios from 'axios';
 import { API_BASE } from '../services/api';
 import { 
   AlertTriangle, MapPin, Navigation, Droplets, Flame, Car, Home, 
-  ShieldAlert, Bomb, PlusCircle, Layers, Mountain, Wind, Trees
+  ShieldAlert, Bomb, PlusCircle, Layers, Mountain, Wind, Trees, RefreshCw
 } from 'lucide-react';
 import { useTranslation } from '../services/i18n';
 import './PublicMap.css';
