@@ -118,54 +118,49 @@ const SubmitReport = () => {
             setLoading(false);
             setIsSuccess(true);
         }, 2000);
-    };
-
-    if (isSuccess) {
+     if (isSuccess) {
         return (
-            <div className="success-overlay">
-                <div className="success-card-tactical">
-                    <div className="success-icon-bg">
-                        <Check size={48} strokeWidth={3} />
+            <div className="success-overlay-premium">
+                <div className="success-card-premium">
+                    <div className="confetti-bg"></div>
+                    <div className="success-icon-circle-large">
+                        <Check size={48} color="white" strokeWidth={4} />
                     </div>
                     <h2>Signalement envoyé !</h2>
-                    <p className="success-sub">Merci pour votre contribution.<br/>Votre signalement a été transmis avec succès.</p>
-                    <div className="success-id-badge">ID : #ALR-2024-08-03-00124</div>
-                    <button className="btn-success-ok" onClick={() => { setIsSuccess(false); setFormStep(1); setMediaPreview(null); }}>OK</button>
+                    <p className="success-sub-text">Merci pour votre contribution.<br/>Votre signalement a été transmis avec succès.</p>
+                    <div className="success-id-container">ID : #ALR-2024-08-03-00124</div>
+                    <button className="btn-success-final" onClick={() => { setIsSuccess(false); setFormStep(1); setMediaPreview(null); }}>OK</button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="submit-report-modern">
-    return (
-        <div className="submit-report-modern">
-            <header className="report-tactical-header-v2">
-                <div className="header-top-row">
-                    <div className="step-label-v2">ÉTAPE {formStep}/2</div>
-                    <button className="timer-btn-v2"><Clock size={20} /></button>
+        <div className="submit-report-premium">
+            <header className="report-header-premium">
+                <button className="header-back-btn" onClick={() => formStep > 1 ? setFormStep(formStep - 1) : null}>
+                    <ChevronLeft size={24} />
+                </button>
+                <div className="header-center-info">
+                    <div className="step-count-label">Étape {formStep}/2</div>
+                    <div className="gradient-progress-container">
+                        <div className="gradient-progress-fill" style={{ width: `${formStep === 1 ? '50%' : '100%'}` }}></div>
+                    </div>
                 </div>
-                <div className="step-progress-line-orange">
-                    <div className="progress-fill-orange" style={{ width: `${formStep === 1 ? '50%' : '100%'}` }}></div>
-                </div>
-                <div className="header-bottom-row">
-                    <button className="back-btn-v2" onClick={() => formStep > 1 ? setFormStep(formStep - 1) : null}>
-                        <ChevronLeft size={24} />
-                    </button>
-                </div>
+                <button className="header-clock-btn"><Clock size={20} /></button>
             </header>
 
-            <div className="report-content">
+            <div className="report-content-scroll">
                 {formStep === 1 && !mediaPreview && (
-                    <div className="media-choice-step">
-                        <h1>Prenez une photo ou vidéo</h1>
-                        <div className="media-buttons">
-                            <div className="media-btn" onClick={() => handleMediaCapture('image')}>
-                                <div className="media-icon-box"><Camera size={32} /></div>
+                    <div className="media-step-premium">
+                        <h1 className="step-title-premium">Prenez une photo ou vidéo</h1>
+                        <div className="media-grid-premium">
+                            <div className="media-option photo" onClick={() => handleMediaCapture('image')}>
+                                <div className="option-icon-box"><Camera size={32} /></div>
                                 <span>PHOTO</span>
                             </div>
-                            <div className="media-btn" onClick={() => handleMediaCapture('video')}>
-                                <div className="media-icon-box"><Video size={32} /></div>
+                            <div className="media-option video" onClick={() => handleMediaCapture('video')}>
+                                <div className="option-icon-box"><Video size={32} /></div>
                                 <span>VIDÉO</span>
                             </div>
                         </div>
@@ -173,83 +168,71 @@ const SubmitReport = () => {
                 )}
 
                 {formStep === 1 && mediaPreview && (
-                    <div className="description-step">
-                        <div className="media-preview-container">
-                            <img src={mediaPreview} alt="Preview" className="main-preview" />
-                            <button className="remove-media" onClick={() => setMediaPreview(null)}><X size={16} /></button>
-                            
-                            {aiAnalyzing && (
-                                <div className="ai-overlay">
-                                    <div className="ai-header">
-                                        <Activity size={16} /> <span>Analyse IA en cours...</span>
-                                    </div>
-                                    <p>Détection d'éléments et pré-classification</p>
-                                    <div className="ai-progress-bar">
-                                        <div className="ai-progress-fill" style={{ width: `${aiProgress}%` }}></div>
-                                    </div>
-                                    <div className="ai-percentage">{aiProgress}%</div>
-                                </div>
-                            )}
+                    <div className="form-step-premium">
+                        <div className="preview-card-premium">
+                            <img src={mediaPreview} alt="Capture" />
+                            <button className="close-preview-btn" onClick={() => setMediaPreview(null)}><X size={16} /></button>
                         </div>
-
-                        {!aiAnalyzing && (
-                            <div className="form-fields">
-                                <h1>Décrivez la situation</h1>
-                                <div className="input-group">
+                        
+                        {aiAnalyzing ? (
+                            <div className="ai-analysis-card-premium">
+                                <div className="ai-status-row">
+                                    <Activity size={18} />
+                                    <span>Analyse IA en cours...</span>
+                                </div>
+                                <p className="ai-sub-status">Détection d'éléments et pré-classification</p>
+                                <div className="ai-progress-track">
+                                    <div className="ai-progress-bar-fill" style={{ width: `${aiProgress}%` }}></div>
+                                </div>
+                                <div className="ai-percentage-text">{aiProgress}%</div>
+                            </div>
+                        ) : (
+                            <div className="fields-stack-premium">
+                                <h1 className="step-title-premium">Décrivez la situation</h1>
+                                <div className="field-group-premium">
                                     <label>Description du sinistre *</label>
                                     <textarea 
-                                        placeholder="Inondation importante dans le quartier, plusieurs maisons sont touchées et les routes sont impraticables."
+                                        placeholder="Inondation importante dans le quartier..."
                                         value={formData.description}
                                         onChange={(e) => setFormData({...formData, description: e.target.value})}
                                     />
-                                    <span className="char-count">{formData.description.length}/500</span>
+                                    <div className="char-indicator">{formData.description.length}/500</div>
                                 </div>
 
-                                <div className="input-group">
+                                <div className="field-group-premium">
                                     <label>Niveau de dégâts *</label>
-                                    <div className="damage-selector">
-                                        <div className={`damage-opt minime ${formData.damage_level === 'minime' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'minime'})}>
-                                            <div className="opt-icon green"><ShieldCheck size={18} /></div> <span>Minime</span>
+                                    <div className="damage-grid-premium">
+                                        <div className={`damage-box minime ${formData.damage_level === 'minime' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'minime'})}>
+                                            <ShieldCheck size={20} /> <span>Minime</span>
                                         </div>
-                                        <div className={`damage-opt partiel ${formData.damage_level === 'partiel' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'partiel'})}>
-                                            <div className="opt-icon orange"><AlertTriangle size={18} /></div> <span>Partiel</span>
+                                        <div className={`damage-box partiel ${formData.damage_level === 'partiel' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'partiel'})}>
+                                            <AlertTriangle size={20} /> <span>Partiel</span>
                                         </div>
-                                        <div className={`damage-opt complet ${formData.damage_level === 'complet' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'complet'})}>
-                                            <div className="opt-icon red"><X size={18} /></div> <span>Complet</span>
+                                        <div className={`damage-box complet ${formData.damage_level === 'complet' ? 'active' : ''}`} onClick={() => setFormData({...formData, damage_level: 'complet'})}>
+                                            <Flame size={20} /> <span>Complet</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="input-group">
+                                <div className="field-group-premium">
                                     <label>Type d'infrastructure *</label>
                                     <select value={formData.infrastructure_type} onChange={(e) => setFormData({...formData, infrastructure_type: e.target.value})}>
                                         <option>Résidentiel</option>
                                         <option>Commercial</option>
-                                        <option>Public / Gouvernemental</option>
-                                        <option>Industriel</option>
+                                        <option>Public</option>
                                     </select>
                                 </div>
 
-                                <div className="input-group">
-                                    <label>Nature de la crise *</label>
-                                    <select value={formData.crisis_type} onChange={(e) => setFormData({...formData, crisis_type: e.target.value})}>
-                                        <option>Inondation</option>
-                                        <option>Incendie</option>
-                                        <option>Effondrement</option>
-                                        <option>Conflit</option>
-                                        <option>Autre</option>
-                                    </select>
-                                </div>
-
-                                <div className="input-group">
-                                    <label>Localisation <div className="gps-pill-badge">● GPS ACTIF</div></label>
-                                    <div className="loc-input-box-v2">
-                                        <input 
-                                            type="text" 
-                                            value={formData.text_location} 
-                                            onChange={(e) => setFormData({...formData, text_location: e.target.value})} 
-                                        />
-                                        <button className="loc-refresh-btn"><Navigation size={18} style={{ transform: 'rotate(45deg)' }} /></button>
+                                <div className="field-group-premium">
+                                    <label className="label-with-badge">
+                                        Localisation 
+                                        <span className="gps-pill-green"><div className="dot-blink"></div> GPS actif</span>
+                                    </label>
+                                    <div className="location-box-premium">
+                                        <div className="location-text-wrap">
+                                            {formData.text_location}
+                                        </div>
+                                        <button className="edit-loc-btn"><Navigation size={18} /></button>
                                     </div>
                                 </div>
                             </div>
@@ -258,10 +241,10 @@ const SubmitReport = () => {
                 )}
 
                 {formStep === 2 && (
-                    <div className="additional-info-step">
-                        <h1>Informations complémentaires</h1>
+                    <div className="additional-step-premium">
+                        <h1 className="step-title-premium">Informations complémentaires</h1>
                         
-                        <div className="input-group">
+                        <div className="field-group-premium">
                             <label>Électricité</label>
                             <select value={formData.electricity_status} onChange={(e) => setFormData({...formData, electricity_status: e.target.value})}>
                                 <option>Partiellement disponible</option>
@@ -270,7 +253,7 @@ const SubmitReport = () => {
                             </select>
                         </div>
 
-                        <div className="input-group">
+                        <div className="field-group-premium">
                             <label>Services de santé</label>
                             <select value={formData.health_services_status} onChange={(e) => setFormData({...formData, health_services_status: e.target.value})}>
                                 <option>Non fonctionnels</option>
@@ -279,13 +262,13 @@ const SubmitReport = () => {
                             </select>
                         </div>
 
-                        <div className="input-group">
+                        <div className="field-group-premium">
                             <label>Besoins les plus urgents (sélectionnez)</label>
-                            <div className="needs-grid">
+                            <div className="needs-tag-grid-premium">
                                 {needsOptions.map(need => (
                                     <div 
                                         key={need} 
-                                        className={`need-tag ${formData.urgent_needs.includes(need) ? 'active' : ''}`}
+                                        className={`need-tag-premium ${formData.urgent_needs.includes(need) ? 'active' : ''}`}
                                         onClick={() => toggleNeed(need)}
                                     >
                                         {need}
@@ -297,16 +280,28 @@ const SubmitReport = () => {
                 )}
             </div>
 
-            <footer className="report-footer-v2">
-                {formStep === 1 ? (
-                    <button className="btn-next-v2" disabled={!mediaPreview || aiAnalyzing} onClick={() => setFormStep(2)}>
-                        SUIVANT <ChevronRight size={20} />
-                    </button>
-                ) : (
-                    <button className="btn-submit-v2" disabled={loading} onClick={handleSubmit}>
-                        {loading ? <Loader2 className="spinner" /> : 'ENVOYER LE SIGNALEMENT'} <Navigation size={20} style={{ transform: 'rotate(90deg)' }} />
-                    </button>
-                )}
+            <footer className="report-footer-premium">
+                <div className="footer-actions-row">
+                    <button className="btn-cancel-premium" onClick={() => setFormStep(1)}>Annuler</button>
+                    {formStep === 1 ? (
+                        <button className="btn-next-premium" disabled={!mediaPreview || aiAnalyzing} onClick={() => setFormStep(2)}>
+                            Suivant <ChevronRight size={20} />
+                        </button>
+                    ) : (
+                        <button className="btn-submit-premium" disabled={loading} onClick={handleSubmit}>
+                            {loading ? <Loader2 className="spinner" /> : (
+                                <>
+                                    <span>Envoyer le signalement</span>
+                                    <Navigation size={20} style={{ transform: 'rotate(90deg)' }} />
+                                </>
+                            )}
+                        </button>
+                    )}
+                </div>
+                <div className="footer-status-row">
+                    <div className="status-dot-green"></div>
+                    <span>En ligne — Prêt à envoyer</span>
+                </div>
             </footer>
         </div>
     );
