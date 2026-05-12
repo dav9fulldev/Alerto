@@ -113,12 +113,13 @@ const SubmitReport = () => {
 
     const handleSubmit = async () => {
         setLoading(true);
-        // Simulation d'envoi pour la démo maquette
         setTimeout(() => {
             setLoading(false);
             setIsSuccess(true);
         }, 2000);
-     if (isSuccess) {
+    };
+
+    if (isSuccess) {
         return (
             <div className="success-overlay-premium">
                 <div className="success-card-premium">
