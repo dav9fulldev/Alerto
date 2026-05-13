@@ -117,6 +117,19 @@ function AppContent() {
                   <Clock size={20} /> <span>MES ALERTES</span>
                 </button>
               </nav>
+
+              <div className="drawer-footer-premium">
+                 <div className="drawer-lang-selector" onClick={() => {
+                    const langs = ['fr', 'en', 'es', 'ar', 'zh', 'ru'];
+                    const nextIdx = (langs.indexOf(lang) + 1) % langs.length;
+                    setLang(langs[nextIdx]);
+                 }}>
+                    <Globe size={18} />
+                    <span className="flag-emoji">{lang === 'fr' ? '🇫🇷' : lang === 'en' ? '🇺🇸' : '🌍'}</span>
+                    <span>{lang === 'fr' ? 'Français' : lang === 'en' ? 'English' : lang.toUpperCase()}</span>
+                    <ChevronDown size={14} className="ml-auto" />
+                 </div>
+              </div>
             </div>
           </div>
         )}
@@ -217,9 +230,30 @@ function AppContent() {
     color: #ef4444;
 }
 
-.drawer-item:active {
-    background: rgba(255, 255, 255, 0.05);
+.drawer-footer-premium {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
+
+.drawer-lang-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 14px;
+    color: #94a3b8;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.flag-emoji {
+    font-size: 1.2rem;
+}
+
+.ml-auto { margin-left: auto; }
       `}</style>
     </div>
   );

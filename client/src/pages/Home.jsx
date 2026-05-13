@@ -12,14 +12,6 @@ const Home = ({ onNavigate, onMenuClick }) => {
                 <button className="menu-btn-maquette" onClick={onMenuClick}><Menu size={24} /></button>
                 <h1 className="brand-alerto-maquette">ALERTO</h1>
                 <div className="header-actions-vertical-maquette">
-                    <div className="lang-pill-maquette" onClick={() => {
-                        const langs = ['fr', 'en', 'es', 'ar', 'zh', 'ru'];
-                        const nextIdx = (langs.indexOf(lang) + 1) % langs.length;
-                        setLang(langs[nextIdx]);
-                    }}>
-                        <span>{lang.toUpperCase()}</span>
-                        <ChevronDown size={14} />
-                    </div>
                     <div className="notif-wrapper-maquette" onClick={() => onNavigate('notifications')}>
                         <Bell size={24} />
                         <span className="notif-badge-maquette">3</span>
