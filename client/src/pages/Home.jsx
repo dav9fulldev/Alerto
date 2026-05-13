@@ -27,8 +27,8 @@ const Home = ({ onNavigate, onMenuClick }) => {
                         <Camera size={26} color="#ef4444" />
                     </div>
                     <div className="card-content-maquette">
-                        <h3>Nouveau signalement</h3>
-                        <p>Signaler un incident ou des dégâts</p>
+                        <h3>{t?.home?.cards?.new_report || "Nouveau signalement"}</h3>
+                        <p>{t?.home?.cards?.new_report_desc || "Signaler un incident ou des dégâts"}</p>
                     </div>
                 </div>
 
@@ -37,8 +37,8 @@ const Home = ({ onNavigate, onMenuClick }) => {
                         <MapIcon size={26} color="#1e293b" />
                     </div>
                     <div className="card-content-maquette">
-                        <h3>Carte des alertes</h3>
-                        <p>Voir les incidents signalés sur la carte</p>
+                        <h3>{t?.home?.cards?.map || "Carte des alertes"}</h3>
+                        <p>{t?.home?.cards?.map_desc || "Voir les incidents signalés sur la carte"}</p>
                     </div>
                 </div>
 
@@ -47,8 +47,8 @@ const Home = ({ onNavigate, onMenuClick }) => {
                         <ClipboardList size={26} color="#115e59" />
                     </div>
                     <div className="card-content-maquette">
-                        <h3>Mes signalements</h3>
-                        <p>Voir l'historique de vos signalements</p>
+                        <h3>{t?.home?.cards?.history || "Mes signalements"}</h3>
+                        <p>{t?.home?.cards?.history_desc || "Voir l'historique de vos signalements"}</p>
                     </div>
                 </div>
             </div>
@@ -56,8 +56,8 @@ const Home = ({ onNavigate, onMenuClick }) => {
             <div className="home-status-box-maquette">
                 <div className="status-dot-maquette"></div>
                 <div className="status-text-maquette">
-                    <span className="status-main-maquette">En ligne</span>
-                    <span className="status-sub-maquette">Tous les systèmes opérationnels</span>
+                    <span className="status-main-maquette">{t?.home?.status?.online || "En ligne"}</span>
+                    <span className="status-sub-maquette">{t?.home?.status?.desc || "Tous les systèmes opérationnels"}</span>
                 </div>
             </div>
         </div>

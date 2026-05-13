@@ -107,16 +107,16 @@ function AppContent() {
               </div>
               <nav className="drawer-nav">
                 <button className={`drawer-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => { setActiveTab('home'); setIsMenuOpen(false); }}>
-                  <ShieldCheck size={20} /> <span>ACCUEIL</span>
+                  <ShieldCheck size={20} /> <span>{(t?.nav?.home || "ACCUEIL").toUpperCase()}</span>
                 </button>
                 <button className={`drawer-item ${activeTab === 'map' ? 'active' : ''}`} onClick={() => { setActiveTab('map'); setIsMenuOpen(false); }}>
-                  <MapIcon size={20} /> <span>EXPLORER</span>
+                  <MapIcon size={20} /> <span>{(t?.nav?.map || "EXPLORER").toUpperCase()}</span>
                 </button>
                 <button className={`drawer-item ${activeTab === 'report' ? 'active' : ''}`} onClick={() => { setActiveTab('report'); setIsMenuOpen(false); }}>
-                  <AlertCircle size={20} /> <span>SIGNALER</span>
+                  <AlertCircle size={20} /> <span>{(t?.nav?.report || "SIGNALER").toUpperCase()}</span>
                 </button>
                 <button className={`drawer-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => { setActiveTab('history'); setIsMenuOpen(false); }}>
-                  <Clock size={20} /> <span>MES ALERTES</span>
+                  <Clock size={20} /> <span>{(t?.nav?.history || "MES ALERTES").toUpperCase()}</span>
                 </button>
               </nav>
 
