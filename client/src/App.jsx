@@ -26,6 +26,7 @@ function AppContent() {
   const [path, setPath] = useState(window.location.pathname);
   const [activeTab, setActiveTab] = useState('home'); 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const { t, lang, setLang } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('alerto_token'));
 
@@ -120,16 +121,30 @@ function AppContent() {
               </nav>
 
               <div className="drawer-footer-premium">
-                 <div className="drawer-lang-selector" onClick={() => {
-                    const langs = ['fr', 'en', 'es', 'ar', 'zh', 'ru'];
-                    const nextIdx = (langs.indexOf(lang) + 1) % langs.length;
-                    setLang(langs[nextIdx]);
-                 }}>
+                 <div className={`drawer-lang-selector ${isLangMenuOpen ? 'open' : ''}`} onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}>
                     <Globe size={18} />
-                    <span className="flag-emoji">{lang === 'fr' ? '🇫🇷' : lang === 'en' ? '🇺🇸' : '🌍'}</span>
-                    <span>{lang === 'fr' ? 'Français' : lang === 'en' ? 'English' : lang.toUpperCase()}</span>
-                    <ChevronDown size={14} className="ml-auto" />
+                    <span className="flag-emoji">{lang === 'fr' ? '🇫🇷' : lang === 'en' ? '🇺🇸' : lang === 'es' ? '🇪🇸' : lang === 'ar' ? '🇸🇦' : lang === 'zh' ? '🇨🇳' : '🇷🇺'}</span>
+                    <span>{lang === 'fr' ? 'Français' : lang === 'en' ? 'English' : lang === 'es' ? 'Español' : lang === 'ar' ? 'العربية' : lang === 'zh' ? '中文' : 'Русский'}</span>
+                    <ChevronDown size={14} className={`ml-auto transition-transform ${isLangMenuOpen ? 'rotate-180' : ''}`} />
                  </div>
+                 
+                 {isLangMenuOpen && (
+                   <div className="lang-dropdown-menu">
+                     {[
+                       { id: 'fr', label: 'Français', flag: '🇫🇷' },
+                       { id: 'en', label: 'English', flag: '🇺🇸' },
+                       { id: 'es', label: 'Español', flag: '🇪🇸' },
+                       { id: 'ar', label: 'العربية', flag: '🇸🇦' },
+                       { id: 'zh', label: '中文', flag: '🇨🇳' },
+                       { id: 'ru', label: 'Русский', flag: '🇷🇺' }
+                     ].map(l => (
+                       <div key={l.id} className={`lang-option ${lang === l.id ? 'active' : ''}`} onClick={() => { setLang(l.id); setIsLangMenuOpen(false); }}>
+                         <span className="flag-emoji">{l.flag}</span>
+                         <span>{l.label}</span>
+                       </div>
+                     ))}
+                   </div>
+                 )}
               </div>
             </div>
           </div>
@@ -255,6 +270,43 @@ function AppContent() {
 }
 
 .ml-auto { margin-left: auto; }
+
+.transition-transform { transition: transform 0.3s ease; }
+.rotate-180 { transform: rotate(180deg); }
+
+.lang-dropdown-menu {
+    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.lang-option {
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.lang-option:active {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.lang-option.active {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.lang-option .flag-emoji {
+    font-size: 1.1rem;
+}
       `}</style>
     </div>
   );
