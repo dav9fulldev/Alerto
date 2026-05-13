@@ -23,6 +23,28 @@ const MyReports = ({ onBack }) => {
         return r.status === filter;
     });
 
+    const formatDate = (dateValue) => {
+        if (!dateValue) return 'Date inconnue';
+        const d = new Date(dateValue);
+        if (Number.isNaN(d.getTime())) return 'Date inconnue';
+        return d.toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const getImageSrc = (report) => {
+        const src = report.image_url || report.image || '';
+        if (!src) return '';
+        if (src.startsWith('data:') || src.startsWith('http')) return src;
+        return `${API_BASE}${src}`;
+    };
+
+    const getLocationText = (report) => report.location || report.text_location || 'Localisation inconnue';
+
     const getStatusIcon = (status) => {
         switch (status) {
             case 'sent': return <CheckCircle2 size={14} />;
@@ -53,7 +75,7 @@ const MyReports = ({ onBack }) => {
                 <div className="detail-scroll-premium">
                     <div className="detail-hero-media">
                         <img 
-                            src={selectedReport.image_url?.startsWith('http') ? selectedReport.image_url : `${API_BASE}${selectedReport.image_url}`} 
+                            src={getImageSrc(selectedReport)} 
                             alt="Incident" 
                         />
                         <div className={`hero-status-pill ${selectedReport.status}`}>
@@ -64,7 +86,7 @@ const MyReports = ({ onBack }) => {
                     <div className="detail-info-grid">
                         <div className="info-row">
                             <span className="info-label">{t?.history?.type || "Type"}</span>
-                            <span className="info-value">{selectedReport.crisis}</span>
+                            <span className="info-value">{selectedReport.crisis || selectedReport.crisis_type || '-'}</span>
                         </div>
                         <div className="info-row">
                             <span className="info-label">{t?.submit?.damage_label?.replace('*', '') || "Niveau de dégâts"}</span>
@@ -79,13 +101,13 @@ const MyReports = ({ onBack }) => {
                             <label>{t?.submit?.location_label || "Localisation"}</label>
                             <div className="loc-display-box">
                                 <MapPin size={18} color="#94a3b8" />
-                                <span>{selectedReport.location}</span>
+                                <span>{getLocationText(selectedReport)}</span>
                             </div>
                         </div>
 
                         <div className="info-row">
                             <span className="info-label">Date</span>
-                            <span className="info-value">03 Août 2024 - 10:24</span>
+                            <span className="info-value">{formatDate(selectedReport.created_at)}</span>
                         </div>
 
                         <div className="info-section">
@@ -123,16 +145,16 @@ const MyReports = ({ onBack }) => {
                 {filteredReports.map(report => (
                     <div key={report.id} className="report-card-premium" onClick={() => setSelectedReport(report)}>
                         <div className="card-thumb-premium">
-                            <img src={report.image_url?.startsWith('http') ? report.image_url : `${API_BASE}${report.image_url}`} alt="Thumb" />
+                            <img src={getImageSrc(report)} alt="Thumb" />
                         </div>
                         <div className="card-info-premium">
                             <div className="card-header-row">
-                                <h3>{report.crisis} - {report.location.split(',')[0]}</h3>
+                                <h3>{report.crisis || report.crisis_type || 'Incident'} - {getLocationText(report).split(',')[0]}</h3>
                                 <MoreVertical size={16} color="#475569" />
                             </div>
-                            <p className="card-loc-text">{report.location}</p>
+                            <p className="card-loc-text">{getLocationText(report)}</p>
                             <div className="card-footer-row">
-                                <span className="card-time-text">03 Août 2024 - 10:24</span>
+                                <span className="card-time-text">{formatDate(report.created_at)}</span>
                                 <div className={`card-status-badge ${report.status}`}>
                                     {getStatusIcon(report.status)}
                                     <span>{getStatusText(report.status)}</span>

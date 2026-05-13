@@ -8,6 +8,7 @@ import PnudLogin from './pages/PnudLogin';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import { LanguageProvider, useTranslation } from './services/i18n';
+import './services/sync';
 import { 
   AlertCircle, 
   Map as MapIcon, 

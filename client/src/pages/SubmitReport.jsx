@@ -10,6 +10,7 @@ import {
 import axios from 'axios';
 import { API_BASE } from '../services/api';
 import { useTranslation } from '../services/i18n';
+import { saveReportOffline } from '../services/storage';
 
 const SubmitReport = ({ lang, onClose }) => {
     const { t } = useTranslation();
@@ -22,6 +23,8 @@ const SubmitReport = ({ lang, onClose }) => {
     const [aiAnalyzing, setAiAnalyzing] = useState(false);
     const [aiProgress, setAiProgress] = useState(0);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successId, setSuccessId] = useState('');
 
     const [formData, setFormData] = useState({
         description: '',
@@ -120,11 +123,120 @@ const SubmitReport = ({ lang, onClose }) => {
     };
 
     const handleSubmit = async () => {
+        if (!selectedFile || !location || !formData.description.trim()) {
+            setErrorMessage(t?.submit?.required_fields || 'Veuillez ajouter un média, une description et activer la localisation.');
+            return;
+        }
+
         setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
+        setErrorMessage('');
+
+        const healthMap = {
+            [t?.submit?.health_none || 'Non fonctionnels']: 0,
+            [t?.submit?.health_part || 'Partiellement fonctionnels']: 50,
+            [t?.submit?.health_full || 'Fonctionnels']: 100
+        };
+
+        const electricityMap = {
+            [t?.submit?.elec_none || 'Totalement indisponible']: 0,
+            [t?.submit?.elec_part || 'Partiellement disponible']: 50,
+            [t?.submit?.elec_stable || 'Stable']: 100
+        };
+
+        const payload = {
+            description: formData.description.trim(),
+            damage_level: formData.damage_level,
+            infrastructure_type: formData.infrastructure_type,
+            crisis_type: formData.crisis_type,
+            text_location: formData.text_location,
+            electricity_status: electricityMap[formData.electricity_status] ?? 50,
+            health_services_status: healthMap[formData.health_services_status] ?? 50,
+            urgent_needs: formData.urgent_needs,
+            location: {
+                type: 'Point',
+                coordinates: [location.lng, location.lat]
+            },
+            user_id: localStorage.getItem('alerto_user_id') || null,
+            source: navigator.onLine ? 'online' : 'offline',
+            created_at: new Date().toISOString()
+        };
+
+        try {
+            let uploadedUrl = null;
+            const uploadData = new FormData();
+            uploadData.append('file', selectedFile);
+            const uploadRes = await axios.post(`${API_BASE}/reports/upload`, uploadData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            uploadedUrl = uploadRes?.data?.url || null;
+            payload.image_url = uploadedUrl;
+
+            if (navigator.onLine) {
+                const res = await axios.post(`${API_BASE}/reports/`, payload);
+                const reportId = res?.data?.id || `ALR-${Date.now()}`;
+                setSuccessId(reportId);
+                saveToLocalHistory({
+                    id: reportId,
+                    status: 'sent',
+                    image_url: uploadedUrl,
+                    description: payload.description,
+                    damage_level: payload.damage_level,
+                    infrastructure_type: payload.infrastructure_type,
+                    crisis: payload.crisis_type,
+                    location: payload.text_location || `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`,
+                    created_at: payload.created_at
+                });
+            } else {
+                await saveReportOffline(payload);
+                const offlineId = `OFF-${Date.now()}`;
+                setSuccessId(offlineId);
+                saveToLocalHistory({
+                    id: offlineId,
+                    status: 'pending',
+                    image_url: mediaPreview,
+                    description: payload.description,
+                    damage_level: payload.damage_level,
+                    infrastructure_type: payload.infrastructure_type,
+                    crisis: payload.crisis_type,
+                    location: payload.text_location || `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`,
+                    created_at: payload.created_at
+                });
+            }
+
             setIsSuccess(true);
-        }, 2000);
+        } catch (error) {
+            const canFallbackOffline = !error?.response || (error?.response?.status >= 500 && error?.response?.status < 600);
+            if (!navigator.onLine || canFallbackOffline) {
+                try {
+                    await saveReportOffline(payload);
+                    const offlineId = `OFF-${Date.now()}`;
+                    setSuccessId(offlineId);
+                    saveToLocalHistory({
+                        id: offlineId,
+                        status: 'pending',
+                        image_url: mediaPreview,
+                        description: payload.description,
+                        damage_level: payload.damage_level,
+                        infrastructure_type: payload.infrastructure_type,
+                        crisis: payload.crisis_type,
+                        location: payload.text_location || `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`,
+                        created_at: payload.created_at
+                    });
+                    setIsSuccess(true);
+                } catch {
+                    setErrorMessage(t?.submit?.offline_save_error || "Impossible d'enregistrer le signalement hors ligne.");
+                }
+            } else {
+                setErrorMessage(error?.response?.data?.detail || t?.submit?.submit_error || "Échec de l'envoi du signalement.");
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const saveToLocalHistory = (entry) => {
+        const existing = JSON.parse(localStorage.getItem('alerto_my_reports') || '[]');
+        localStorage.setItem('alerto_my_reports', JSON.stringify([entry, ...existing]));
     };
 
     if (isSuccess) {
@@ -137,8 +249,8 @@ const SubmitReport = ({ lang, onClose }) => {
                     </div>
                     <h2>{t?.submit?.success_title || "Signalement envoyé !"}</h2>
                     <p className="success-sub-text">{t?.submit?.success_msg || "Merci pour votre contribution. Votre signalement a été transmis avec succès."}</p>
-                    <div className="success-id-container">ID : #ALR-2024-08-03-00124</div>
-                    <button className="btn-success-final" onClick={() => { setIsSuccess(false); setFormStep(1); setMediaPreview(null); }}>OK</button>
+                    <div className="success-id-container">ID : #{successId || 'ALR-PENDING'}</div>
+                    <button className="btn-success-final" onClick={() => { setIsSuccess(false); setFormStep(1); setMediaPreview(null); setSelectedFile(null); setFormData(prev => ({ ...prev, description: '', urgent_needs: [] })); }}>OK</button>
                 </div>
             </div>
         );
@@ -288,6 +400,11 @@ const SubmitReport = ({ lang, onClose }) => {
             </div>
 
             <footer className="report-footer-premium">
+                {errorMessage && (
+                    <div style={{ color: '#fca5a5', fontWeight: 700, marginBottom: 10, textAlign: 'center' }}>
+                        {errorMessage}
+                    </div>
+                )}
                 <div className="footer-actions-row">
                     <button className="btn-cancel-premium" onClick={handleBack}>{t?.submit?.btn_back || "Annuler"}</button>
                     {formStep === 1 ? (
