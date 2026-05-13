@@ -215,6 +215,21 @@ export const translations = {
         title: "ALERTO",
         subtitle: "Sistema de respuesta rápida",
         nav: { home: "Inicio", map: "Explorar", report: "Informar", history: "Mis Alertas", help: "Ayuda", profile: "Perfil" },
+        home: {
+            subtitle: "¿Qué desea hacer?",
+            cards: {
+                new_report: "Nuevo informe",
+                new_report_desc: "Informar de un incidente o daños",
+                map: "Mapa de alertas",
+                map_desc: "Ver incidentes informados en el mapa",
+                history: "Mis informes",
+                history_desc: "Ver el historial de sus informes"
+            },
+            status: {
+                online: "En línea",
+                desc: "Todos los sistemas operativos"
+            }
+        },
         submit: {
             title: "Informar un incidente",
             step1: "Información básica",
@@ -305,6 +320,21 @@ export const translations = {
         title: "ALERTO",
         subtitle: "نظام الاستجابة السريعة",
         nav: { home: "الرئيسية", map: "استكشاف", report: "إبلاغ", history: "تنبيهاتي", help: "مساعدة", profile: "الملف الشخصي" },
+        home: {
+            subtitle: "ماذا تريد أن تفعل؟",
+            cards: {
+                new_report: "بلاغ جديد",
+                new_report_desc: "الإبلاغ عن حادث أو أضرار",
+                map: "خريطة التنبيهات",
+                map_desc: "عرض الحوادث المبلغ عنها على الخريطة",
+                history: "بلاغاتي",
+                history_desc: "عرض سجل البلاغات الخاصة بك"
+            },
+            status: {
+                online: "متصل",
+                desc: "جميع الأنظمة تعمل"
+            }
+        },
         submit: {
             title: "الإبلاغ عن حادث",
             step1: "معلومات أساسية",
@@ -395,6 +425,21 @@ export const translations = {
         title: "ALERTO",
         subtitle: "快速反应系统",
         nav: { home: "首页", map: "探索", report: "报告", history: "我的警报", help: "帮助", profile: "个人资料" },
+        home: {
+            subtitle: "您想做什么？",
+            cards: {
+                new_report: "新报告",
+                new_report_desc: "报告事故或损坏",
+                map: "警报地图",
+                map_desc: "在地图上查看报告的事件",
+                history: "我的报告",
+                history_desc: "查看您的报告历史记录"
+            },
+            status: {
+                online: "在线",
+                desc: "所有系统运行正常"
+            }
+        },
         submit: {
             title: "报告事件",
             step1: "基本信息",
@@ -485,6 +530,21 @@ export const translations = {
         title: "ALERTO",
         subtitle: "Система быстрого реагирования",
         nav: { home: "Главная", map: "Обзор", report: "Сообщить", history: "Мои алерты", help: "Помощь", profile: "Профиль" },
+        home: {
+            subtitle: "Что бы вы хотели сделать?",
+            cards: {
+                new_report: "Новый отчет",
+                new_report_desc: "Сообщить об инциденте или ущербе",
+                map: "Карта алертов",
+                map_desc: "Просмотр инцидентов на карте",
+                history: "Мои отчеты",
+                history_desc: "Просмотр истории ваших отчетов"
+            },
+            status: {
+                online: "В сети",
+                desc: "Все системы работают нормально"
+            }
+        },
         submit: {
             title: "Сообщить об инциденте",
             step1: "Основная информация",
