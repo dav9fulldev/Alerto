@@ -11,7 +11,7 @@ const Home = ({ onNavigate, onMenuClick }) => {
             <header className="home-header-maquette">
                 <button className="menu-btn-maquette" onClick={onMenuClick}><Menu size={24} /></button>
                 <h1 className="brand-alerto-maquette">ALERTO</h1>
-                <div className="header-actions-maquette">
+                <div className="header-actions-vertical-maquette">
                     <div className="lang-pill-maquette" onClick={() => {
                         const langs = ['fr', 'en', 'es', 'ar', 'zh', 'ru'];
                         const nextIdx = (langs.indexOf(lang) + 1) % langs.length;
@@ -27,7 +27,7 @@ const Home = ({ onNavigate, onMenuClick }) => {
                 </div>
             </header>
             
-            <p className="home-subtitle-maquette">{t.home.subtitle || "Que souhaitez-vous faire ?"}</p>
+            <p className="home-subtitle-maquette">{t?.home?.subtitle || "Que souhaitez-vous faire ?"}</p>
                 
             <div className="home-grid-maquette">
                 <div className="home-card-maquette red" onClick={() => onNavigate('report')}>
