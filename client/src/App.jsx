@@ -121,17 +121,6 @@ function AppContent() {
           </div>
         )}
 
-        {/* Global Language Switcher (Mobile Only) */}
-        <div className="mobile-lang-overlay">
-          <select value={lang} onChange={(e) => setLang(e.target.value)} className="minimal-select">
-            <option value="fr">FR</option>
-            <option value="en">EN</option>
-            <option value="es">ES</option>
-            <option value="ar">AR</option>
-            <option value="zh">ZH</option>
-            <option value="ru">RU</option>
-          </select>
-        </div>
         
         <main className="main-content">
           {activeTab === 'home' && <Home onNavigate={setActiveTab} onMenuClick={() => setIsMenuOpen(true)} />}

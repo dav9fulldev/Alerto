@@ -9,12 +9,24 @@
     color: white;
 }
 
-.home-header-maquette {
+.header-actions-maquette {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 15px 0;
-    margin-bottom: 5px;
+    gap: 15px;
+}
+
+.lang-pill-maquette {
+    background: white;
+    padding: 6px 12px;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #3b82f6; /* Blue text from maquette */
+    font-weight: 800;
+    font-size: 0.75rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .menu-btn-maquette, .notif-wrapper-maquette {
@@ -24,6 +36,8 @@
     cursor: pointer;
     position: relative;
     padding: 5px;
+    display: flex;
+    align-items: center;
 }
 
 .brand-alerto-maquette {
@@ -31,12 +45,13 @@
     font-weight: 900;
     color: #ef4444; /* Branded Red */
     letter-spacing: 1px;
+    margin: 0;
 }
 
 .notif-badge-maquette {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: -2px;
+    right: -2px;
     background: #ef4444;
     color: white;
     font-size: 0.6rem;
