@@ -22,6 +22,9 @@ NSFW_LOG_DIR = os.getenv("NSFW_LOG_DIR", "uploads/nsfw_logs")
 # Optional: OpenAI API for online moderation
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
+# Classification dégâts (vision) — même clé OpenAI que la modération optionnelle
+AI_CLASSIFICATION_MODEL = os.getenv("AI_CLASSIFICATION_MODEL", "gpt-4o-mini")
+
 # API Configuration
 API_TITLE = "ALERTO Crisis Mapping API"
 API_VERSION = "1.0.0"

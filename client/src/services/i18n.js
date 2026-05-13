@@ -47,6 +47,7 @@ export const translations = {
             description_placeholder: "Inondation importante dans le quartier...",
             damage_label: "Niveau de dégâts *",
             infra_label: "Type d'infrastructure *",
+            crisis_label: "Nature de la crise *",
             location_label: "Localisation",
             gps_active: "GPS actif",
             extra_info: "Informations complémentaires",
@@ -67,7 +68,9 @@ export const translations = {
             success_msg: "Merci pour votre contribution. Votre signalement a été transmis avec succès.",
             err_crisis: "Veuillez choisir un type de crise.",
             err_loc: "Veuillez renseigner le lieu.",
-            err_submit: "Erreur de soumission."
+            err_submit: "Erreur de soumission.",
+            photo_not_crisis: "Cette photo ne semble pas montrer un sinistre ou un contexte de crise. Reprenez une vue des dégâts ou vérifiez les champs avant envoi.",
+            ai_prefill_hint: "Type de crise, infrastructure, description et besoins peuvent être pré-remplis — contrôlez toujours avant envoi."
         },
         help: {
             title: "Centre d'Aide",
@@ -185,6 +188,7 @@ export const translations = {
             description_placeholder: "Major flooding in the neighborhood...",
             damage_label: "Damage Level *",
             infra_label: "Infrastructure Type *",
+            crisis_label: "Crisis type *",
             location_label: "Location",
             gps_active: "GPS active",
             extra_info: "Additional Information",
@@ -205,7 +209,9 @@ export const translations = {
             success_msg: "Thank you for your contribution. Your report has been successfully transmitted.",
             err_crisis: "Please choose a crisis type.",
             err_loc: "Please provide the location.",
-            err_submit: "Submission error."
+            err_submit: "Submission error.",
+            photo_not_crisis: "This photo doesn't seem to show a disaster or crisis context. Take another shot of the damage or review the fields before sending.",
+            ai_prefill_hint: "Crisis type, infrastructure, description and needs may be pre-filled — always verify before submitting."
         },
         help: {
             title: "Help Center",
@@ -638,6 +644,7 @@ export const translations = {
             description_placeholder: "Сильное наводнение в районе...",
             damage_label: "Уровень повреждений *",
             infra_label: "Тип инфраструктуры *",
+            crisis_label: "Тип кризиса *",
             location_label: "Местоположение",
             gps_active: "GPS активен",
             extra_info: "Дополнительная информация",

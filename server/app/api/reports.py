@@ -5,6 +5,8 @@ from typing import List
 from bson import ObjectId
 import datetime, httpx, re, os, shutil, uuid
 
+from app.services.report_preview_ai import analyze_report_preview
+
 router = APIRouter()
 
 # ============ UPLOAD ============
@@ -27,6 +29,37 @@ async def upload_file(file: UploadFile = File(...)):
         return {"url": f"/uploads/{file_name}"}
     except Exception as e:
         print(f"ERREUR UPLOAD : {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============ PRÉ-ANALYSE IMAGE (formulaire) ============
+ALLOWED_PREVIEW_EXTENSIONS = {"jpg", "jpeg", "png", "webp", "gif"}
+
+
+@router.post("/analyze-preview")
+async def analyze_report_preview_endpoint(file: UploadFile = File(...)):
+    """
+    Analyse une photo avant création du rapport : pertinence sinistre + suggestions
+    (types de crise, infrastructure, dégâts, description, besoins).
+    """
+    try:
+        ext = (file.filename or "img.jpg").split(".")[-1].lower()
+        if ext not in ALLOWED_PREVIEW_EXTENSIONS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Extension non supportée. Utilisez : {', '.join(sorted(ALLOWED_PREVIEW_EXTENSIONS))}",
+            )
+        content = await file.read()
+        if len(content) > MAX_FILE_SIZE:
+            raise HTTPException(status_code=400, detail="Fichier trop volumineux")
+        if len(content) < 32:
+            raise HTTPException(status_code=400, detail="Fichier image invalide ou vide")
+        mime = file.content_type or "image/jpeg"
+        result = await analyze_report_preview(content, mime)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"ERREUR analyze-preview : {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============ HELPERS ============
@@ -83,7 +116,7 @@ def sanitize_input(text: str) -> str:
 from app.services.translation import translate_text
 from app.services.ai_classification import classify_damage
 from app.services.nsfw_detection import validate_image_safety
-from app.core.config import NSFW_ENABLED, NSFW_BLOCK_THRESHOLD
+from app.core.config import NSFW_ENABLED, NSFW_BLOCK_THRESHOLD, MAX_FILE_SIZE
 
 # ============ ROUTES ============
 
