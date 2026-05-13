@@ -16,7 +16,8 @@ import {
   Globe,
   RefreshCw,
   ShieldCheck,
-  User as UserIcon
+  User as UserIcon,
+  ChevronDown
 } from 'lucide-react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { v4 as uuidv4 } from 'uuid';
