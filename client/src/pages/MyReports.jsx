@@ -34,10 +34,10 @@ const MyReports = ({ onBack }) => {
 
     const getStatusText = (status) => {
         switch (status) {
-            case 'sent': return 'Envoyé';
-            case 'pending': return 'En attente';
-            case 'failed': return 'Échec';
-            default: return 'Inconnu';
+            case 'sent': return t?.status?.sent || 'Envoyé';
+            case 'pending': return t?.status?.pending || 'En attente';
+            case 'failed': return t?.status?.failed || 'Échec';
+            default: return t?.status?.unknown || 'Inconnu';
         }
     };
 
@@ -46,7 +46,7 @@ const MyReports = ({ onBack }) => {
             <div className="report-detail-premium">
                 <header className="detail-header-premium">
                     <button className="back-btn-premium" onClick={() => setSelectedReport(null)}><ChevronLeft size={24} /></button>
-                    <h2>Détail du signalement</h2>
+                    <h2>{t?.history?.detail_title || "Détail du signalement"}</h2>
                     <button className="more-btn-premium"><MoreVertical size={20} /></button>
                 </header>
                 
@@ -56,27 +56,27 @@ const MyReports = ({ onBack }) => {
                             src={selectedReport.image_url?.startsWith('http') ? selectedReport.image_url : `${API_BASE}${selectedReport.image_url}`} 
                             alt="Incident" 
                         />
-                        <div className="hero-status-pill sent">
-                            <CheckCircle2 size={16} /> <span>Envoyé</span>
+                        <div className={`hero-status-pill ${selectedReport.status}`}>
+                            {getStatusIcon(selectedReport.status)} <span>{getStatusText(selectedReport.status)}</span>
                         </div>
                     </div>
 
                     <div className="detail-info-grid">
                         <div className="info-row">
-                            <span className="info-label">Type</span>
+                            <span className="info-label">{t?.history?.type || "Type"}</span>
                             <span className="info-value">{selectedReport.crisis}</span>
                         </div>
                         <div className="info-row">
-                            <span className="info-label">Niveau de dégâts</span>
-                            <span className="info-value">{selectedReport.damage_level?.charAt(0).toUpperCase() + selectedReport.damage_level?.slice(1)}</span>
+                            <span className="info-label">{t?.submit?.damage_label?.replace('*', '') || "Niveau de dégâts"}</span>
+                            <span className="info-value">{selectedReport.damage_level}</span>
                         </div>
                         <div className="info-row">
-                            <span className="info-label">Infrastructure</span>
+                            <span className="info-label">{t?.submit?.infra_label?.replace('*', '') || "Infrastructure"}</span>
                             <span className="info-value">{selectedReport.infrastructure_type || 'Résidentiel'}</span>
                         </div>
                         
                         <div className="info-section">
-                            <label>Localisation</label>
+                            <label>{t?.submit?.location_label || "Localisation"}</label>
                             <div className="loc-display-box">
                                 <MapPin size={18} color="#94a3b8" />
                                 <span>{selectedReport.location}</span>
@@ -91,15 +91,15 @@ const MyReports = ({ onBack }) => {
                         <div className="info-section">
                             <label>Description</label>
                             <p className="description-text-premium">
-                                {selectedReport.description || "Inondation importante dans le quartier..."}
+                                {selectedReport.description}
                             </p>
                         </div>
                     </div>
                 </div>
 
                 <footer className="detail-footer-premium">
-                    <button className="btn-share-premium"><Share2 size={20} /> <span>Partager</span></button>
-                    <button className="btn-problem-premium"><AlertCircle size={20} /> <span>Signaler un problème</span></button>
+                    <button className="btn-share-premium"><Share2 size={20} /> <span>{t?.history?.share || "Partager"}</span></button>
+                    <button className="btn-problem-premium"><AlertCircle size={20} /> <span>{t?.history?.report_problem || "Signaler un problème"}</span></button>
                 </footer>
             </div>
         );
@@ -109,14 +109,14 @@ const MyReports = ({ onBack }) => {
         <div className="my-reports-premium">
             <header className="reports-header-premium">
                 <button className="back-btn-premium" onClick={onBack}><ChevronLeft size={24} /></button>
-                <h1>Mes signalements</h1>
+                <h1>{t?.nav?.history || "Mes signalements"}</h1>
             </header>
 
             <div className="reports-filters-premium">
-                <button className={`filter-pill ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>Tous</button>
-                <button className={`filter-pill ${filter === 'sent' ? 'active' : ''}`} onClick={() => setFilter('sent')}>Envoyés</button>
-                <button className={`filter-pill ${filter === 'pending' ? 'active' : ''}`} onClick={() => setFilter('pending')}>En attente</button>
-                <button className={`filter-pill ${filter === 'failed' ? 'active' : ''}`} onClick={() => setFilter('failed')}>Échec</button>
+                <button className={`filter-pill ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>{t?.history?.all || "Tous"}</button>
+                <button className={`filter-pill ${filter === 'sent' ? 'active' : ''}`} onClick={() => setFilter('sent')}>{t?.status?.sent_plural || "Envoyés"}</button>
+                <button className={`filter-pill ${filter === 'pending' ? 'active' : ''}`} onClick={() => setFilter('pending')}>{t?.status?.pending || "En attente"}</button>
+                <button className={`filter-pill ${filter === 'failed' ? 'active' : ''}`} onClick={() => setFilter('failed')}>{t?.status?.failed || "Échec"}</button>
             </div>
 
             <div className="reports-list-premium">
