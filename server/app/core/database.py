@@ -4,8 +4,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-DB_NAME = "alerto_db"
+from app.core.config import MONGO_URI, MONGO_DB_NAME
+
+DB_NAME = MONGO_DB_NAME or "alerto_db"
 
 try:
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)

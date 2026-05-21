@@ -34,6 +34,21 @@ export const translations = {
             report_problem: "Signaler un problème",
             all: "Tous"
         },
+        map: {
+            title: "Carte des alertes",
+            filters: "Filtres",
+            all: "Tous",
+            period: "Période",
+            period_24h: "Dernières 24 heures",
+            period_7d: "7 derniers jours",
+            period_30d: "30 derniers jours",
+            damage_level: "Niveau de dégâts",
+            incident_types: "Types d'incidents",
+            reset: "Réinitialiser",
+            apply: "Appliquer",
+            my_position: "Ma position",
+            refresh: "Actualiser"
+        },
         submit: {
             title: "Signaler un sinistre",
             step: "Étape",
@@ -175,6 +190,21 @@ export const translations = {
             share: "Share",
             report_problem: "Report a problem",
             all: "All"
+        },
+        map: {
+            title: "Alert Map",
+            filters: "Filters",
+            all: "All",
+            period: "Period",
+            period_24h: "Last 24 hours",
+            period_7d: "Last 7 days",
+            period_30d: "Last 30 days",
+            damage_level: "Damage level",
+            incident_types: "Incident types",
+            reset: "Reset",
+            apply: "Apply",
+            my_position: "My location",
+            refresh: "Refresh"
         },
         submit: {
             title: "Report an Incident",

@@ -10,7 +10,7 @@ import {
 import axios from 'axios';
 import { API_BASE } from '../services/api';
 import { useTranslation } from '../services/i18n';
-import { saveReportOffline } from '../services/storage';
+import { saveReportOffline, fileToDataUrl } from '../services/storage';
 
 /** Listes canoniques (FR) — alignées sur le backend `report_preview_ai.py` et i18n fr */
 const CRISIS_TYPES_FR = [
@@ -549,8 +549,8 @@ const SubmitReport = ({ lang, onClose }) => {
                     created_at: payload.created_at
                 });
             } else {
-                await saveReportOffline(payload);
                 const offlineId = `OFF-${Date.now()}`;
+                await queueOfflineReport(payload, offlineId);
                 setSuccessId(offlineId);
                 saveToLocalHistory({
                     id: offlineId,
@@ -570,8 +570,8 @@ const SubmitReport = ({ lang, onClose }) => {
             const canFallbackOffline = !error?.response || (error?.response?.status >= 500 && error?.response?.status < 600);
             if (!navigator.onLine || canFallbackOffline) {
                 try {
-                    await saveReportOffline(payload);
                     const offlineId = `OFF-${Date.now()}`;
+                    await queueOfflineReport(payload, offlineId);
                     setSuccessId(offlineId);
                     saveToLocalHistory({
                         id: offlineId,
@@ -599,6 +599,20 @@ const SubmitReport = ({ lang, onClose }) => {
     const saveToLocalHistory = (entry) => {
         const existing = JSON.parse(localStorage.getItem('alerto_my_reports') || '[]');
         localStorage.setItem('alerto_my_reports', JSON.stringify([entry, ...existing]));
+    };
+
+    const queueOfflineReport = async (payload, offlineId) => {
+        const entry = { ...payload, local_history_id: offlineId };
+        if (selectedFile) {
+            try {
+                entry.offline_media = await fileToDataUrl(selectedFile);
+                entry.offline_media_name = selectedFile.name;
+                entry.offline_media_type = selectedFile.type;
+            } catch (e) {
+                console.warn('Impossible de stocker le média hors ligne', e);
+            }
+        }
+        await saveReportOffline(entry);
     };
 
     if (isSuccess) {

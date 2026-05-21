@@ -13,9 +13,20 @@ const MyReports = ({ onBack }) => {
     const [selectedReport, setSelectedReport] = useState(null);
     const [filter, setFilter] = useState('all');
 
-    useEffect(() => {
+    const loadHistory = () => {
         const history = JSON.parse(localStorage.getItem('alerto_my_reports') || '[]');
         setReports(history);
+    };
+
+    useEffect(() => {
+        loadHistory();
+        const onSync = () => loadHistory();
+        window.addEventListener('alerto-sync-complete', onSync);
+        window.addEventListener('focus', onSync);
+        return () => {
+            window.removeEventListener('alerto-sync-complete', onSync);
+            window.removeEventListener('focus', onSync);
+        };
     }, []);
 
     const filteredReports = reports.filter(r => {

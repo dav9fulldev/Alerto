@@ -17,13 +17,12 @@ const PnudLogin = ({ onBack, onLoginSuccess }) => {
         setError(null);
         
         try {
-            // Utilisation de FormData car OAuth2PasswordRequestForm côté backend attend x-www-form-urlencoded
-            const formData = new FormData();
-            formData.append('username', username);
-            formData.append('password', password);
+            const body = new URLSearchParams();
+            body.append('username', username);
+            body.append('password', password);
 
-            const response = await axios.post(`${API_BASE}/auth/login`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+            const response = await axios.post(`${API_BASE}/auth/login`, body, {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
             });
 
             const { access_token, user } = response.data;
