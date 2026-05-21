@@ -119,6 +119,9 @@ function AppContent() {
                 <button className={`drawer-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => { setActiveTab('history'); setIsMenuOpen(false); }}>
                   <Clock size={20} /> <span>{(t?.nav?.history || "MES ALERTES").toUpperCase()}</span>
                 </button>
+                <button className={`drawer-item ${activeTab === 'help' ? 'active' : ''}`} onClick={() => { setActiveTab('help'); setIsMenuOpen(false); }}>
+                  <HelpCircle size={20} /> <span>{(t?.nav?.help || "AIDE").toUpperCase()}</span>
+                </button>
               </nav>
 
               <div className="drawer-footer-premium">

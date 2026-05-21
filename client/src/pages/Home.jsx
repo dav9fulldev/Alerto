@@ -1,10 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlertCircle, Map as MapIcon, Clock, ShieldCheck, Navigation, Camera, FileText, ChevronDown, Menu, Bell, ClipboardList } from 'lucide-react';
 import { useTranslation } from '../services/i18n';
 import './Home.css';
 
 const Home = ({ onNavigate, onMenuClick }) => {
-    const { t, lang, setLang } = useTranslation();
+    const { t } = useTranslation();
+    const [pendingCount, setPendingCount] = useState(0);
+
+    const refreshPending = () => {
+        try {
+            const history = JSON.parse(localStorage.getItem('alerto_my_reports') || '[]');
+            setPendingCount(history.filter((r) => r.status === 'pending').length);
+        } catch {
+            setPendingCount(0);
+        }
+    };
+
+    useEffect(() => {
+        refreshPending();
+        window.addEventListener('alerto-sync-complete', refreshPending);
+        window.addEventListener('focus', refreshPending);
+        return () => {
+            window.removeEventListener('alerto-sync-complete', refreshPending);
+            window.removeEventListener('focus', refreshPending);
+        };
+    }, []);
 
     return (
         <div className="home-container-premium">
@@ -12,9 +32,11 @@ const Home = ({ onNavigate, onMenuClick }) => {
                 <button className="menu-btn-maquette" onClick={onMenuClick}><Menu size={24} /></button>
                 <h1 className="brand-alerto-maquette">ALERTO</h1>
                 <div className="header-actions-vertical-maquette">
-                    <div className="notif-wrapper-maquette" onClick={() => onNavigate('notifications')}>
+                    <div className="notif-wrapper-maquette" onClick={() => onNavigate('history')} title={t?.nav?.history || 'Mes signalements'}>
                         <Bell size={24} />
-                        <span className="notif-badge-maquette">3</span>
+                        {pendingCount > 0 && (
+                            <span className="notif-badge-maquette">{pendingCount > 9 ? '9+' : pendingCount}</span>
+                        )}
                     </div>
                 </div>
             </header>
