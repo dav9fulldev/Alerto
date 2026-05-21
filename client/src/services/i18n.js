@@ -70,7 +70,8 @@ export const translations = {
             err_loc: "Veuillez renseigner le lieu.",
             err_submit: "Erreur de soumission.",
             photo_not_crisis: "Cette photo ne semble pas montrer un sinistre ou un contexte de crise. Reprenez une vue des dégâts ou vérifiez les champs avant envoi.",
-            ai_prefill_hint: "Type de crise, infrastructure, description et besoins peuvent être pré-remplis — contrôlez toujours avant envoi."
+            ai_prefill_hint: "Type de crise, infrastructure, description et besoins peuvent être pré-remplis — contrôlez toujours avant envoi.",
+            openai_quota: "Quota OpenAI épuisé : l’IA vision ne peut pas analyser la photo. Rechargez votre compte OpenAI (platform.openai.com) ou remplissez les champs manuellement."
         },
         help: {
             title: "Centre d'Aide",
@@ -211,7 +212,8 @@ export const translations = {
             err_loc: "Please provide the location.",
             err_submit: "Submission error.",
             photo_not_crisis: "This photo doesn't seem to show a disaster or crisis context. Take another shot of the damage or review the fields before sending.",
-            ai_prefill_hint: "Crisis type, infrastructure, description and needs may be pre-filled — always verify before submitting."
+            ai_prefill_hint: "Crisis type, infrastructure, description and needs may be pre-filled — always verify before submitting.",
+            openai_quota: "OpenAI quota exceeded: vision AI cannot analyze this photo. Top up your OpenAI account or fill the form manually."
         },
         help: {
             title: "Help Center",

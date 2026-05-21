@@ -368,7 +368,26 @@ const SubmitReport = ({ lang, onClose }) => {
 
                             const localResult = await analyzeImageFromDataUrl(mediaDataUrl);
 
-                            if (serverPreview && typeof serverPreview.damage_level === 'string') {
+                            const apiBlocked = serverPreview?.api_error === 'openai_quota_exceeded'
+                                || serverPreview?.api_error === 'openai_auth_error'
+                                || serverPreview?.api_error === 'openai_unavailable';
+
+                            if (apiBlocked) {
+                                const warnMsg = serverPreview.api_error === 'openai_quota_exceeded'
+                                    ? (t?.submit?.openai_quota || serverPreview.analysis_summary)
+                                    : (serverPreview.analysis_summary || t?.submit?.openai_quota);
+                                setPreviewWarning(warnMsg);
+                                setAiResult({
+                                    ...localResult,
+                                    isCrisisRelated: true,
+                                    serverSource: null,
+                                    bullets: [serverPreview.analysis_summary, ...(localResult.bullets || []).slice(0, 1)].filter(Boolean)
+                                });
+                                setFormData(fd => ({
+                                    ...fd,
+                                    damage_level: localResult.suggestedDamage
+                                }));
+                            } else if (serverPreview && typeof serverPreview.damage_level === 'string' && serverPreview.source === 'openai') {
                                 const bullets = [
                                     serverPreview.analysis_summary,
                                     ...(localResult.bullets || []).slice(0, 2)
@@ -383,7 +402,7 @@ const SubmitReport = ({ lang, onClose }) => {
                                     avgLum: localResult.avgLum,
                                     avgSat: localResult.avgSat,
                                     isCrisisRelated: serverPreview.is_crisis_related !== false,
-                                    serverSource: serverPreview.source || 'openai'
+                                    serverSource: 'openai'
                                 });
 
                                 setFormData(fd => {
@@ -418,6 +437,17 @@ const SubmitReport = ({ lang, onClose }) => {
                                         || 'La photo ne semble pas montrer un sinistre ou un contexte de crise. Reprenez une image des dégâts ou complétez manuellement les champs.'
                                     );
                                 }
+                            } else if (serverPreview && typeof serverPreview.damage_level === 'string') {
+                                setAiResult({
+                                    suggestedDamage: serverPreview.damage_level,
+                                    confidence: typeof serverPreview.relevance_score === 'number'
+                                        ? serverPreview.relevance_score
+                                        : localResult.confidence,
+                                    bullets: [serverPreview.analysis_summary, ...(localResult.bullets || [])].filter(Boolean),
+                                    isCrisisRelated: serverPreview.is_crisis_related !== false,
+                                    serverSource: null
+                                });
+                                setFormData(fd => ({ ...fd, damage_level: serverPreview.damage_level }));
                             } else {
                                 setAiResult({
                                     ...localResult,
