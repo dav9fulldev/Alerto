@@ -188,8 +188,24 @@ async def analyze_report_preview(image_bytes: bytes, mime: str = "image/jpeg") -
                 json=payload,
             )
         if r.status_code != 200:
-            print(f"[report_preview_ai] OpenAI HTTP {r.status_code}: {r.text[:400]}")
-            return _heuristic_preview(image_bytes)
+            err_body = r.text[:400]
+            print(f"[report_preview_ai] OpenAI HTTP {r.status_code}: {err_body}")
+            out = _heuristic_preview(image_bytes)
+            if r.status_code == 429 or "insufficient_quota" in err_body:
+                out["api_error"] = "openai_quota_exceeded"
+                out["analysis_summary"] = (
+                    "Quota OpenAI épuisé : l’analyse vision (sinistre / champs) est indisponible. "
+                    "Vérifiez facturation sur platform.openai.com, puis réessayez — ou complétez le formulaire à la main."
+                )
+            elif r.status_code in (401, 403):
+                out["api_error"] = "openai_auth_error"
+                out["analysis_summary"] = "Clé OpenAI refusée ou invalide. Vérifiez OPENAI_API_KEY dans server/.env."
+            else:
+                out["api_error"] = "openai_unavailable"
+                out["analysis_summary"] = (
+                    "Service OpenAI temporairement indisponible. Analyse simplifiée locale uniquement."
+                )
+            return out
 
         data = r.json()
         content = (
