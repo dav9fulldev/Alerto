@@ -6,6 +6,7 @@ import {
 import './MyReports.css';
 import { API_BASE } from '../services/api';
 import { useTranslation } from '../services/i18n';
+import { sanitizeImageUrl, sanitizeReportStatus, stripRequiredMarker } from '../utils/sanitizeUrl';
 
 const MyReports = ({ onBack }) => {
     const { t, lang } = useTranslation();
@@ -47,12 +48,8 @@ const MyReports = ({ onBack }) => {
         });
     };
 
-    const getImageSrc = (report) => {
-        const src = report.image_url || report.image || '';
-        if (!src) return '';
-        if (src.startsWith('data:') || src.startsWith('http')) return src;
-        return `${API_BASE}${src}`;
-    };
+    const getImageSrc = (report) =>
+        sanitizeImageUrl(report?.image_url || report?.image || '', API_BASE);
 
     const getLocationText = (report) => report.location || report.text_location || 'Localisation inconnue';
 
@@ -75,6 +72,9 @@ const MyReports = ({ onBack }) => {
     };
 
     if (selectedReport) {
+        const detailImageSrc = getImageSrc(selectedReport);
+        const detailStatus = sanitizeReportStatus(selectedReport.status);
+
         return (
             <div className="report-detail-premium">
                 <header className="detail-header-premium">
@@ -85,12 +85,13 @@ const MyReports = ({ onBack }) => {
                 
                 <div className="detail-scroll-premium">
                     <div className="detail-hero-media">
-                        <img 
-                            src={getImageSrc(selectedReport)} 
-                            alt="Incident" 
-                        />
-                        <div className={`hero-status-pill ${selectedReport.status}`}>
-                            {getStatusIcon(selectedReport.status)} <span>{getStatusText(selectedReport.status)}</span>
+                        {detailImageSrc ? (
+                            <img src={detailImageSrc} alt="Incident" />
+                        ) : (
+                            <div className="detail-hero-placeholder" aria-hidden="true" />
+                        )}
+                        <div className={`hero-status-pill ${detailStatus}`}>
+                            {getStatusIcon(detailStatus)} <span>{getStatusText(detailStatus)}</span>
                         </div>
                     </div>
 
@@ -100,11 +101,11 @@ const MyReports = ({ onBack }) => {
                             <span className="info-value">{selectedReport.crisis || selectedReport.crisis_type || '-'}</span>
                         </div>
                         <div className="info-row">
-                            <span className="info-label">{t?.submit?.damage_label?.replace('*', '') || "Niveau de dégâts"}</span>
+                            <span className="info-label">{stripRequiredMarker(t?.submit?.damage_label) || 'Niveau de dégâts'}</span>
                             <span className="info-value">{selectedReport.damage_level}</span>
                         </div>
                         <div className="info-row">
-                            <span className="info-label">{t?.submit?.infra_label?.replace('*', '') || "Infrastructure"}</span>
+                            <span className="info-label">{stripRequiredMarker(t?.submit?.infra_label) || 'Infrastructure'}</span>
                             <span className="info-value">{selectedReport.infrastructure_type || 'Résidentiel'}</span>
                         </div>
                         
@@ -153,10 +154,17 @@ const MyReports = ({ onBack }) => {
             </div>
 
             <div className="reports-list-premium">
-                {filteredReports.map(report => (
+                {filteredReports.map(report => {
+                    const thumbSrc = getImageSrc(report);
+                    const cardStatus = sanitizeReportStatus(report.status);
+                    return (
                     <div key={report.id} className="report-card-premium" onClick={() => setSelectedReport(report)}>
                         <div className="card-thumb-premium">
-                            <img src={getImageSrc(report)} alt="Thumb" />
+                            {thumbSrc ? (
+                                <img src={thumbSrc} alt="Thumb" />
+                            ) : (
+                                <div className="card-thumb-placeholder" aria-hidden="true" />
+                            )}
                         </div>
                         <div className="card-info-premium">
                             <div className="card-header-row">
@@ -166,14 +174,15 @@ const MyReports = ({ onBack }) => {
                             <p className="card-loc-text">{getLocationText(report)}</p>
                             <div className="card-footer-row">
                                 <span className="card-time-text">{formatDate(report.created_at)}</span>
-                                <div className={`card-status-badge ${report.status}`}>
-                                    {getStatusIcon(report.status)}
-                                    <span>{getStatusText(report.status)}</span>
+                                <div className={`card-status-badge ${cardStatus}`}>
+                                    {getStatusIcon(cardStatus)}
+                                    <span>{getStatusText(cardStatus)}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
